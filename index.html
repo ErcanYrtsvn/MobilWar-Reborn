@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial‐scale=1.0" />
+  <title>MobilWar</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <div class="menu">
+      <h1>MobilWar</h1>
+      <button onclick="goTo('baraka')">Baraka</button>
+      <button onclick="goTo('harita')">Harita</button>
+      <button onclick="goTo('ayarlar')">Ayarlar</button>
+    </div>
+    <div id="baraka" class="screen hidden">
+      <h2>Baraka</h2>
+      <p>Askerlerinizi burada eğitebilirsiniz.</p>
+      <button onclick="goHome()">Ana Menü</button>
+    </div>
+    <div id="harita" class="screen hidden">
+      <h2>Harita</h2>
+      <p>Harita ekranı gelecek.</p>
+      <button onclick="goHome()">Ana Menü</button>
+    </div>
+    <div id="ayarlar" class="screen hidden">
+      <h2>Ayarlar</h2>
+      <p>Ses, dil ve oyun ayarları burada olacak.</p>
+      <button onclick="goHome()">Ana Menü</button>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
