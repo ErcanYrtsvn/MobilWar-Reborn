@@ -1,0 +1,23 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #101820;
+  color: white;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+.menu, .screen {
+  padding: 20px;
+}
+button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  background: #00aaff;
+  color: white;
+}
+.hidden {
+  display: none;
+}
