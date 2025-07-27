@@ -1,97 +1,120 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html><html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MobilWar</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #111;
-      color: #fff;
+      font-family: sans-serif;
       margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-    }
-    .menu {
+      padding: 0;
       background: #222;
-      padding: 20px;
-      border-radius: 10px;
-      margin-top: 20px;
+      color: #fff;
     }
-    .building {
-      border: 1px solid #555;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-    }
-    .hidden {
+    .menu, .game {
       display: none;
+      padding: 20px;
+    }
+    .active {
+      display: block;
     }
     button {
-      padding: 8px 12px;
-      margin-top: 10px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .stats {
       margin: 10px 0;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    .resource-bar {
+      background: #333;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .units {
+      display: flex;
+      gap: 10px;
+    }
+    .unit-card {
+      background: #444;
+      padding: 10px;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-  <h1>MobilWar</h1>
-  <div class="stats">
-    <p>Altın: <span id="gold">1000</span></p>
-  </div>  <div id="buildings-menu" class="menu">
-    <h2>Yapılar</h2>
-    <div class="building">
-      <h3>Belediye Binası (Seviye <span id="townhall-lvl">1</span>)</h3>
-      <button onclick="upgradeBuilding('townhall')">Yükselt (500 altın)</button>
-    </div>
-    <div class="building">
-      <h3>Maden (Seviye <span id="mine-lvl">1</span>)</h3>
-      <button onclick="upgradeBuilding('mine')">Yükselt (200 altın)</button>
-    </div>
-    <div class="building">
-      <h3>Kışla (Seviye <span id="barracks-lvl">1</span>)</h3>
-      <button onclick="upgradeBuilding('barracks')">Yükselt (300 altın)</button>
-    </div>
-    <div class="building">
-      <h3>Akademi (Seviye <span id="academy-lvl">1</span>)</h3>
-      <button onclick="upgradeBuilding('academy')">Yükselt (400 altın)</button>
-    </div>
+  <div class="menu active" id="mainMenu">
+    <h1>MobilWar</h1>
+    <button onclick="startGame()">Oyuna Başla</button>
+  </div>  <div class="game" id="gameScreen">
+    <div class="resource-bar">
+      Altın: <span id="gold">100</span> | Enerji: <span id="energy">50</span>
+    </div><div class="units">
+  <div class="unit-card">
+    <h4>Okçu</h4>
+    <p>Altın: 30 | Enerji: 10</p>
+    <button onclick="trainUnit('okcu')">Üret</button>
+  </div>
+  <div class="unit-card">
+    <h4>Kılıçlı</h4>
+    <p>Altın: 40 | Enerji: 15</p>
+    <button onclick="trainUnit('kilicli')">Üret</button>
+  </div>
+  <div class="unit-card">
+    <h4>Atlı</h4>
+    <p>Altın: 60 | Enerji: 20</p>
+    <button onclick="trainUnit('atli')">Üret</button>
+  </div>
+</div>
+
+<p>Toplam Güç: <span id="power">0</span></p>
+<button onclick="attackEnemy()">Düşmana Saldır</button>
+<p id="battleLog"></p>
+<br />
+<button onclick="goToMenu()">Ana Menü</button>
+
   </div>  <script>
-    let gold = 1000;
-    const levels = {
-      townhall: 1,
-      mine: 1,
-      barracks: 1,
-      academy: 1
-    };
+    let gold = 100;
+    let energy = 50;
+    let power = 0;
 
-    const upgradeCosts = {
-      townhall: 500,
-      mine: 200,
-      barracks: 300,
-      academy: 400
-    };
+    function updateUI() {
+      document.getElementById('gold').innerText = gold;
+      document.getElementById('energy').innerText = energy;
+      document.getElementById('power').innerText = power;
+    }
 
-    function upgradeBuilding(type) {
-      const cost = upgradeCosts[type];
-      if (gold >= cost) {
-        gold -= cost;
-        levels[type]++;
-        document.getElementById("gold").textContent = gold;
-        document.getElementById(`${type}-lvl`).textContent = levels[type];
-        alert(`${type} seviyesi ${levels[type]} oldu!`);
-      } else {
-        alert("Yetersiz altın!");
+    function startGame() {
+      document.getElementById('mainMenu').classList.remove('active');
+      document.getElementById('gameScreen').classList.add('active');
+      updateUI();
+    }
+
+    function goToMenu() {
+      document.getElementById('gameScreen').classList.remove('active');
+      document.getElementById('mainMenu').classList.add('active');
+    }
+
+    function trainUnit(type) {
+      let cost = { okcu: [30, 10, 10], kilicli: [40, 15, 15], atli: [60, 20, 25] };
+      let [g, e, p] = cost[type];
+      if (gold >= g && energy >= e) {
+        gold -= g;
+        energy -= e;
+        power += p;
+        updateUI();
       }
+    }
+
+    function attackEnemy() {
+      let result = '';
+      if (power >= 50) {
+        result = 'Zafer! Düşmanı yendin.';
+        gold += 50;
+        energy += 20;
+      } else {
+        result = 'Kaybettin! Gücün yetersiz.';
+        power = Math.max(0, power - 10);
+      }
+      document.getElementById('battleLog').innerText = result;
+      updateUI();
     }
   </script></body>
 </html>
