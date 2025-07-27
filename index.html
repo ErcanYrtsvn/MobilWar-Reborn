@@ -1,120 +1,130 @@
-<!DOCTYPE html><html lang="tr">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MobilWar</title>
   <style>
     body {
-      font-family: sans-serif;
       margin: 0;
-      padding: 0;
-      background: #222;
-      color: #fff;
+      font-family: Arial, sans-serif;
+      background: #1e1e1e;
+      color: white;
     }
-    .menu, .game {
-      display: none;
-      padding: 20px;
+    header {
+      background-color: #292929;
+      padding: 1rem;
+      text-align: center;
+      font-size: 2rem;
     }
-    .active {
-      display: block;
-    }
-    button {
-      margin: 10px 0;
-      padding: 10px 20px;
-      font-size: 16px;
-    }
-    .resource-bar {
-      background: #333;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
-    .units {
+    .resources {
       display: flex;
-      gap: 10px;
+      justify-content: center;
+      gap: 2rem;
+      padding: 1rem;
+      background-color: #333;
+      font-size: 1.2rem;
     }
-    .unit-card {
-      background: #444;
-      padding: 10px;
+    .buildings {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+    .building {
+      background-color: #2e2e2e;
+      border: 1px solid #444;
       border-radius: 8px;
+      padding: 1rem;
+      margin: 0.5rem;
+      width: 90%;
+      max-width: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .building img {
+      width: 40px;
+      height: 40px;
+      margin-right: 1rem;
+    }
+    .building-info {
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+    .building button {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 5px;
+      background-color: #4caf50;
+      color: white;
+      cursor: pointer;
+    }
+    .building button:disabled {
+      background-color: gray;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
-  <div class="menu active" id="mainMenu">
-    <h1>MobilWar</h1>
-    <button onclick="startGame()">Oyuna Başla</button>
-  </div>  <div class="game" id="gameScreen">
-    <div class="resource-bar">
-      Altın: <span id="gold">100</span> | Enerji: <span id="energy">50</span>
-    </div><div class="units">
-  <div class="unit-card">
-    <h4>Okçu</h4>
-    <p>Altın: 30 | Enerji: 10</p>
-    <button onclick="trainUnit('okcu')">Üret</button>
-  </div>
-  <div class="unit-card">
-    <h4>Kılıçlı</h4>
-    <p>Altın: 40 | Enerji: 15</p>
-    <button onclick="trainUnit('kilicli')">Üret</button>
-  </div>
-  <div class="unit-card">
-    <h4>Atlı</h4>
-    <p>Altın: 60 | Enerji: 20</p>
-    <button onclick="trainUnit('atli')">Üret</button>
-  </div>
-</div>
+  <header>MobilWar</header>  <div class="resources">
+    <div>Altın: <span id="gold">1000</span></div>
+    <div>Odun: <span id="wood">500</span></div>
+  </div>  <div class="buildings" id="buildings"></div>  <script>
+    const buildings = [
+      { name: "Maden", icon: "https://cdn-icons-png.flaticon.com/128/854/854894.png", level: 1, goldCost: 200, woodCost: 100 },
+      { name: "Oduncu", icon: "https://cdn-icons-png.flaticon.com/128/1995/1995515.png", level: 1, goldCost: 150, woodCost: 120 },
+      { name: "Depo", icon: "https://cdn-icons-png.flaticon.com/128/2541/2541988.png", level: 1, goldCost: 300, woodCost: 200 },
+      { name: "Merkez", icon: "https://cdn-icons-png.flaticon.com/128/1721/1721929.png", level: 1, goldCost: 500, woodCost: 400 },
+    ];
 
-<p>Toplam Güç: <span id="power">0</span></p>
-<button onclick="attackEnemy()">Düşmana Saldır</button>
-<p id="battleLog"></p>
-<br />
-<button onclick="goToMenu()">Ana Menü</button>
+    let playerGold = 1000;
+    let playerWood = 500;
 
-  </div>  <script>
-    let gold = 100;
-    let energy = 50;
-    let power = 0;
+    const buildingsContainer = document.getElementById("buildings");
 
-    function updateUI() {
-      document.getElementById('gold').innerText = gold;
-      document.getElementById('energy').innerText = energy;
-      document.getElementById('power').innerText = power;
+    function renderBuildings() {
+      buildingsContainer.innerHTML = "";
+      buildings.forEach((b, index) => {
+        const div = document.createElement("div");
+        div.className = "building";
+        div.innerHTML = `
+          <div class="building-info">
+            <img src="${b.icon}" alt="icon" />
+            <div>
+              <strong>${b.name}</strong><br />
+              Seviye: ${b.level}<br />
+              Maliyet: ${b.goldCost} altın / ${b.woodCost} odun
+            </div>
+          </div>
+          <button onclick="upgradeBuilding(${index})" ${playerGold < b.goldCost || playerWood < b.woodCost ? "disabled" : ""}>Geliştir</button>
+        `;
+        buildingsContainer.appendChild(div);
+      });
     }
 
-    function startGame() {
-      document.getElementById('mainMenu').classList.remove('active');
-      document.getElementById('gameScreen').classList.add('active');
-      updateUI();
-    }
-
-    function goToMenu() {
-      document.getElementById('gameScreen').classList.remove('active');
-      document.getElementById('mainMenu').classList.add('active');
-    }
-
-    function trainUnit(type) {
-      let cost = { okcu: [30, 10, 10], kilicli: [40, 15, 15], atli: [60, 20, 25] };
-      let [g, e, p] = cost[type];
-      if (gold >= g && energy >= e) {
-        gold -= g;
-        energy -= e;
-        power += p;
-        updateUI();
-      }
-    }
-
-    function attackEnemy() {
-      let result = '';
-      if (power >= 50) {
-        result = 'Zafer! Düşmanı yendin.';
-        gold += 50;
-        energy += 20;
+    function upgradeBuilding(i) {
+      const b = buildings[i];
+      if (playerGold >= b.goldCost && playerWood >= b.woodCost) {
+        playerGold -= b.goldCost;
+        playerWood -= b.woodCost;
+        b.level++;
+        b.goldCost = Math.floor(b.goldCost * 1.5);
+        b.woodCost = Math.floor(b.woodCost * 1.4);
+        updateResources();
+        renderBuildings();
       } else {
-        result = 'Kaybettin! Gücün yetersiz.';
-        power = Math.max(0, power - 10);
+        alert("Yetersiz kaynak!");
       }
-      document.getElementById('battleLog').innerText = result;
-      updateUI();
     }
+
+    function updateResources() {
+      document.getElementById("gold").textContent = playerGold;
+      document.getElementById("wood").textContent = playerWood;
+    }
+
+    updateResources();
+    renderBuildings();
   </script></body>
 </html>
