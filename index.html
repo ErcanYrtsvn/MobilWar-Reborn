@@ -1,130 +1,145 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html><html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MobilWar</title>
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: #1e1e1e;
-      color: white;
+      background-color: #e7e7e7;
+      margin: 0;
+      padding: 0;
     }
     header {
-      background-color: #292929;
+      background-color: #2c3e50;
+      color: white;
       padding: 1rem;
       text-align: center;
-      font-size: 2rem;
     }
     .resources {
       display: flex;
       justify-content: center;
       gap: 2rem;
       padding: 1rem;
-      background-color: #333;
+      background-color: #34495e;
+      color: white;
       font-size: 1.2rem;
     }
-    .buildings {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .container {
+      max-width: 600px;
+      margin: 1rem auto;
+      background-color: white;
+      border-radius: 10px;
       padding: 1rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
     .building {
-      background-color: #2e2e2e;
-      border: 1px solid #444;
-      border-radius: 8px;
-      padding: 1rem;
-      margin: 0.5rem;
-      width: 90%;
-      max-width: 400px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      border-bottom: 1px solid #ddd;
+      padding: 0.8rem 0;
     }
     .building img {
       width: 40px;
       height: 40px;
-      margin-right: 1rem;
+      margin-right: 10px;
     }
     .building-info {
       display: flex;
       align-items: center;
-      flex: 1;
     }
-    .building button {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.9rem;
+    button {
+      padding: 5px 10px;
       border: none;
-      border-radius: 5px;
-      background-color: #4caf50;
+      background-color: #27ae60;
       color: white;
       cursor: pointer;
+      border-radius: 5px;
     }
-    .building button:disabled {
+    button:disabled {
       background-color: gray;
       cursor: not-allowed;
     }
   </style>
 </head>
 <body>
-  <header>MobilWar</header>  <div class="resources">
-    <div>Altın: <span id="gold">1000</span></div>
-    <div>Odun: <span id="wood">500</span></div>
-  </div>  <div class="buildings" id="buildings"></div>  <script>
+  <header>
+    <h1>MobilWar</h1>
+  </header>
+  <div class="resources">
+    <div>Altın: <span id="gold">100</span></div>
+    <div>Odun: <span id="wood">100</span></div>
+  </div>
+  <div class="container" id="buildings"></div>
+  <script>
     const buildings = [
-      { name: "Maden", icon: "https://cdn-icons-png.flaticon.com/128/854/854894.png", level: 1, goldCost: 200, woodCost: 100 },
-      { name: "Oduncu", icon: "https://cdn-icons-png.flaticon.com/128/1995/1995515.png", level: 1, goldCost: 150, woodCost: 120 },
-      { name: "Depo", icon: "https://cdn-icons-png.flaticon.com/128/2541/2541988.png", level: 1, goldCost: 300, woodCost: 200 },
-      { name: "Merkez", icon: "https://cdn-icons-png.flaticon.com/128/1721/1721929.png", level: 1, goldCost: 500, woodCost: 400 },
-    ];
-
-    let playerGold = 1000;
-    let playerWood = 500;
-
-    const buildingsContainer = document.getElementById("buildings");
-
-    function renderBuildings() {
-      buildingsContainer.innerHTML = "";
-      buildings.forEach((b, index) => {
-        const div = document.createElement("div");
-        div.className = "building";
-        div.innerHTML = `
-          <div class="building-info">
-            <img src="${b.icon}" alt="icon" />
-            <div>
-              <strong>${b.name}</strong><br />
-              Seviye: ${b.level}<br />
-              Maliyet: ${b.goldCost} altın / ${b.woodCost} odun
-            </div>
-          </div>
-          <button onclick="upgradeBuilding(${index})" ${playerGold < b.goldCost || playerWood < b.woodCost ? "disabled" : ""}>Geliştir</button>
-        `;
-        buildingsContainer.appendChild(div);
-      });
-    }
-
-    function upgradeBuilding(i) {
-      const b = buildings[i];
-      if (playerGold >= b.goldCost && playerWood >= b.woodCost) {
-        playerGold -= b.goldCost;
-        playerWood -= b.woodCost;
-        b.level++;
-        b.goldCost = Math.floor(b.goldCost * 1.5);
-        b.woodCost = Math.floor(b.woodCost * 1.4);
-        updateResources();
-        renderBuildings();
-      } else {
-        alert("Yetersiz kaynak!");
+      {
+        name: "Maden",
+        icon: "https://cdn-icons-png.flaticon.com/512/158/158734.png",
+        level: 1,
+        cost: { gold: 20, wood: 10 }
+      },
+      {
+        name: "Oduncu",
+        icon: "https://cdn-icons-png.flaticon.com/512/590/590685.png",
+        level: 1,
+        cost: { gold: 15, wood: 20 }
+      },
+      {
+        name: "Depo",
+        icon: "https://cdn-icons-png.flaticon.com/512/2554/2554973.png",
+        level: 1,
+        cost: { gold: 30, wood: 30 }
+      },
+      {
+        name: "Merkez",
+        icon: "https://cdn-icons-png.flaticon.com/512/2250/2250207.png",
+        level: 1,
+        cost: { gold: 50, wood: 50 }
       }
-    }
+    ];let gold = 100;
+let wood = 100;
 
-    function updateResources() {
-      document.getElementById("gold").textContent = playerGold;
-      document.getElementById("wood").textContent = playerWood;
-    }
+function renderBuildings() {
+  const container = document.getElementById("buildings");
+  container.innerHTML = "";
+  buildings.forEach((b, i) => {
+    const disabled = gold < b.cost.gold || wood < b.cost.wood ? "disabled" : "";
+    container.innerHTML += `
+      <div class="building">
+        <div class="building-info">
+          <img src="${b.icon}" alt="${b.name}">
+          <div>${b.name} (Seviye ${b.level})</div>
+        </div>
+        <button onclick="upgrade(${i})" ${disabled}>Geliştir</button>
+      </div>
+    `;
+  });
+}
 
+function upgrade(index) {
+  const b = buildings[index];
+  if (gold >= b.cost.gold && wood >= b.cost.wood) {
+    gold -= b.cost.gold;
+    wood -= b.cost.wood;
+    b.level++;
+    // Geliştirme maliyetlerini biraz artır
+    b.cost.gold = Math.round(b.cost.gold * 1.5);
+    b.cost.wood = Math.round(b.cost.wood * 1.5);
     updateResources();
     renderBuildings();
-  </script></body>
+  }
+}
+
+function updateResources() {
+  document.getElementById("gold").textContent = gold;
+  document.getElementById("wood").textContent = wood;
+}
+
+renderBuildings();
+updateResources();
+
+  </script>
+</body>
 </html>
