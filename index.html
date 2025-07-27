@@ -1,118 +1,116 @@
-<!DOCTYPE html><html lang="tr">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MobilWar</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background: #121212;
+      color: #f0f0f0;
       margin: 0;
-      padding: 0;
-      background-color: #f0f0f0;
+      padding: 20px;
     }
-    header, main {
-      padding: 1rem;
-      max-width: 800px;
-      margin: auto;
+    h1, h2 {
+      color: #00ff99;
     }
-    header {
-      background-color: #333;
-      color: #fff;
-      text-align: center;
-      padding: 2rem 1rem;
-    }
-    h1 {
-      margin: 0;
-    }
-    section {
-      background: white;
-      padding: 1rem;
-      margin: 1rem 0;
+    .resource-bar {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      background: #1e1e1e;
+      padding: 10px;
       border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .resource {
+      background: #2a2a2a;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .unit-buttons {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
     }
     button {
-      margin: 0.25rem;
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 4px;
-      background-color: #4CAF50;
+      background-color: #00cc66;
       color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
     }
     button:hover {
-      background-color: #45a049;
+      background-color: #00994d;
     }
     ul {
-      padding-left: 1.5rem;
+      list-style: none;
+      padding: 0;
+    }
+    .unit-list li {
+      background: #1e1e1e;
+      padding: 8px;
+      border-bottom: 1px solid #333;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>MobilWar</h1>
-    <p>Basit ama etkili bir strateji oyunu</p>
-  </header>
-  <main>
-    <section id="resources">
-      <h2>Kaynaklar</h2>
-      <p>Altın: <span id="gold">100</span></p>
-      <p>Odun: <span id="wood">100</span></p>
-      <p>Taş: <span id="stone">100</span></p>
-    </section><section id="military">
-  <h2>Asker Üretimi</h2>
-  <div id="units">
-    <button onclick="produceUnit('Piyade')">Piyade (20 altın)</button>
-    <button onclick="produceUnit('Okçu')">Okçu (30 altın)</button>
-    <button onclick="produceUnit('Süvari')">Süvari (50 altın)</button>
-  </div>
-  <div>
-    <h3>Mevcut Askerler</h3>
-    <ul id="armyList"></ul>
-  </div>
-</section>
+  <h1>MobilWar - Tam Sürüm Başlangıç</h1>
 
-  </main>  <script>
+  <div class="resource-bar">
+    <div class="resource">Altın: <span id="gold">100</span></div>
+    <div class="resource">Odun: <span id="wood">50</span></div>
+    <div class="resource">Taş: <span id="stone">30</span></div>
+  </div>
+
+  <h2>Asker Üretimi</h2>
+  <div class="unit-buttons">
+    <button onclick="produceUnit('Piyade', 20)">Piyade (20 altın)</button>
+    <button onclick="produceUnit('Okçu', 30)">Okçu (30 altın)</button>
+    <button onclick="produceUnit('Süvari', 50)">Süvari (50 altın)</button>
+  </div>
+
+  <h2>Asker Listesi</h2>
+  <ul class="unit-list" id="unitList">
+    <!-- Üretilen askerler buraya gelir -->
+  </ul>
+
+  <script>
     let resources = {
       gold: 100,
-      wood: 100,
-      stone: 100
+      wood: 50,
+      stone: 30
     };
 
-    let army = [];
+    let unitList = [];
 
-    function updateResourcesUI() {
-      document.getElementById("gold").textContent = resources.gold;
-      document.getElementById("wood").textContent = resources.wood;
-      document.getElementById("stone").textContent = resources.stone;
+    function updateUI() {
+      document.getElementById("gold").innerText = resources.gold;
+      document.getElementById("wood").innerText = resources.wood;
+      document.getElementById("stone").innerText = resources.stone;
+
+      const list = document.getElementById("unitList");
+      list.innerHTML = "";
+      unitList.forEach((unit, i) => {
+        const li = document.createElement("li");
+        li.innerText = `${i + 1}. ${unit}`;
+        list.appendChild(li);
+      });
     }
 
-    function produceUnit(type) {
-      let cost = 0;
-      if (type === "Piyade") cost = 20;
-      if (type === "Okçu") cost = 30;
-      if (type === "Süvari") cost = 50;
-
+    function produceUnit(type, cost) {
       if (resources.gold >= cost) {
         resources.gold -= cost;
-        army.push(type);
-        updateArmyUI();
-        updateResourcesUI();
+        unitList.push(type);
+        updateUI();
       } else {
         alert("Yetersiz altın!");
       }
     }
 
-    function updateArmyUI() {
-      const armyList = document.getElementById("armyList");
-      armyList.innerHTML = "";
-      army.forEach((unit, index) => {
-        const li = document.createElement("li");
-        li.textContent = `${index + 1}. ${unit}`;
-        armyList.appendChild(li);
-      });
-    }
-
-    updateResourcesUI();
-  </script></body>
+    // İlk yüklemede UI güncelle
+    updateUI();
+  </script>
+</body>
 </html>
