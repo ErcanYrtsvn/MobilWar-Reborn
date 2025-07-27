@@ -1,23 +1,41 @@
 body {
-  font-family: Arial, sans-serif;
-  background: #101820;
-  color: white;
-  margin: 0;
-  padding: 0;
-  text-align: center;
+    font-family: Arial, sans-serif;
+    background-color: #101820;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 20px;
 }
-.menu, .screen {
-  padding: 20px;
+
+#container {
+    max-width: 600px;
+    margin: auto;
+    background-color: #1e2a38;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
 }
+
 button {
-  padding: 10px 20px;
-  margin: 10px;
-  font-size: 16px;
-  border-radius: 10px;
-  border: none;
-  background: #00aaff;
-  color: white;
+    background-color: #00bfa6;
+    border: none;
+    padding: 10px 20px;
+    margin: 8px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+    transition: background 0.3s;
 }
-.hidden {
-  display: none;
+
+button:hover {
+    background-color: #008c7d;
+}
+
+input[type="number"] {
+    padding: 8px;
+    font-size: 16px;
+    width: 80px;
+    border-radius: 6px;
+    border: none;
+    margin: 10px;
 }
