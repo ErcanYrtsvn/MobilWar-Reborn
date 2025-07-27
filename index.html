@@ -1,20 +1,47 @@
-<!DOCTYPE html>
-<html lang="tr">
+<!DOCTYPE html><html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MobilWar</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MobilWar</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="container">
-        <h1>MobilWar</h1>
-        <button onclick="startGame()">Oyunu Başlat</button>
-        <div id="mainMenu" style="display:none;">
-            <button onclick="goToBarracks()">🏹 Baraka</button>
-        </div>
-        <div id="gameArea"></div>
-    </div>
-    <script src="app.js"></script>
-</body>
+  <div id="app">
+    <div id="main-menu" class="screen active">
+      <h1>MobilWar</h1>
+      <button onclick="goTo('city')">Oyuna Başla</button>
+    </div><div id="city" class="screen">
+  <h2>Şehir Merkezi</h2>
+  <button onclick="goTo('barracks')">Baraka</button>
+  <button onclick="goTo('academy')">Akademi</button>
+  <button onclick="goTo('battle')">Savaş</button>
+  <button onclick="goTo('main-menu')">Ana Menü</button>
+</div>
+
+<div id="barracks" class="screen">
+  <h2>Baraka</h2>
+  <p>Asker Eğit:</p>
+  <input type="number" id="soldier-count" placeholder="Asker Sayısı">
+  <button onclick="trainSoldiers()">Eğit</button>
+  <p id="barracks-info"></p>
+  <button onclick="goTo('city')">Geri</button>
+</div>
+
+<div id="academy" class="screen">
+  <h2>Akademi</h2>
+  <p>Geliştirme: Teknoloji puanı +1</p>
+  <button onclick="upgradeAcademy()">Geliştir</button>
+  <p id="academy-info"></p>
+  <button onclick="goTo('city')">Geri</button>
+</div>
+
+<div id="battle" class="screen">
+  <h2>Savaş Alanı</h2>
+  <p>Düşmanlara saldır!</p>
+  <button onclick="attackEnemy()">Saldır</button>
+  <p id="battle-result"></p>
+  <button onclick="goTo('city')">Geri</button>
+</div>
+
+  </div>  <script src="app.js"></script></body>
 </html>
