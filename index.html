@@ -2,176 +2,149 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MobilWar - Tam Sürüm</title>
+  <title>MobilWar</title>
   <style>
     body {
       margin: 0;
-      font-family: sans-serif;
-      background: #121212;
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a1a;
       color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     header {
-      background: #1f1f1f;
-      padding: 10px;
+      background: #222;
+      width: 100%;
+      padding: 1rem;
       text-align: center;
-      font-size: 24px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      border-bottom: 2px solid #444;
     }
-    #main {
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      gap: 10px;
-      padding: 10px;
+    .resources {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      padding: 0.5rem;
+      background: #333;
+      width: 100%;
+    }
+    .resources div {
+      background: #444;
+      padding: 0.3rem 0.7rem;
+      border-radius: 5px;
+    }
+    .menu {
+      margin: 1rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .menu button {
+      background: #444;
+      border: none;
+      padding: 1rem;
+      font-size: 1rem;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
     }
     .panel {
-      background: #1f1f1f;
-      padding: 10px;
+      background: #222;
+      padding: 1rem;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      display: none;
+    }
+    .building {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      background: #333;
+      padding: 0.5rem 1rem;
       border-radius: 8px;
     }
-    button {
-      background: #3498db;
+    .building img {
+      width: 40px;
+      height: 40px;
+    }
+    .btn {
+      background: #555;
       border: none;
+      padding: 0.3rem 0.6rem;
       color: white;
-      padding: 8px;
-      border-radius: 4px;
+      border-radius: 5px;
       cursor: pointer;
-      margin-top: 5px;
-    }
-    .building, .unit {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 5px 0;
-    }
-    .building img, .unit img {
-      width: 24px;
-      margin-right: 5px;
-    }
-    .map-tile {
-      display: inline-block;
-      width: 30px;
-      height: 30px;
-      background: #444;
-      border: 1px solid #666;
-      text-align: center;
-      line-height: 30px;
     }
   </style>
 </head>
 <body>
-  <header>MobilWar - Tam Sürüm</header>
-  <div id="main">
-    <div class="panel">
-      <h3>Kaynaklar</h3>
-      <div>Altın: <span id="gold">0</span></div>
-      <div>Odun: <span id="wood">0</span></div>
-      <h3>Yapılar</h3>
-      <div class="building"><img src="https://img.icons8.com/emoji/48/cityscape.png"/><span>Merkez Bina (Lv <span id="mainLevel">1</span>)</span> <button onclick="upgrade('main')">Geliştir</button></div>
-      <div class="building"><img src="https://img.icons8.com/emoji/48/wood.png"/><span>Oduncu (Lv <span id="woodcutterLevel">1</span>)</span> <button onclick="upgrade('woodcutter')">Geliştir</button></div>
-      <div class="building"><img src="https://img.icons8.com/emoji/48/money-bag.png"/><span>Altın Madeni (Lv <span id="goldmineLevel">1</span>)</span> <button onclick="upgrade('goldmine')">Geliştir</button></div>
-      <h3>Birlikler</h3>
-      <div class="unit"><img src="https://img.icons8.com/emoji/48/crossed-swords.png"/><span>Asker: <span id="soldiers">0</span></span> <button onclick="trainUnit()">Eğit</button></div>
+  <header>MobilWar</header>
+  <div class="resources">
+    <div>Altın: <span id="gold">1000</span></div>
+    <div>Odun: <span id="wood">500</span></div>
+    <div>Taş: <span id="stone">500</span></div>
+  </div>
+  <div class="menu">
+    <button onclick="showPanel('buildings')">Binalar</button>
+    <button onclick="showPanel('units')">Birlikler</button>
+    <button onclick="showPanel('map')">Harita</button>
+  </div>
+  <div class="panel" id="buildings">
+    <div class="building">
+      <img src="https://i.imgur.com/1XzDb4L.png" alt="Town Hall">
+      <div>Merkez Bina (Lv. <span id="townhall-lv">1</span>)</div>
+      <button class="btn" onclick="upgradeBuilding('townhall')">Yükselt</button>
     </div>
-    <div class="panel">
-      <h3>Harita</h3>
-      <div id="map"></div>
-      <h3>Saldırı</h3>
-      <button onclick="attack()">Rastgele Düşmana Saldır</button>
-      <div id="log"></div>
+    <div class="building">
+      <img src="https://i.imgur.com/MOwYm4v.png" alt="Barracks">
+      <div>Kışla (Lv. <span id="barracks-lv">1</span>)</div>
+      <button class="btn" onclick="upgradeBuilding('barracks')">Yükselt</button>
     </div>
   </div>
-  <script>
-    const state = {
-      gold: 100,
-      wood: 100,
-      mainLevel: 1,
-      woodcutterLevel: 1,
-      goldmineLevel: 1,
-      soldiers: 0
-    };function updateUI() {
-  document.getElementById("gold").textContent = state.gold;
-  document.getElementById("wood").textContent = state.wood;
-  document.getElementById("mainLevel").textContent = state.mainLevel;
-  document.getElementById("woodcutterLevel").textContent = state.woodcutterLevel;
-  document.getElementById("goldmineLevel").textContent = state.goldmineLevel;
-  document.getElementById("soldiers").textContent = state.soldiers;
-}
+  <div class="panel" id="units">
+    <p>Şimdilik birlik üretimi aktif değil. Birlik üretimi sonraki sürümde açılacak.</p>
+  </div>
+  <div class="panel" id="map">
+    <p>Harita sistemi hazırlanıyor...</p>
+  </div>  <script>
+    let resources = {
+      gold: 1000,
+      wood: 500,
+      stone: 500
+    };
 
-function upgrade(type) {
-  const cost = 50 * state[type + "Level"];
-  if (state.gold >= cost && state.wood >= cost) {
-    state.gold -= cost;
-    state.wood -= cost;
-    state[type + "Level"]++;
+    let buildings = {
+      townhall: 1,
+      barracks: 1
+    };
+
+    function showPanel(panelId) {
+      document.querySelectorAll('.panel').forEach(panel => panel.style.display = 'none');
+      document.getElementById(panelId).style.display = 'block';
+    }
+
+    function upgradeBuilding(type) {
+      const cost = 200 * buildings[type];
+      if (resources.gold >= cost) {
+        resources.gold -= cost;
+        buildings[type]++;
+        updateUI();
+      } else {
+        alert("Yetersiz altın!");
+      }
+    }
+
+    function updateUI() {
+      document.getElementById('gold').textContent = resources.gold;
+      document.getElementById('townhall-lv').textContent = buildings.townhall;
+      document.getElementById('barracks-lv').textContent = buildings.barracks;
+    }
+
     updateUI();
-    save();
-  } else {
-    alert("Yeterli kaynak yok!");
-  }
-}
-
-function trainUnit() {
-  if (state.gold >= 30 && state.wood >= 20) {
-    state.gold -= 30;
-    state.wood -= 20;
-    state.soldiers++;
-    updateUI();
-    save();
-  } else {
-    alert("Birlik eğitmek için yeterli kaynak yok!");
-  }
-}
-
-function attack() {
-  if (state.soldiers <= 0) return alert("Birlik yok!");
-  const success = Math.random() < 0.6;
-  const gain = Math.floor(Math.random() * 100);
-  if (success) {
-    state.gold += gain;
-    log("Saldırı başarılı! " + gain + " altın kazandın.");
-  } else {
-    state.soldiers--;
-    log("Saldırı başarısız! 1 asker kaybettin.");
-  }
-  updateUI();
-  save();
-}
-
-function log(msg) {
-  const logEl = document.getElementById("log");
-  logEl.innerHTML = "<p>" + msg + "</p>" + logEl.innerHTML;
-}
-
-function generateMap() {
-  const map = document.getElementById("map");
-  for (let i = 0; i < 5 * 5; i++) {
-    const div = document.createElement("div");
-    div.className = "map-tile";
-    div.textContent = "?";
-    map.appendChild(div);
-  }
-}
-
-function save() {
-  localStorage.setItem("mobilwar", JSON.stringify(state));
-}
-
-function load() {
-  const data = localStorage.getItem("mobilwar");
-  if (data) Object.assign(state, JSON.parse(data));
-}
-
-function produceResources() {
-  state.gold += state.goldmineLevel * 2;
-  state.wood += state.woodcutterLevel * 2;
-  updateUI();
-  save();
-}
-
-load();
-updateUI();
-generateMap();
-setInterval(produceResources, 5000);
-
-  </script>
-</body>
+  </script></body>
 </html>
