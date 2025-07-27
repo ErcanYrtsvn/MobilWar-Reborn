@@ -1,47 +1,31 @@
-<!DOCTYPE html><html lang="tr">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MobilWar</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app">
-    <div id="main-menu" class="screen active">
-      <h1>MobilWar</h1>
-      <button onclick="goTo('city')">Oyuna Başla</button>
-    </div><div id="city" class="screen">
-  <h2>Şehir Merkezi</h2>
-  <button onclick="goTo('barracks')">Baraka</button>
-  <button onclick="goTo('academy')">Akademi</button>
-  <button onclick="goTo('battle')">Savaş</button>
-  <button onclick="goTo('main-menu')">Ana Menü</button>
-</div>
+  <div id="mainMenu" class="screen active">
+    <h1>MobilWar</h1>
+    <button onclick="startGame()">Oyunu Başlat</button>
+  </div>
 
-<div id="barracks" class="screen">
-  <h2>Baraka</h2>
-  <p>Asker Eğit:</p>
-  <input type="number" id="soldier-count" placeholder="Asker Sayısı">
-  <button onclick="trainSoldiers()">Eğit</button>
-  <p id="barracks-info"></p>
-  <button onclick="goTo('city')">Geri</button>
-</div>
+  <div id="cityView" class="screen">
+    <h2>Şehir</h2>
+    <p>Altın: <span id="gold">100</span></p>
+    <p>Asker: <span id="soldiers">0</span></p>
+    <p>Akademi Seviyesi: <span id="academyLevel">1</span></p>
 
-<div id="academy" class="screen">
-  <h2>Akademi</h2>
-  <p>Geliştirme: Teknoloji puanı +1</p>
-  <button onclick="upgradeAcademy()">Geliştir</button>
-  <p id="academy-info"></p>
-  <button onclick="goTo('city')">Geri</button>
-</div>
+    <button onclick="trainSoldier()">Baraka: Asker Eğit (10 altın)</button>
+    <button onclick="upgradeAcademy()">Akademi: Geliştir (50 altın)</button>
+    <button onclick="attack()">Saldır</button>
+    <button onclick="goToMenu()">Ana Menü</button>
 
-<div id="battle" class="screen">
-  <h2>Savaş Alanı</h2>
-  <p>Düşmanlara saldır!</p>
-  <button onclick="attackEnemy()">Saldır</button>
-  <p id="battle-result"></p>
-  <button onclick="goTo('city')">Geri</button>
-</div>
+    <p id="message"></p>
+  </div>
 
-  </div>  <script src="app.js"></script></body>
+  <script src="app.js"></script>
+</body>
 </html>
