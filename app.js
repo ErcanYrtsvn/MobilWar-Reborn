@@ -1,67 +1,63 @@
-let gold = 100;
-let soldiers = 0;
-let academyLevel = 1;
+let resources = {
+  gold: 100,
+  wood: 50
+};
 
-function updateUI() {
-  document.getElementById("gold").textContent = gold;
-  document.getElementById("soldiers").textContent = soldiers;
-  document.getElementById("academyLevel").textContent = academyLevel;
+let buildings = [
+  { id: 1, name: "Maden", level: 1, goldCost: 50, woodCost: 20, icon: "⛏" },
+  { id: 2, name: "Kereste Fabrikası", level: 1, goldCost: 40, woodCost: 30, icon: "🪓" },
+  { id: 3, name: "Kışla", level: 1, goldCost: 100, woodCost: 50, icon: "🏹" },
+  { id: 4, name: "Surlar", level: 1, goldCost: 80, woodCost: 60, icon: "🛡" }
+];
+
+function updateResourcesUI() {
+  document.getElementById("gold").textContent = resources.gold;
+  document.getElementById("wood").textContent = resources.wood;
 }
 
-function showScreen(id) {
-  document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-
-function startGame() {
-  showScreen("cityView");
-  updateUI();
-}
-
-function goToMenu() {
-  showScreen("mainMenu");
-}
-
-function trainSoldier() {
-  if (gold >= 10) {
-    gold -= 10;
-    soldiers += 1;
-    updateUI();
-    showMessage("Bir asker eğitildi!");
+function upgradeBuilding(id) {
+  const building = buildings.find(b => b.id === id);
+  if (
+    resources.gold >= building.goldCost &&
+    resources.wood >= building.woodCost
+  ) {
+    resources.gold -= building.goldCost;
+    resources.wood -= building.woodCost;
+    building.level++;
+    building.goldCost = Math.floor(building.goldCost * 1.5);
+    building.woodCost = Math.floor(building.woodCost * 1.5);
+    renderBuildings();
+    updateResourcesUI();
   } else {
-    showMessage("Yeterli altın yok.");
+    alert("Yetersiz kaynak!");
   }
 }
 
-function upgradeAcademy() {
-  if (gold >= 50) {
-    gold -= 50;
-    academyLevel += 1;
-    updateUI();
-    showMessage("Akademi seviyesi arttı!");
-  } else {
-    showMessage("Yeterli altın yok.");
-  }
+function renderBuildings() {
+  const container = document.getElementById("buildings");
+  container.innerHTML = "";
+  buildings.forEach(building => {
+    const card = document.createElement("div");
+    card.className = "building-card";
+    card.innerHTML = `
+      <div class="building-icon">${building.icon}</div>
+      <h3>${building.name}</h3>
+      <p>Seviye: ${building.level}</p>
+      <p>Maliyet: ${building.goldCost} Altın, ${building.woodCost} Odun</p>
+      <button onclick="upgradeBuilding(${building.id})">Geliştir</button>
+    `;
+    container.appendChild(card);
+  });
 }
 
-function attack() {
-  if (soldiers > 0) {
-    const chance = Math.random() < 0.5 + academyLevel * 0.05;
-    if (chance) {
-      const loot = Math.floor(Math.random() * 50 + 20);
-      gold += loot;
-      showMessage(`Saldırı başarılı! ${loot} altın kazandın.`);
-    } else {
-      const loss = Math.min(soldiers, Math.floor(Math.random() * 5 + 1));
-      soldiers -= loss;
-      showMessage(`Saldırı başarısız! ${loss} asker kaybettin.`);
-    }
-    updateUI();
-  } else {
-    showMessage("Askerin yok.");
-  }
-}
+// Otomatik kaynak üretimi (her 5 saniyede bir artış)
+setInterval(() => {
+  resources.gold += 10;
+  resources.wood += 5;
+  updateResourcesUI();
+}, 5000);
 
-function showMessage(msg) {
-  document.getElementById("message").textContent = msg;
-}
+window.onload = () => {
+  updateResourcesUI();
+  renderBuildings();
+};
