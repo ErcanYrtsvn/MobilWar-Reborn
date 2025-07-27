@@ -1,15 +1,67 @@
-// app.js
+let gold = 100;
+let soldiers = 0;
+let academyLevel = 1;
 
-let currentScreen = "menu"; let soldiers = 0; let academyLevel = 1; let gold = 100;
+function updateUI() {
+  document.getElementById("gold").textContent = gold;
+  document.getElementById("soldiers").textContent = soldiers;
+  document.getElementById("academyLevel").textContent = academyLevel;
+}
 
-function goTo(screen) { document.querySelectorAll(".screen").forEach(s => s.classList.remove("active")); document.getElementById(screen).classList.add("active"); currentScreen = screen; if (screen === "city") updateCity(); }
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
 
-function updateCity() { document.getElementById("barracks-info").innerText = Mevcut Asker: ${soldiers}; document.getElementById("academy-info").innerText = Akademi Seviyesi: ${academyLevel}; }
+function startGame() {
+  showScreen("cityView");
+  updateUI();
+}
 
-function trainSoldiers() { const input = document.getElementById("soldier-count"); const count = parseInt(input.value); if (isNaN(count) || count <= 0) { alert("Geçerli bir asker sayısı giriniz."); return; } const cost = count * 10; if (gold >= cost) { soldiers += count; gold -= cost; updateCity(); alert(${count} asker eğitildi!); } else { alert("Yeterli altın yok!"); } input.value = ""; }
+function goToMenu() {
+  showScreen("mainMenu");
+}
 
-function upgradeAcademy() { const cost = academyLevel * 100; if (gold >= cost) { academyLevel++; gold -= cost; updateCity(); alert("Akademi seviyesi yükseltildi!"); } else { alert("Yeterli altın yok!"); } }
+function trainSoldier() {
+  if (gold >= 10) {
+    gold -= 10;
+    soldiers += 1;
+    updateUI();
+    showMessage("Bir asker eğitildi!");
+  } else {
+    showMessage("Yeterli altın yok.");
+  }
+}
 
-function attackEnemy() { if (soldiers < 5) { document.getElementById("battle-result").innerText = "Saldırı için yeterli asker yok."; return; }
+function upgradeAcademy() {
+  if (gold >= 50) {
+    gold -= 50;
+    academyLevel += 1;
+    updateUI();
+    showMessage("Akademi seviyesi arttı!");
+  } else {
+    showMessage("Yeterli altın yok.");
+  }
+}
 
-const success = Math.random() < (0.4 + academyLevel * 0.1); if (success) { const loot = 50 + Math.floor(Math.random() * 100); gold += loot; document.getElementById("battle-result").innerText = Zafer! ${loot} altın kazandınız.; } else { const loss = Math.floor(soldiers * 0.3); soldiers -= loss; document.getElementById("battle-result").innerText = Kaybettiniz. ${loss} asker öldü.; } updateCity(); }
+function attack() {
+  if (soldiers > 0) {
+    const chance = Math.random() < 0.5 + academyLevel * 0.05;
+    if (chance) {
+      const loot = Math.floor(Math.random() * 50 + 20);
+      gold += loot;
+      showMessage(`Saldırı başarılı! ${loot} altın kazandın.`);
+    } else {
+      const loss = Math.min(soldiers, Math.floor(Math.random() * 5 + 1));
+      soldiers -= loss;
+      showMessage(`Saldırı başarısız! ${loss} asker kaybettin.`);
+    }
+    updateUI();
+  } else {
+    showMessage("Askerin yok.");
+  }
+}
+
+function showMessage(msg) {
+  document.getElementById("message").textContent = msg;
+}
