@@ -1,31 +1,97 @@
-<!DOCTYPE html>
-<html lang="tr">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MobilWar</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .menu {
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+    .building {
+      border: 1px solid #555;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+    .hidden {
+      display: none;
+    }
+    button {
+      padding: 8px 12px;
+      margin-top: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .stats {
+      margin: 10px 0;
+    }
+  </style>
 </head>
 <body>
-  <div id="mainMenu" class="screen active">
-    <h1>MobilWar</h1>
-    <button onclick="startGame()">Oyunu Başlat</button>
-  </div>
+  <h1>MobilWar</h1>
+  <div class="stats">
+    <p>Altın: <span id="gold">1000</span></p>
+  </div>  <div id="buildings-menu" class="menu">
+    <h2>Yapılar</h2>
+    <div class="building">
+      <h3>Belediye Binası (Seviye <span id="townhall-lvl">1</span>)</h3>
+      <button onclick="upgradeBuilding('townhall')">Yükselt (500 altın)</button>
+    </div>
+    <div class="building">
+      <h3>Maden (Seviye <span id="mine-lvl">1</span>)</h3>
+      <button onclick="upgradeBuilding('mine')">Yükselt (200 altın)</button>
+    </div>
+    <div class="building">
+      <h3>Kışla (Seviye <span id="barracks-lvl">1</span>)</h3>
+      <button onclick="upgradeBuilding('barracks')">Yükselt (300 altın)</button>
+    </div>
+    <div class="building">
+      <h3>Akademi (Seviye <span id="academy-lvl">1</span>)</h3>
+      <button onclick="upgradeBuilding('academy')">Yükselt (400 altın)</button>
+    </div>
+  </div>  <script>
+    let gold = 1000;
+    const levels = {
+      townhall: 1,
+      mine: 1,
+      barracks: 1,
+      academy: 1
+    };
 
-  <div id="cityView" class="screen">
-    <h2>Şehir</h2>
-    <p>Altın: <span id="gold">100</span></p>
-    <p>Asker: <span id="soldiers">0</span></p>
-    <p>Akademi Seviyesi: <span id="academyLevel">1</span></p>
+    const upgradeCosts = {
+      townhall: 500,
+      mine: 200,
+      barracks: 300,
+      academy: 400
+    };
 
-    <button onclick="trainSoldier()">Baraka: Asker Eğit (10 altın)</button>
-    <button onclick="upgradeAcademy()">Akademi: Geliştir (50 altın)</button>
-    <button onclick="attack()">Saldır</button>
-    <button onclick="goToMenu()">Ana Menü</button>
-
-    <p id="message"></p>
-  </div>
-
-  <script src="app.js"></script>
-</body>
+    function upgradeBuilding(type) {
+      const cost = upgradeCosts[type];
+      if (gold >= cost) {
+        gold -= cost;
+        levels[type]++;
+        document.getElementById("gold").textContent = gold;
+        document.getElementById(`${type}-lvl`).textContent = levels[type];
+        alert(`${type} seviyesi ${levels[type]} oldu!`);
+      } else {
+        alert("Yetersiz altın!");
+      }
+    }
+  </script></body>
 </html>
