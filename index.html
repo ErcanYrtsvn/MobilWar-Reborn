@@ -85,4 +85,101 @@
     <button class="menu-btn" onclick="showScreen('units')">Birlikler</button>
     <button class="menu-btn" onclick="showScreen('attack')">Saldırı</button>
   </div>  <div class="screen hidden" id="buildings">
-    <div class="building-list
+    <div class="building-list">
+      <div class="card">
+        <img src="https://cdn-icons-png.flaticon.com/512/2933/2933182.png" />
+        <p>Altın Madeni</p>
+        <button class="action-btn" onclick="upgradeBuilding('gold')">Geliştir (100)</button>
+      </div>
+      <div class="card">
+        <img src="https://cdn-icons-png.flaticon.com/512/2910/2910791.png" />
+        <p>Oduncu</p>
+        <button class="action-btn" onclick="upgradeBuilding('wood')">Geliştir (50)</button>
+      </div>
+      <div class="card">
+        <img src="https://cdn-icons-png.flaticon.com/512/2917/2917992.png" />
+        <p>Taş Ocağı</p>
+        <button class="action-btn" onclick="upgradeBuilding('stone')">Geliştir (70)</button>
+      </div>
+    </div>
+    <button class="menu-btn" onclick="showScreen('main-menu')">Geri</button>
+  </div>  <div class="screen hidden" id="units">
+    <div class="army-list">
+      <div class="card">
+        <img src="https://cdn-icons-png.flaticon.com/512/1053/1053244.png" />
+        <p>Asker (100)</p>
+        <button class="action-btn" onclick="trainUnit()">Eğit</button>
+      </div>
+    </div>
+    <button class="menu-btn" onclick="showScreen('main-menu')">Geri</button>
+  </div>  <div class="screen hidden" id="attack">
+    <h3>Rastgele saldırı simülasyonu</h3>
+    <button class="action-btn" onclick="attackEnemy()">Saldır!</button>
+    <p id="attack-result"></p>
+    <button class="menu-btn" onclick="showScreen('main-menu')">Geri</button>
+  </div>  <footer></footer>  <script>
+    let gold = 1000;
+    let wood = 500;
+    let stone = 300;
+    let army = 0;
+
+    function updateResources() {
+      document.getElementById('gold').textContent = gold;
+      document.getElementById('wood').textContent = wood;
+      document.getElementById('stone').textContent = stone;
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function upgradeBuilding(type) {
+      let cost = { gold: 100, wood: 50, stone: 70 };
+      if (gold >= cost[type]) {
+        gold -= cost[type];
+        if (type === 'gold') gold += 200;
+        if (type === 'wood') wood += 100;
+        if (type === 'stone') stone += 90;
+        playSound();
+        updateResources();
+      } else {
+        alert("Yetersiz kaynak!");
+      }
+    }
+
+    function trainUnit() {
+      if (gold >= 100) {
+        gold -= 100;
+        army += 1;
+        playSound();
+        updateResources();
+      } else {
+        alert("Altın yetersiz!");
+      }
+    }
+
+    function attackEnemy() {
+      let result = "";
+      if (army === 0) {
+        result = "Askerin yok!";
+      } else {
+        const chance = Math.random();
+        if (chance > 0.5) {
+          gold += 300;
+          result = "Saldırı başarılı! +300 Altın";
+        } else {
+          army -= 1;
+          result = "Saldırı başarısız. 1 asker kaybettin.";
+        }
+        updateResources();
+      }
+      document.getElementById('attack-result').innerText = result;
+    }
+
+    function playSound() {
+      const audio = new Audio('https://www.soundjay.com/button/button-16.mp3');
+      audio.play();
+    }
+  </script></body>
+</html>
