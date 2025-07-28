@@ -2,149 +2,200 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MobilWar</title>
+  <title>MobilWar - Strateji Oyunu</title>
   <style>
-    body {
+    * {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #1a1a1a;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      background: #101820;
       color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 20px;
     }
-    header {
-      background: #222;
-      width: 100%;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: bold;
-      border-bottom: 2px solid #444;
-    }
-    .resources {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      padding: 0.5rem;
-      background: #333;
-      width: 100%;
-    }
-    .resources div {
-      background: #444;
-      padding: 0.3rem 0.7rem;
-      border-radius: 5px;
-    }
-    .menu {
-      margin: 1rem;
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .menu button {
-      background: #444;
-      border: none;
-      padding: 1rem;
-      font-size: 1rem;
-      color: white;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-    .panel {
-      background: #222;
-      padding: 1rem;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 600px;
+    .screen {
       display: none;
-    }
-    .building {
-      display: flex;
-      justify-content: space-between;
+      flex-direction: column;
       align-items: center;
-      margin-bottom: 1rem;
-      background: #333;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
     }
-    .building img {
-      width: 40px;
-      height: 40px;
+    .active {
+      display: flex !important;
     }
-    .btn {
-      background: #555;
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      background: #28a745;
       border: none;
-      padding: 0.3rem 0.6rem;
-      color: white;
       border-radius: 5px;
+      color: white;
+      font-size: 18px;
       cursor: pointer;
+    }
+    input {
+      padding: 10px;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .header {
+      font-size: 28px;
+      margin: 20px;
+    }
+    .menu-btns button {
+      width: 200px;
+    }
+    .resource-bar {
+      margin: 10px;
+      padding: 10px;
+      background: #222;
+      border-radius: 10px;
+      display: flex;
+      gap: 15px;
+    }
+    .building, .unit, .enemy {
+      margin: 10px;
+      padding: 10px;
+      background: #333;
+      border-radius: 10px;
+      width: 250px;
+      text-align: center;
+    }
+    img.icon {
+      width: 32px;
+      vertical-align: middle;
     }
   </style>
 </head>
-<body>
-  <header>MobilWar</header>
-  <div class="resources">
-    <div>Altın: <span id="gold">1000</span></div>
-    <div>Odun: <span id="wood">500</span></div>
-    <div>Taş: <span id="stone">500</span></div>
-  </div>
-  <div class="menu">
-    <button onclick="showPanel('buildings')">Binalar</button>
-    <button onclick="showPanel('units')">Birlikler</button>
-    <button onclick="showPanel('map')">Harita</button>
-  </div>
-  <div class="panel" id="buildings">
+<body>  <!-- Giriş Ekranı -->  <div class="screen active" id="loginScreen">
+    <h1>MobilWar</h1>
+    <p>Kullanıcı adınızı girin:</p>
+    <input type="text" id="username" placeholder="Oyuncu Adı" />
+    <button onclick="login()">Başla</button>
+  </div>  <!-- Ana Menü -->  <div class="screen" id="mainMenu">
+    <div class="header">Hoş geldin, <span id="playerName"></span></div>
+    <div class="resource-bar">
+      <span>Altın: <span id="gold">1000</span></span>
+      <span>Enerji: <span id="energy">500</span></span>
+      <span>Birlik: <span id="units">0</span></span>
+    </div>
+    <div class="menu-btns">
+      <button onclick="showScreen('buildings')">Yapılar</button>
+      <button onclick="showScreen('barracks')">Asker Üret</button>
+      <button onclick="showScreen('attack')">Saldır</button>
+      <button onclick="showScreen('map')">Harita</button>
+    </div>
+  </div>  <!-- Yapılar -->  <div class="screen" id="buildings">
+    <div class="header">Yapılar</div>
     <div class="building">
-      <img src="https://i.imgur.com/1XzDb4L.png" alt="Town Hall">
-      <div>Merkez Bina (Lv. <span id="townhall-lv">1</span>)</div>
-      <button class="btn" onclick="upgradeBuilding('townhall')">Yükselt</button>
+      <img src="https://cdn-icons-png.flaticon.com/512/2942/2942926.png" class="icon" /> Altın Madeni (Seviye: <span id="mineLevel">1</span>)
+      <br><button onclick="upgradeBuilding('mine')">Geliştir (100 altın)</button>
     </div>
     <div class="building">
-      <img src="https://i.imgur.com/MOwYm4v.png" alt="Barracks">
-      <div>Kışla (Lv. <span id="barracks-lv">1</span>)</div>
-      <button class="btn" onclick="upgradeBuilding('barracks')">Yükselt</button>
+      <img src="https://cdn-icons-png.flaticon.com/512/252/252035.png" class="icon" /> Enerji Merkezi (Seviye: <span id="energyLevel">1</span>)
+      <br><button onclick="upgradeBuilding('energy')">Geliştir (100 altın)</button>
     </div>
-  </div>
-  <div class="panel" id="units">
-    <p>Şimdilik birlik üretimi aktif değil. Birlik üretimi sonraki sürümde açılacak.</p>
-  </div>
-  <div class="panel" id="map">
-    <p>Harita sistemi hazırlanıyor...</p>
+    <button onclick="showScreen('mainMenu')">Geri</button>
+  </div>  <!-- Asker Üretimi -->  <div class="screen" id="barracks">
+    <div class="header">Birlik Üretimi</div>
+    <div class="unit">
+      <img src="https://cdn-icons-png.flaticon.com/512/3106/3106913.png" class="icon" /> Piyade - Maliyet: 50 altın, 10 enerji
+      <br><button onclick="produceUnit()">Üret</button>
+    </div>
+    <button onclick="showScreen('mainMenu')">Geri</button>
+  </div>  <!-- Saldırı Ekranı -->  <div class="screen" id="attack">
+    <div class="header">Saldırı Başlat</div>
+    <div class="enemy">
+      <img src="https://cdn-icons-png.flaticon.com/512/3050/3050525.png" class="icon" /> Düşman Üssü
+      <br><button onclick="attackEnemy()">Saldır!</button>
+    </div>
+    <p id="attackResult"></p>
+    <button onclick="showScreen('mainMenu')">Geri</button>
+  </div>  <!-- Harita -->  <div class="screen" id="map">
+    <div class="header">Harita</div>
+    <p>Düşmanlar harita üzerinde gösterilecek (şimdilik boş)</p>
+    <button onclick="showScreen('mainMenu')">Geri</button>
   </div>  <script>
-    let resources = {
+    const player = {
       gold: 1000,
-      wood: 500,
-      stone: 500
+      energy: 500,
+      units: 0,
+      mineLevel: 1,
+      energyLevel: 1
     };
 
-    let buildings = {
-      townhall: 1,
-      barracks: 1
-    };
-
-    function showPanel(panelId) {
-      document.querySelectorAll('.panel').forEach(panel => panel.style.display = 'none');
-      document.getElementById(panelId).style.display = 'block';
-    }
-
-    function upgradeBuilding(type) {
-      const cost = 200 * buildings[type];
-      if (resources.gold >= cost) {
-        resources.gold -= cost;
-        buildings[type]++;
-        updateUI();
-      } else {
-        alert("Yetersiz altın!");
+    function login() {
+      const name = document.getElementById('username').value.trim();
+      if (name !== '') {
+        localStorage.setItem('mobilwarUser', name);
+        document.getElementById('playerName').innerText = name;
+        showScreen('mainMenu');
+        updateResources();
       }
     }
 
-    function updateUI() {
-      document.getElementById('gold').textContent = resources.gold;
-      document.getElementById('townhall-lv').textContent = buildings.townhall;
-      document.getElementById('barracks-lv').textContent = buildings.barracks;
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
     }
 
-    updateUI();
+    function updateResources() {
+      document.getElementById('gold').innerText = player.gold;
+      document.getElementById('energy').innerText = player.energy;
+      document.getElementById('units').innerText = player.units;
+      document.getElementById('mineLevel').innerText = player.mineLevel;
+      document.getElementById('energyLevel').innerText = player.energyLevel;
+    }
+
+    function upgradeBuilding(type) {
+      if (player.gold >= 100) {
+        player.gold -= 100;
+        if (type === 'mine') player.mineLevel++;
+        if (type === 'energy') player.energyLevel++;
+        updateResources();
+      } else {
+        alert('Yetersiz altın!');
+      }
+    }
+
+    function produceUnit() {
+      if (player.gold >= 50 && player.energy >= 10) {
+        player.gold -= 50;
+        player.energy -= 10;
+        player.units++;
+        updateResources();
+      } else {
+        alert('Kaynak yetersiz!');
+      }
+    }
+
+    function attackEnemy() {
+      if (player.units >= 1) {
+        const win = Math.random() < 0.7;
+        player.units--;
+        if (win) {
+          const loot = Math.floor(Math.random() * 200) + 100;
+          player.gold += loot;
+          document.getElementById('attackResult').innerText = `Zafer! ${loot} altın kazandın.`;
+        } else {
+          document.getElementById('attackResult').innerText = 'Maalesef kaybettin.';
+        }
+        updateResources();
+      } else {
+        alert('Askerin yok!');
+      }
+    }
+
+    window.onload = () => {
+      const savedUser = localStorage.getItem('mobilwarUser');
+      if (savedUser) {
+        document.getElementById('playerName').innerText = savedUser;
+        showScreen('mainMenu');
+        updateResources();
+      }
+    }
   </script></body>
 </html>
