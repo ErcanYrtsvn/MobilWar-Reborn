@@ -66,8 +66,8 @@
 <body>
   <div class="container">
     <h1>MobilWar-Reborn</h1>
-    <input type="text" placeholder="Oyuncu Adı" />
-    <input type="password" placeholder="Şifre" />
+    <input type="text" placeholder="Oyuncu Adı" id="playerName" />
+    <input type="password" placeholder="Şifre" id="playerPassword" />
     <button onclick="startGame()">Giriş Yap</button>
     <div class="resource-bar" id="resources" style="display:none">
       <div class="resource">Altın: <span id="gold">100</span></div>
@@ -76,8 +76,15 @@
     </div>
   </div>  <script>
     function startGame() {
-      document.querySelector("input[type='text']").style.display = "none";
-      document.querySelector("input[type='password']").style.display = "none";
+      const name = document.getElementById("playerName").value;
+      const pass = document.getElementById("playerPassword").value;
+      if (!name || !pass) {
+        alert("Lütfen oyuncu adı ve şifre girin!");
+        return;
+      }
+      localStorage.setItem("mobilwar_user", JSON.stringify({ name, pass }));
+      document.getElementById("playerName").style.display = "none";
+      document.getElementById("playerPassword").style.display = "none";
       document.querySelector("button").style.display = "none";
       document.getElementById("resources").style.display = "flex";
     }
