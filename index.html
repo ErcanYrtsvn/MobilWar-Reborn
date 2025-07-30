@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="tr">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -6,139 +7,92 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
       background-color: #2c1f0f;
       color: #f5deb3;
-    }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      padding: 1rem;
+      margin: 0;
+      padding: 0;
     }
     h1 {
       text-align: center;
-      color: #f5deb3;
-      margin-top: 1.5rem;
-      font-size: 2em;
+      margin-top: 1.2rem;
     }
     .logo-image {
       display: block;
-      margin: 0 auto 1rem auto;
+      margin: 0 auto;
       width: 120px;
-      max-width: 50%;
-      height: auto;
-      filter: drop-shadow(0 0 6px rgba(0,0,0,0.4));
-      border-radius: 6px;
     }
-    button {
+    .resource-bar {
+      display: flex;
+      justify-content: space-around;
+      background-color: #5a3f2b;
       padding: 0.5rem;
-      margin: 0.3rem 0;
-      width: 100%;
+      border-radius: 6px;
+      margin: 1rem auto 0.5rem auto;
+      width: 90%;
+      max-width: 500px;
+    }
+    .yapilar-button {
+      display: block;
+      margin: 0 auto 1rem auto;
+      width: 160px;
+      padding: 0.5rem;
       background-color: #ffcc00;
       border: none;
       border-radius: 5px;
       font-weight: bold;
-      cursor: pointer;
-    }
-    input {
-      padding: 0.5rem;
-      width: 100%;
-      margin-bottom: 0.5rem;
-      border-radius: 4px;
-      border: 1px solid #ccc;
     }
     .menu {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 0.5rem;
-      margin: 1rem 0;
+      gap: 0.6rem;
+      max-width: 500px;
+      margin: 0 auto;
     }
     .menu button {
-      flex: 1 1 45%;
+      width: 45%;
+      padding: 0.6rem;
+      background-color: #ffcc00;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
     }
-    .section {
-      display: none;
-      background-color: #3d2a12;
-      padding: 1rem;
-      border-radius: 8px;
-    }
-    .resource-bar {
-      display: flex;
-      justify-content: space-around;
-      background: #5a3f2b;
-      padding: 0.5rem;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-    }
-    .building, .unit {
-      background: #4b3220;
-      padding: 0.5rem;
-      margin: 0.3rem 0;
-      border-radius: 6px;
-    }
-    .center-button {
+    .logout-button {
+      width: 160px;
+      padding: 0.6rem;
+      background-color: #ffcc00;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
       display: block;
-      margin: 0.5rem auto;
-      width: 50%;
+      margin: 1rem auto;
     }
   </style>
 </head>
 <body>
-  <div class="container"><h1>MobilWar-Reborn</h1>
-<img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" />
+  <h1>MobilWar-Reborn</h1>
+  <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" />
 
-<div id="login-section">
-  <input type="text" id="username" placeholder="Oyuncu Adı">
-  <input type="password" id="password" placeholder="Şifre">
-  <button onclick="login()">Giriş Yap</button>
-</div>
-
-<div id="game-section" style="display:none;">
   <div class="resource-bar">
-    <div>Altın: <span id="gold">100</span></div>
-    <div>Odun: <span id="wood">100</span></div>
-    <div>Taş: <span id="stone">100</span></div>
+    <div>Altın: 100</div>
+    <div>Odun: 100</div>
+    <div>Taş: 100</div>
   </div>
 
-  <button class="center-button" onclick="location.href='yapilar.html'">Yapılar</button>
+  <button class="yapilar-button">Yapılar</button>
 
   <div class="menu">
-  <button onclick="location.href='yapilar.html'">Yapılar</button>
-  <button onclick="location.href='savunma.html'">Savunma</button>
+    <button>Savunma</button>
+    <button>Baraka</button>
+    <button>Birlikler</button>
+    <button>Saldırı</button>
+    <button>Akademi</button>
+    <button>Tapınak</button>
+    <button>Dünya</button>
+    <button>Komuta Merkezi</button>
+    <button>Seçenekler</button>
+  </div>
 
-  <button onclick="location.href='baraka.html'">Baraka</button>
-  <button onclick="location.href='birlikler.html'">Birlikler</button>
-
-  <button onclick="location.href='saldiri.html'">Saldırı</button>
-  <button onclick="location.href='akademi.html'">Akademi</button>
-
-  <button onclick="location.href='tapinak.html'">Tapınak</button>
-  <button onclick="location.href='dunya.html'">Dünya</button>
-
-  <button onclick="location.href='komuta.html'">Komuta Merkezi</button>
-  <button onclick="location.href='secenekler.html'">Seçenekler</button>
-    
-  <button onclick="location.href='yardim.html'">Yardım</button>
-  <button onclick="location.href='index.html'">Oyunu Kapat</button>
-</div>
-</div>
-
-  </div>  <script>
-    function login() {
-      const u = document.getElementById("username").value;
-      const p = document.getElementById("password").value;
-      if (u && p) {
-        document.getElementById("login-section").style.display = "none";
-        document.getElementById("game-section").style.display = "block";
-      } else {
-        alert("Lütfen giriş bilgilerini girin!");
-      }
-    }
-
-    function logout() {
-      location.reload();
-    }
-  </script></body>
+  <button class="logout-button">Oturumu Kapat</button>
+</body>
 </html>
