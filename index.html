@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="tr">
+<!DOCTYPE html><html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -71,28 +70,45 @@
 </head>
 <body>
   <div class="container">
-    <h1>MobilWar-Reborn</h1>
-    <img src="kilickalkan.png" alt="MobilWar Logo" class="logo-image" />
-
-    <div class="resource-bar">
-      <div>🪙 Altın: 100</div>
-      <div>🍗 Et: 100</div>
-      <div>🪨 Taş: 100</div>
-    </div>
-
-    <div class="menu">
-      <button>Yapılar</button>
-      <button>Savunma</button>
-      <button>Birlikler</button>
-      <button>Saldırı</button>
-      <button>Akademi</button>
-      <button>Tapınak</button>
-      <button>Dünya</button>
-      <button>Komuta Merkezi</button>
-      <button>Seçenekler</button>
-      <button>Yardım</button>
-      <button>Oturumu Kapat</button>
-    </div>
+    <div id="login-section">
+      <h1>MobilWar-Reborn</h1>
+      <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" />
+      <input type="text" id="username" placeholder="Oyuncu Adı">
+      <input type="password" id="password" placeholder="Şifre">
+      <button onclick="login()">Giriş Yap</button>
+    </div><div id="game-section" style="display: none;">
+  <h1>MobilWar-Reborn</h1>
+  <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" />
+  <div class="resource-bar">
+    <div>Altın: 100</div>
+    <div>Et: 100 🍖</div>
+    <div>Taş: 100</div>
   </div>
-</body>
+  <div class="menu">
+    <button>Yapılar</button>
+    <button>Savunma</button>
+    <button>Birlikler</button>
+    <button>Saldırı</button>
+    <button>Akademi</button>
+    <button>Tapınak</button>
+    <button>Dünya</button>
+    <button>Komuta Merkezi</button>
+    <button>Seçenekler</button>
+    <button>Yardım</button>
+    <button>Oturumu Kapat</button>
+  </div>
+</div>
+
+  </div>  <script>
+    function login() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      if (username && password) {
+        document.getElementById("login-section").style.display = "none";
+        document.getElementById("game-section").style.display = "block";
+      } else {
+        alert("Lütfen kullanıcı adı ve şifre girin.");
+      }
+    }
+  </script></body>
 </html>
