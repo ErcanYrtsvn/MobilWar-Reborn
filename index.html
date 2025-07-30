@@ -66,12 +66,18 @@
       border-radius: 6px;
       margin-bottom: 1rem;
     }
+    .section {
+      display: none;
+      background-color: #3d2a12;
+      padding: 1rem;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>MobilWar-Reborn</h1>
-    <img src="kilickalkan.png" alt="MobilWar Logo" class="logo-image" /><div id="login-section">
+    <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" /><div id="login-section">
   <input type="text" id="username" placeholder="Oyuncu Adı">
   <input type="password" id="password" placeholder="Şifre">
   <button onclick="login()">Giriş Yap</button>
@@ -79,27 +85,53 @@
 
 <div id="game-section" style="display:none;">
   <div class="resource-bar">
-    <div>💰 Altın: <span id="gold">100</span></div>
-    <div>🍖 Et: <span id="wood">100</span></div>
-    <div>🪨 Taş: <span id="stone">100</span></div>
+    <div>Altın: <span id="gold">100</span> 💰</div>
+    <div>Yemek: <span id="wood">100</span> 🍖</div>
+    <div>Taş: <span id="stone">100</span> 🪨</div>
   </div>
 
   <div class="menu">
-    <button>Yapılar</button>
-    <button>Savunma</button>
-    <button>Birlikler</button>
-    <button>Saldırı</button>
-    <button>Akademi</button>
-    <button>Tapınak</button>
-    <button>Dünya</button>
-    <button>Komuta Merkezi</button>
-    <button>Seçenekler</button>
-    <button>Yardım</button>
+    <button onclick="showSection('structures')">Yapılar</button>
+    <button onclick="showSection('barracks')">Baraka</button>
+    <button onclick="showSection('defense')">Savunma</button>
+    <button onclick="showSection('academy')">Akademi</button>
+    <button onclick="showSection('temple')">Tapınak</button>
+    <button onclick="showSection('units')">Birlikler</button>
+    <button onclick="showSection('battle')">Saldırı</button>
+    <button onclick="showSection('world')">Dünya</button>
+    <button onclick="showSection('command')">Komuta Merkezi</button>
+    <button onclick="showSection('options')">Seçenekler</button>
+    <button onclick="showSection('help')">Yardım</button>
     <button onclick="logout()">Oturumu Kapat</button>
   </div>
+
+  <div id="structures" class="section">
+    <h2>Yapılar</h2>
+    <button><span style="font-size: 1.2em;">🏹</span> Baraka</button>
+    <button><span style="font-size: 1.2em;">🛡️</span> Savunma</button>
+    <button><span style="font-size: 1.2em;">📚</span> Akademi</button>
+    <button><span style="font-size: 1.2em;">⛪</span> Tapınak</button>
+    <button><span style="font-size: 1.2em;">🏛️</span> Altın Madeni</button>
+    <button><span style="font-size: 1.2em;">🪨</span> Taş Ocağı</button>
+    <button><span style="font-size: 1.2em;">🍖</span> Çiftlik</button>
+  </div>
+
+  <!-- Diğer sekmelerin yer tutucuları -->
+  <div id="barracks" class="section"><h2>Baraka</h2><p>Baraka içerikleri</p></div>
+  <div id="defense" class="section"><h2>Savunma</h2><p>Savunma içerikleri</p></div>
+  <div id="academy" class="section"><h2>Akademi</h2><p>Akademi içerikleri</p></div>
+  <div id="temple" class="section"><h2>Tapınak</h2><p>Tapınak içerikleri</p></div>
+  <div id="units" class="section"><h2>Birlikler</h2><p>Birlik içerikleri</p></div>
+  <div id="battle" class="section"><h2>Saldırı</h2><p>Saldırı içerikleri</p></div>
+  <div id="world" class="section"><h2>Dünya</h2><p>Dünya içerikleri</p></div>
+  <div id="command" class="section"><h2>Komuta Merkezi</h2><p>Komuta içerikleri</p></div>
+  <div id="options" class="section"><h2>Seçenekler</h2><p>Ayarlar</p></div>
+  <div id="help" class="section"><h2>Yardım</h2><p>Destek</p></div>
 </div>
 
   </div>  <script>
+    let gold = 100, wood = 100, stone = 100;
+
     function login() {
       const u = document.getElementById("username").value;
       const p = document.getElementById("password").value;
@@ -112,8 +144,12 @@
     }
 
     function logout() {
-      document.getElementById("game-section").style.display = "none";
-      document.getElementById("login-section").style.display = "block";
+      location.reload();
+    }
+
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
     }
   </script></body>
 </html>
