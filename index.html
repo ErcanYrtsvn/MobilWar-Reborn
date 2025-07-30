@@ -58,12 +58,6 @@
     .menu button {
       flex: 1 1 45%;
     }
-    .section {
-      display: none;
-      background-color: #3d2a12;
-      padding: 1rem;
-      border-radius: 8px;
-    }
     .resource-bar {
       display: flex;
       justify-content: space-around;
@@ -72,83 +66,120 @@
       border-radius: 6px;
       margin-bottom: 1rem;
     }
-    .building, .unit {
+    .section {
+      display: none;
+      background-color: #3d2a12;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .building {
       background: #4b3220;
-      padding: 0.5rem;
-      margin: 0.3rem 0;
-      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>MobilWar-Reborn</h1>
-    <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" /><div id="login-section">
-  <input type="text" id="username" placeholder="Oyuncu Adı">
-  <input type="password" id="password" placeholder="Şifre">
-  <button onclick="login()">Giriş Yap</button>
+    <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" /><div class="resource-bar">
+  <div>💰 Altın: <span id="gold">100</span></div>
+  <div>🍖 Et: <span id="meat">100</span></div>
+  <div>🪨 Taş: <span id="stone">100</span></div>
 </div>
 
-<div id="game-section" style="display:none;">
-  <div class="resource-bar">
-    <div>💰 Altın: <span id="gold">100</span></div>
-    <div>🍖 Et: <span id="wood">100</span></div>
-    <div>🪨 Taş: <span id="stone">100</span></div>
-  </div>
+<div class="menu">
+  <button onclick="showSection('structures')">Yapılar</button>
+  <button>Baraka</button>
+  <button>Savunma</button>
+  <button>Akademi</button>
+  <button>Tapınak</button>
+  <button>Birlikler</button>
+  <button>Saldırı</button>
+  <button>Dünya</button>
+  <button>Komuta Merkezi</button>
+  <button>Seçenekler</button>
+  <button>Yardım</button>
+  <button onclick="location.reload()">Oturumu Kapat</button>
+</div>
 
-  <div class="menu">
-    <button onclick="showSection('structures')">Yapılar</button>
-    <button onclick="showSection('barracks')">Baraka</button>
-    <button onclick="showSection('defense')">Savunma</button>
-    <button onclick="showSection('academy')">Akademi</button>
-    <button onclick="showSection('temple')">Tapınak</button>
-    <button onclick="showSection('units')">Birlikler</button>
-    <button onclick="showSection('battle')">Saldırı</button>
-    <button onclick="showSection('world')">Dünya</button>
-    <button onclick="showSection('command')">Komuta Merkezi</button>
-    <button onclick="showSection('options')">Seçenekler</button>
-    <button onclick="showSection('help')">Yardım</button>
-    <button onclick="logout()">Oturumu Kapat</button>
-  </div>
-
-  <div id="structures" class="section">
-    <h2>Yapılar</h2>
-    <!-- Yapılar geliştirme içeriği buraya gelecek -->
-  </div>
-
-  <div id="barracks" class="section"><h2>Baraka</h2><p>Baraka ekranı</p></div>
-  <div id="defense" class="section"><h2>Savunma</h2><p>Savunma ekranı</p></div>
-  <div id="academy" class="section"><h2>Akademi</h2><p>Akademi ekranı</p></div>
-  <div id="temple" class="section"><h2>Tapınak</h2><p>Tapınak ekranı</p></div>
-  <div id="units" class="section"><h2>Birlikler</h2><p>Birlik üretimi</p></div>
-  <div id="battle" class="section"><h2>Saldırı</h2><p>Saldırı ekranı</p></div>
-  <div id="world" class="section"><h2>Dünya</h2><p>Harita</p></div>
-  <div id="command" class="section"><h2>Komuta Merkezi</h2><p>Yönetim</p></div>
-  <div id="options" class="section"><h2>Seçenekler</h2><p>Ayarlar</p></div>
-  <div id="help" class="section"><h2>Yardım</h2><p>Destek</p></div>
+<div id="structures" class="section">
+  <h2>Yapılar</h2>
+  <div id="structure-list"></div>
 </div>
 
   </div>  <script>
-    let gold = 100, wood = 100, stone = 100;
+    let resources = {
+      gold: 100,
+      meat: 100,
+      stone: 100
+    };
 
-    function login() {
-      const u = document.getElementById("username").value;
-      const p = document.getElementById("password").value;
-      if (u && p) {
-        document.getElementById("login-section").style.display = "none";
-        document.getElementById("game-section").style.display = "block";
-      } else {
-        alert("Lütfen giriş bilgilerini girin!");
-      }
-    }
+    let structures = [
+      { name: "Baraka", icon: "🏹", level: 1 },
+      { name: "Savunma", icon: "🛡️", level: 1 },
+      { name: "Akademi", icon: "📚", level: 1 },
+      { name: "Tapınak", icon: "⛪", level: 1 },
+      { name: "Altın Madeni", icon: "🏛️", level: 1 },
+      { name: "Taş Ocağı", icon: "🪨", level: 1 },
+      { name: "Çiftlik", icon: "🍖", level: 1 }
+    ];
 
-    function logout() {
-      location.reload();
-    }
+    let upgrading = {};
 
     function showSection(id) {
       document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
       document.getElementById(id).style.display = 'block';
+      if (id === 'structures') renderStructures();
+    }
+
+    function renderStructures() {
+      const container = document.getElementById("structure-list");
+      container.innerHTML = "";
+      structures.forEach((s, i) => {
+        const cost = s.level * 10;
+        const time = s.level * 10;
+        const div = document.createElement("div");
+        div.className = "building";
+        div.innerHTML = `
+          <strong>${s.icon} ${s.name} (Lv. ${s.level})</strong><br>
+          Maliyet: ${cost} 💰 | Süre: ${time}s<br>
+          <button onclick="upgrade(${i})" ${upgrading[i] ? 'disabled' : ''}>Geliştir</button>
+          <div id="timer-${i}">${upgrading[i] ? upgrading[i].timeLeft + ' saniye kaldı…' : ''}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function upgrade(index) {
+      const s = structures[index];
+      const cost = s.level * 10;
+      const time = s.level * 10;
+      if (resources.gold < cost) {
+        alert("Yeterli altın yok!");
+        return;
+      }
+      resources.gold -= cost;
+      updatingResources();
+      upgrading[index] = { timeLeft: time };
+      const timer = setInterval(() => {
+        upgrading[index].timeLeft--;
+        document.getElementById(`timer-${index}`).innerText = upgrading[index].timeLeft + " saniye kaldı…";
+        if (upgrading[index].timeLeft <= 0) {
+          clearInterval(timer);
+          s.level++;
+          delete upgrading[index];
+          renderStructures();
+        }
+      }, 1000);
+      renderStructures();
+    }
+
+    function updatingResources() {
+      document.getElementById("gold").innerText = resources.gold;
+      document.getElementById("meat").innerText = resources.meat;
+      document.getElementById("stone").innerText = resources.stone;
     }
   </script></body>
 </html>
