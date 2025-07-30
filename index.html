@@ -7,88 +7,93 @@
   <style>
     body {
       margin: 0;
-      padding: 0;
+      background-color: #2e1c0e;
       font-family: Arial, sans-serif;
-      background-color: #2e1d0f;
-      color: #fceabb;
+      color: #fcecc7;
       text-align: center;
     }
+
     h1 {
       margin-top: 20px;
     }
+
     .logo {
-      width: 150px;
-      margin: 10px auto;
-      display: block;
-    }
-    .resource-bar {
-      background-color: #5c3a21;
-      padding: 10px;
-      border-radius: 8px;
-      margin: 10px;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
-    .resource {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-weight: bold;
-    }
-    .menu {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin: 10px;
-    }
-    .menu button {
-      background-color: #ffc107;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      width: 140px;
-    }
-    .logout-btn {
-      background-color: #ffc107;
-      width: 90%;
       margin: 20px auto;
-      display: block;
-      font-size: 16px;
+      width: 120px;
+    }
+
+    .resources {
+      display: flex;
+      justify-content: center;
+      background-color: #5a3b22;
       padding: 10px;
       border-radius: 10px;
-      font-weight: bold;
+      margin: 0 auto 20px;
+      width: fit-content;
+      gap: 20px;
+      font-size: 18px;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .button {
+      background-color: #ffcc00;
       border: none;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background-color: #ffd633;
+    }
+
+    .logout {
+      margin-top: 20px;
+      background-color: #ffcc00;
+      padding: 12px;
+      width: 300px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+    }
+
+    .logout:hover {
+      background-color: #ffd633;
     }
   </style>
 </head>
 <body>
   <h1>MobilWar-Reborn</h1>
-  <img src="https://i.ibb.co/5LjsXgK/weapon-icon.png" alt="Logo" class="logo" />
 
-  <div class="resource-bar">
-    <div class="resource">🪙 Altın: 100</div>
-    <div class="resource">🍖 Et: 100</div>
-    <div class="resource">🪨 Taş: 100</div>
+  <img src="https://i.ibb.co/mCRvFjT/kalkan.png" alt="Logo" class="logo" />
+
+  <div class="resources">
+    <div>🏛️ Altın: 100</div>
+    <div>🍖 Et: 100</div>
+    <div>🪨 Taş: 100</div>
   </div>
 
-  <div class="menu">
-    <button>Yapılar</button>
-    <button>Savunma</button>
-    <button>Birlikler</button>
-    <button>Saldırı</button>
-    <button>Akademi</button>
-    <button>Tapınak</button>
-    <button>Dünya</button>
-    <button>Komuta Merkezi</button>
-    <button>Seçenekler</button>
-    <button>Yardım</button>
+  <div class="button-grid">
+    <button class="button">Yapılar</button>
+    <button class="button">Savunma</button>
+    <button class="button">Birlikler</button>
+    <button class="button">Saldırı</button>
+    <button class="button">Akademi</button>
+    <button class="button">Tapınak</button>
+    <button class="button">Dünya</button>
+    <button class="button">Komuta Merkezi</button>
+    <button class="button">Seçenekler</button>
+    <button class="button">Yardım</button>
   </div>
 
-  <button class="logout-btn">Oturumu Kapat</button>
+  <button class="logout">Oturumu Kapat</button>
 </body>
 </html>
