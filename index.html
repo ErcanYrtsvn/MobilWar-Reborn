@@ -6,99 +6,93 @@
   <title>MobilWar-Reborn</title>
   <style>
     body {
-      margin: 0;
-      background-color: #2e1c0e;
       font-family: Arial, sans-serif;
-      color: #fcecc7;
-      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-color: #2c1f0f;
+      color: #f5deb3;
     }
-
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 1rem;
+    }
     h1 {
-      margin-top: 20px;
+      text-align: center;
+      color: #f5deb3;
+      margin-top: 1.5rem;
+      font-size: 2em;
     }
-
-    .logo {
-      margin: 20px auto;
+    .logo-image {
+      display: block;
+      margin: 0 auto 1rem auto;
       width: 120px;
+      max-width: 50%;
+      height: auto;
+      filter: drop-shadow(0 0 6px rgba(0,0,0,0.4));
+      border-radius: 6px;
     }
-
-    .resources {
+    button {
+      padding: 0.5rem;
+      margin: 0.3rem 0;
+      width: 100%;
+      background-color: #ffcc00;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    input {
+      padding: 0.5rem;
+      width: 100%;
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    .menu {
       display: flex;
+      flex-wrap: wrap;
       justify-content: center;
-      background-color: #5a3b22;
-      padding: 10px;
-      border-radius: 10px;
-      margin: 0 auto 20px;
-      width: fit-content;
-      gap: 20px;
-      font-size: 18px;
+      gap: 0.5rem;
+      margin: 1rem 0;
     }
-
-    .button-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      max-width: 300px;
-      margin: 0 auto;
+    .menu button {
+      flex: 1 1 45%;
     }
-
-    .button {
-      background-color: #ffcc00;
-      border: none;
-      padding: 12px;
-      font-size: 16px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
-    .button:hover {
-      background-color: #ffd633;
-    }
-
-    .logout {
-      margin-top: 20px;
-      background-color: #ffcc00;
-      padding: 12px;
-      width: 300px;
-      border-radius: 10px;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .logout:hover {
-      background-color: #ffd633;
+    .resource-bar {
+      display: flex;
+      justify-content: space-around;
+      background: #5a3f2b;
+      padding: 0.5rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
     }
   </style>
 </head>
 <body>
-  <h1>MobilWar-Reborn</h1>
+  <div class="container">
+    <h1>MobilWar-Reborn</h1>
+    <img src="kilickalkan.png" alt="MobilWar Logo" class="logo-image" />
 
-  <!-- ✔️ Sağlam çalışan logo -->
-  <img src="https://i.ibb.co/mCRvFjT/kalkan.png" alt="Logo" class="logo" />
+    <div class="resource-bar">
+      <div>🪙 Altın: 100</div>
+      <div>🍗 Et: 100</div>
+      <div>🪨 Taş: 100</div>
+    </div>
 
-  <!-- ✔️ Kaynak barı -->
-  <div class="resources">
-    <div>🏛️ Altın: 100</div>
-    <div>🍖 Et: 100</div>
-    <div>🪨 Taş: 100</div>
+    <div class="menu">
+      <button>Yapılar</button>
+      <button>Savunma</button>
+      <button>Birlikler</button>
+      <button>Saldırı</button>
+      <button>Akademi</button>
+      <button>Tapınak</button>
+      <button>Dünya</button>
+      <button>Komuta Merkezi</button>
+      <button>Seçenekler</button>
+      <button>Yardım</button>
+      <button>Oturumu Kapat</button>
+    </div>
   </div>
-
-  <!-- ✔️ Ana menü -->
-  <div class="button-grid">
-    <button class="button">Yapılar</button>
-    <button class="button">Savunma</button>
-    <button class="button">Birlikler</button>
-    <button class="button">Saldırı</button>
-    <button class="button">Akademi</button>
-    <button class="button">Tapınak</button>
-    <button class="button">Dünya</button>
-    <button class="button">Komuta Merkezi</button>
-    <button class="button">Seçenekler</button>
-    <button class="button">Yardım</button>
-  </div>
-
-  <!-- ✔️ Oturumu kapat butonu -->
-  <button class="logout">Oturumu Kapat</button>
 </body>
 </html>
