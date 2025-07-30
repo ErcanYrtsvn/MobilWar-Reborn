@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="tr">
+<!DOCTYPE html><html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -42,21 +41,6 @@
       border-radius: 4px;
       border: 1px solid #ccc;
     }
-    .menu {
-      display: flex;
-      justify-content: space-around;
-      margin: 1rem 0;
-    }
-    .menu button {
-      flex: 1;
-      margin: 0 0.2rem;
-    }
-    .section {
-      display: none;
-      background-color: #3d2a12;
-      padding: 1rem;
-      border-radius: 8px;
-    }
     .resource-bar {
       display: flex;
       justify-content: space-around;
@@ -65,62 +49,82 @@
       border-radius: 6px;
       margin-bottom: 1rem;
     }
+    .section {
+      display: none;
+      background-color: #3d2a12;
+      padding: 1rem;
+      border-radius: 8px;
+    }
     .building, .unit {
       background: #4b3220;
       padding: 0.5rem;
       margin: 0.3rem 0;
       border-radius: 6px;
     }
+    .side-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background-color: #1f140a;
+      padding: 10px;
+      border: 2px solid #8b5c2e;
+      border-radius: 8px;
+      max-width: 200px;
+      margin: 10px auto;
+    }
+    .side-menu button {
+      background-color: #2b2e4a;
+      color: gold;
+      font-weight: bold;
+      border: 1px solid #999;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>MobilWar-Reborn</h1>
-    <img src="axe.png" alt="Baltalı Logo" class="logo-image" />
+    <img src="axe.png" alt="Baltalı Logo" class="logo-image" /><div id="login-section">
+  <input type="text" id="username" placeholder="Oyuncu Adı">
+  <input type="password" id="password" placeholder="Şifre">
+  <button onclick="login()">Giriş Yap</button>
+</div>
 
-    <div id="login-section">
-      <input type="text" id="username" placeholder="Oyuncu Adı">
-      <input type="password" id="password" placeholder="Şifre">
-      <button onclick="login()">Giriş Yap</button>
-    </div>
-
-    <div id="game-section" style="display:none;">
-      <div class="resource-bar">
-        <div>Altın: <span id="gold">100</span></div>
-        <div>Odun: <span id="wood">100</span></div>
-        <div>Taş: <span id="stone">100</span></div>
-      </div>
-      <div class="menu">
-        <button onclick="showSection('buildings')">Binalar</button>
-        <button onclick="showSection('units')">Birlikler</button>
-        <button onclick="showSection('battle')">Saldırı</button>
-      </div>
-
-      <div id="buildings" class="section">
-        <h2>Binalar</h2>
-        <div class="building">Çiftlik (Lv. <span id="farmLevel">1</span>) <button onclick="upgrade('farm')">Geliştir (10 Altın)</button></div>
-        <div class="building">Maden (Lv. <span id="mineLevel">1</span>) <button onclick="upgrade('mine')">Geliştir (15 Altın)</button></div>
-        <div class="building">Baraka (Lv. <span id="barrackLevel">1</span>) <button onclick="upgrade('barrack')">Geliştir (20 Altın)</button></div>
-      </div>
-
-      <div id="units" class="section">
-        <h2>Birlik Üretimi</h2>
-        <div class="unit">Cüce (10 Odun) <button onclick="train('dwarf')">Üret</button></div>
-        <div class="unit">Elf (15 Taş) <button onclick="train('elf')">Üret</button></div>
-        <div class="unit">Süvari (20 Altın) <button onclick="train('cavalry')">Üret</button></div>
-      </div>
-
-      <div id="battle" class="section">
-        <h2>Saldırı</h2>
-        <button onclick="attack()">Saldır!</button>
-        <p id="battleResult"></p>
-      </div>
-    </div>
+<div id="game-section" style="display:none;">
+  <div class="resource-bar">
+    <div>Altın: <span id="gold">100</span></div>
+    <div>Odun: <span id="wood">100</span></div>
+    <div>Taş: <span id="stone">100</span></div>
   </div>
 
-  <script>
+  <div class="side-menu">
+    <button onclick="showSection('ordular')">Ordular</button>
+    <button onclick="showSection('baraka')">Baraka</button>
+    <button onclick="showSection('yapilar')">Yapılar</button>
+    <button onclick="showSection('savunma')">Savunma</button>
+    <button onclick="showSection('akademi')">Akademi</button>
+    <button onclick="showSection('tapinak')">Tapınak</button>
+    <button onclick="showSection('dunya')">Dünya</button>
+    <button onclick="showSection('komuta')">Komuta Merkezi</button>
+    <button onclick="showSection('secenekler')">Seçenekler</button>
+    <button onclick="showSection('yardim')">Yardım</button>
+    <button onclick="showSection('kapat')">Oyunu Kapat</button>
+  </div>
+
+  <div id="ordular" class="section"><h2>Ordular</h2><p>Ordularınız burada listelenecek.</p></div>
+  <div id="baraka" class="section"><h2>Baraka</h2><p>Baraka ile asker yetiştirebilirsiniz.</p></div>
+  <div id="yapilar" class="section"><h2>Yapılar</h2><p>Yapılarınızı buradan yönetin.</p></div>
+  <div id="savunma" class="section"><h2>Savunma</h2><p>Savunma sistemlerinizi buradan kontrol edin.</p></div>
+  <div id="akademi" class="section"><h2>Akademi</h2><p>Teknoloji araştırmaları burada yapılır.</p></div>
+  <div id="tapinak" class="section"><h2>Tapınak</h2><p>Dini güçlerinizi buradan yönetin.</p></div>
+  <div id="dunya" class="section"><h2>Dünya</h2><p>Harita görüntüsü burada olacak.</p></div>
+  <div id="komuta" class="section"><h2>Komuta Merkezi</h2><p>Stratejik yönetim ekranı.</p></div>
+  <div id="secenekler" class="section"><h2>Seçenekler</h2><p>Oyun ayarları burada.</p></div>
+  <div id="yardim" class="section"><h2>Yardım</h2><p>Yardım ve rehber içerikleri burada.</p></div>
+  <div id="kapat" class="section"><h2>Oyunu Kapat</h2><p>Görüşmek üzere!</p></div>
+</div>
+
+  </div>  <script>
     let gold = 100, wood = 100, stone = 100;
-    let farmLevel = 1, mineLevel = 1, barrackLevel = 1;
 
     function login() {
       const u = document.getElementById("username").value;
@@ -137,48 +141,5 @@
       document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
       document.getElementById(id).style.display = 'block';
     }
-
-    function upgrade(type) {
-      let cost = 10;
-      if (type === 'mine') cost = 15;
-      if (type === 'barrack') cost = 20;
-      if (gold >= cost) {
-        gold -= cost;
-        if (type === 'farm') document.getElementById("farmLevel").innerText = ++farmLevel;
-        if (type === 'mine') document.getElementById("mineLevel").innerText = ++mineLevel;
-        if (type === 'barrack') document.getElementById("barrackLevel").innerText = ++barrackLevel;
-        updateResources();
-      } else {
-        alert("Yetersiz altın!");
-      }
-    }
-
-    function train(type) {
-      if (type === 'dwarf' && wood >= 10) wood -= 10;
-      else if (type === 'elf' && stone >= 15) stone -= 15;
-      else if (type === 'cavalry' && gold >= 20) gold -= 20;
-      else return alert("Yetersiz kaynak!");
-      updateResources();
-      alert(type + " üretildi!");
-    }
-
-    function attack() {
-      const win = Math.random() > 0.5;
-      if (win) {
-        gold += 10;
-        document.getElementById("battleResult").innerText = "Zafer! 10 altın kazandın.";
-      } else {
-        gold -= 5;
-        document.getElementById("battleResult").innerText = "Kaybettin. 5 altın kaybettin.";
-      }
-      updateResources();
-    }
-
-    function updateResources() {
-      document.getElementById("gold").innerText = gold;
-      document.getElementById("wood").innerText = wood;
-      document.getElementById("stone").innerText = stone;
-    }
-  </script>
-</body>
+  </script></body>
 </html>
