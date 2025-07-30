@@ -69,9 +69,10 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>MobilWar-Reborn</h1>
-    <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" /><div id="login-section">
+  <div class="container"><h1>MobilWar-Reborn</h1>
+<img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" />
+
+<div id="login-section">
   <input type="text" id="username" placeholder="Oyuncu Adı">
   <input type="password" id="password" placeholder="Şifre">
   <button onclick="login()">Giriş Yap</button>
@@ -83,25 +84,21 @@
     <div>Odun: <span id="wood">100</span></div>
     <div>Taş: <span id="stone">100</span></div>
   </div>
-  <div style="text-align:center; margin-bottom:1rem;">
-    <button onclick="navigateTo('baraka')">Baraka</button>
-  </div>
   <div class="menu">
-    <button onclick="navigateTo('units')">Birlikler</button>
-    <button onclick="navigateTo('battle')">Saldırı</button>
-    <button onclick="navigateTo('academy')">Akademi</button>
-    <button onclick="navigateTo('temple')">Tapınak</button>
-    <button onclick="navigateTo('world')">Dünya</button>
-    <button onclick="navigateTo('command')">Komuta Merkezi</button>
-    <button onclick="navigateTo('options')">Seçenekler</button>
-    <button onclick="navigateTo('help')">Yardım</button>
+    <button onclick="navigate('baraka.html')">Baraka</button>
+    <button onclick="navigate('birlikler.html')">Birlikler</button>
+    <button onclick="navigate('saldiri.html')">Saldırı</button>
+    <button onclick="navigate('akademi.html')">Akademi</button>
+    <button onclick="navigate('tapinak.html')">Tapınak</button>
+    <button onclick="navigate('dunya.html')">Dünya</button>
+    <button onclick="navigate('komuta.html')">Komuta Merkezi</button>
+    <button onclick="navigate('secenekler.html')">Seçenekler</button>
+    <button onclick="navigate('yardim.html')">Yardım</button>
     <button onclick="logout()">Oyunu Kapat</button>
   </div>
 </div>
 
   </div>  <script>
-    let gold = 100, wood = 100, stone = 100;
-
     function login() {
       const u = document.getElementById("username").value;
       const p = document.getElementById("password").value;
@@ -117,9 +114,8 @@
       location.reload();
     }
 
-    function navigateTo(page) {
-      alert(`${page} sayfasına yönlendiriliyorsunuz...`);
-      // Gerçek SPA navigasyonu gerekiyorsa: location.href = `${page}.html` gibi yapılabilir.
+    function navigate(page) {
+      window.location.href = page;
     }
   </script></body>
 </html>
