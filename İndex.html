@@ -1,0 +1,125 @@
+<!DOCTYPE html><html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MobilWar-Reborn</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #2c1f0f;
+      color: #f5deb3;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 1rem;
+    }
+    h1 {
+      text-align: center;
+      color: #f5deb3;
+      margin-top: 1.5rem;
+      font-size: 2em;
+    }
+    .logo-image {
+      display: block;
+      margin: 0 auto 1rem auto;
+      width: 120px;
+      max-width: 50%;
+      height: auto;
+      filter: drop-shadow(0 0 6px rgba(0,0,0,0.4));
+      border-radius: 6px;
+    }
+    button {
+      padding: 0.5rem;
+      margin: 0.3rem 0;
+      width: 100%;
+      background-color: #ffcc00;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    input {
+      padding: 0.5rem;
+      width: 100%;
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    .menu {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    .menu button {
+      flex: 1 1 45%;
+    }
+    .resource-bar {
+      display: flex;
+      justify-content: space-around;
+      background: #5a3f2b;
+      padding: 0.5rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>MobilWar-Reborn</h1>
+    <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" /><div id="login-section">
+  <input type="text" id="username" placeholder="Oyuncu Adı">
+  <input type="password" id="password" placeholder="Şifre">
+  <button onclick="login()">Giriş Yap</button>
+</div>
+
+<div id="game-section" style="display:none;">
+  <div class="resource-bar">
+    <div>Altın: <span id="gold">100</span></div>
+    <div>Odun: <span id="wood">100</span></div>
+    <div>Taş: <span id="stone">100</span></div>
+  </div>
+  <div style="text-align:center; margin-bottom:1rem;">
+    <button onclick="navigateTo('baraka')">Baraka</button>
+  </div>
+  <div class="menu">
+    <button onclick="navigateTo('units')">Birlikler</button>
+    <button onclick="navigateTo('battle')">Saldırı</button>
+    <button onclick="navigateTo('academy')">Akademi</button>
+    <button onclick="navigateTo('temple')">Tapınak</button>
+    <button onclick="navigateTo('world')">Dünya</button>
+    <button onclick="navigateTo('command')">Komuta Merkezi</button>
+    <button onclick="navigateTo('options')">Seçenekler</button>
+    <button onclick="navigateTo('help')">Yardım</button>
+    <button onclick="logout()">Oyunu Kapat</button>
+  </div>
+</div>
+
+  </div>  <script>
+    let gold = 100, wood = 100, stone = 100;
+
+    function login() {
+      const u = document.getElementById("username").value;
+      const p = document.getElementById("password").value;
+      if (u && p) {
+        document.getElementById("login-section").style.display = "none";
+        document.getElementById("game-section").style.display = "block";
+      } else {
+        alert("Lütfen giriş bilgilerini girin!");
+      }
+    }
+
+    function logout() {
+      location.reload();
+    }
+
+    function navigateTo(page) {
+      alert(`${page} sayfasına yönlendiriliyorsunuz...`);
+      // Gerçek SPA navigasyonu gerekiyorsa: location.href = `${page}.html` gibi yapılabilir.
+    }
+  </script></body>
+</html>
