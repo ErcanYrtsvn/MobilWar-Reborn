@@ -81,10 +81,9 @@
   </style>
 </head>
 <body>
-  <div class="container"><h1>MobilWar-Reborn</h1>
-<img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" />
-
-<div id="login-section">
+  <div class="container">
+    <h1>MobilWar-Reborn</h1>
+    <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" /><div id="login-section">
   <input type="text" id="username" placeholder="Oyuncu Adı">
   <input type="password" id="password" placeholder="Şifre">
   <button onclick="login()">Giriş Yap</button>
@@ -92,17 +91,15 @@
 
 <div id="game-section" style="display:none;">
   <div class="resource-bar">
-    <div>🪙 Altın: <span id="gold">100</span></div>
-    <div>🍖 Et: <span id="wood">100</span></div>
-    <div>🪨 Taş: <span id="stone">100</span></div>
+    <div>Altın: <span id="gold">100</span></div>
+    <div>Yemek: <span id="wood">100</span> 🍖</div>
+    <div>Taş: <span id="stone">100</span></div>
   </div>
+
   <div class="menu">
-    <button onclick="showSection('buildings')">Yapılar</button>
-    <button onclick="showSection('defense')">Savunma</button>
+    <button onclick="showSection('structures')">Yapılar</button>
     <button onclick="showSection('units')">Birlikler</button>
     <button onclick="showSection('battle')">Saldırı</button>
-    <button onclick="showSection('academy')">Akademi</button>
-    <button onclick="showSection('temple')">Tapınak</button>
     <button onclick="showSection('world')">Dünya</button>
     <button onclick="showSection('command')">Komuta Merkezi</button>
     <button onclick="showSection('options')">Seçenekler</button>
@@ -110,21 +107,20 @@
     <button onclick="logout()">Oturumu Kapat</button>
   </div>
 
-  <div id="buildings" class="section">
+  <div id="structures" class="section">
     <h2>Yapılar</h2>
-    <div class="building">Çiftlik (Lv. <span id="farmLevel">1</span>) <button onclick="upgrade('farm')">Geliştir (10 Altın)</button></div>
-    <div class="building">Taş Ocağı (Lv. <span id="mineLevel">1</span>) <button onclick="upgrade('mine')">Geliştir (15 Altın)</button></div>
-    <div class="building">Altın Madeni (Lv. <span id="barrackLevel">1</span>) <button onclick="upgrade('barrack')">Geliştir (20 Altın)</button></div>
-  </div>
-
-  <div id="defense" class="section">
-    <h2>Savunma</h2>
-    <p>Savunma sistemleri burada olacak.</p>
+    <button><span style="font-size: 1.2em;">🏹</span> Baraka</button>
+    <button><span style="font-size: 1.2em;">🛡️</span> Savunma</button>
+    <button><span style="font-size: 1.2em;">📚</span> Akademi</button>
+    <button><span style="font-size: 1.2em;">⛪</span> Tapınak</button>
+    <button><span style="font-size: 1.2em;">🏛️</span> Altın Madeni</button>
+    <button><span style="font-size: 1.2em;">🪨</span> Taş Ocağı</button>
+    <button><span style="font-size: 1.2em;">🍖</span> Çiftlik</button>
   </div>
 
   <div id="units" class="section">
     <h2>Birlik Üretimi</h2>
-    <div class="unit">Cüce (10 Et) <button onclick="train('dwarf')">Üret</button></div>
+    <div class="unit">Cüce (10 Yemek) <button onclick="train('dwarf')">Üret</button></div>
     <div class="unit">Elf (15 Taş) <button onclick="train('elf')">Üret</button></div>
     <div class="unit">Süvari (20 Altın) <button onclick="train('cavalry')">Üret</button></div>
   </div>
@@ -135,17 +131,14 @@
     <p id="battleResult"></p>
   </div>
 
-  <div id="academy" class="section"><h2>Akademi</h2><p>Geliştirme alanı</p></div>
-  <div id="temple" class="section"><h2>Tapınak</h2><p>İnanç sistemi</p></div>
-  <div id="world" class="section"><h2>Dünya Haritası</h2><p>Global olaylar</p></div>
+  <div id="world" class="section"><h2>Dünya</h2><p>Harita gelecek</p></div>
   <div id="command" class="section"><h2>Komuta Merkezi</h2><p>Yönetim ekranı</p></div>
-  <div id="options" class="section"><h2>Seçenekler</h2><p>Oyun ayarları</p></div>
-  <div id="help" class="section"><h2>Yardım</h2><p>Oyun hakkında bilgiler</p></div>
+  <div id="options" class="section"><h2>Seçenekler</h2><p>Ayarlar</p></div>
+  <div id="help" class="section"><h2>Yardım</h2><p>Destek</p></div>
 </div>
 
   </div>  <script>
     let gold = 100, wood = 100, stone = 100;
-    let farmLevel = 1, mineLevel = 1, barrackLevel = 1;
 
     function login() {
       const u = document.getElementById("username").value;
@@ -165,21 +158,6 @@
     function showSection(id) {
       document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
       document.getElementById(id).style.display = 'block';
-    }
-
-    function upgrade(type) {
-      let cost = 10;
-      if (type === 'mine') cost = 15;
-      if (type === 'barrack') cost = 20;
-      if (gold >= cost) {
-        gold -= cost;
-        if (type === 'farm') document.getElementById("farmLevel").innerText = ++farmLevel;
-        if (type === 'mine') document.getElementById("mineLevel").innerText = ++mineLevel;
-        if (type === 'barrack') document.getElementById("barrackLevel").innerText = ++barrackLevel;
-        updateResources();
-      } else {
-        alert("Yetersiz altın!");
-      }
     }
 
     function train(type) {
