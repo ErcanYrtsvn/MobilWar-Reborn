@@ -70,20 +70,20 @@
 </head>
 <body>
   <div class="container">
-    <div id="login-section">
-      <h1>MobilWar-Reborn</h1>
-      <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" />
-      <input type="text" id="username" placeholder="Oyuncu Adı">
-      <input type="password" id="password" placeholder="Şifre">
-      <button onclick="login()">Giriş Yap</button>
-    </div><div id="game-section" style="display: none;">
-  <h1>MobilWar-Reborn</h1>
-  <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" />
+    <h1>MobilWar-Reborn</h1>
+    <img src="kilickalkan.png" alt="MobilWar Logo" class="logo-image" /><div id="login-section">
+  <input type="text" id="username" placeholder="Oyuncu Adı">
+  <input type="password" id="password" placeholder="Şifre">
+  <button onclick="login()">Giriş Yap</button>
+</div>
+
+<div id="game-section" style="display:none;">
   <div class="resource-bar">
-    <div>Altın: 100</div>
-    <div>Et: 100 🍖</div>
-    <div>Taş: 100</div>
+    <div>💰 Altın: <span id="gold">100</span></div>
+    <div>🍖 Et: <span id="wood">100</span></div>
+    <div>🪨 Taş: <span id="stone">100</span></div>
   </div>
+
   <div class="menu">
     <button>Yapılar</button>
     <button>Savunma</button>
@@ -95,20 +95,25 @@
     <button>Komuta Merkezi</button>
     <button>Seçenekler</button>
     <button>Yardım</button>
-    <button>Oturumu Kapat</button>
+    <button onclick="logout()">Oturumu Kapat</button>
   </div>
 </div>
 
   </div>  <script>
     function login() {
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-      if (username && password) {
+      const u = document.getElementById("username").value;
+      const p = document.getElementById("password").value;
+      if (u && p) {
         document.getElementById("login-section").style.display = "none";
         document.getElementById("game-section").style.display = "block";
       } else {
-        alert("Lütfen kullanıcı adı ve şifre girin.");
+        alert("Lütfen giriş bilgilerini girin!");
       }
+    }
+
+    function logout() {
+      document.getElementById("game-section").style.display = "none";
+      document.getElementById("login-section").style.display = "block";
     }
   </script></body>
 </html>
