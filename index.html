@@ -25,12 +25,12 @@
     }
     .logo-image {
       display: block;
-      margin: 0 auto 1.5rem auto;
-      width: 150px;
+      margin: 0 auto 1rem auto;
+      width: 120px;
       max-width: 50%;
       height: auto;
-      filter: drop-shadow(0 0 8px rgba(0,0,0,0.5));
-      border-radius: 8px;
+      filter: drop-shadow(0 0 6px rgba(0,0,0,0.4));
+      border-radius: 6px;
     }
     button {
       padding: 0.5rem;
@@ -51,12 +51,13 @@
     }
     .menu {
       display: flex;
-      justify-content: space-around;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
       margin: 1rem 0;
     }
     .menu button {
-      flex: 1;
-      margin: 0 0.2rem;
+      flex: 1 1 45%;
     }
     .section {
       display: none;
@@ -102,6 +103,13 @@
         <button onclick="showSection('buildings')">Binalar</button>
         <button onclick="showSection('units')">Birlikler</button>
         <button onclick="showSection('battle')">Saldırı</button>
+        <button onclick="showSection('academy')">Akademi</button>
+        <button onclick="showSection('temple')">Tapınak</button>
+        <button onclick="showSection('world')">Dünya</button>
+        <button onclick="showSection('command')">Komuta Merkezi</button>
+        <button onclick="showSection('options')">Seçenekler</button>
+        <button onclick="showSection('help')">Yardım</button>
+        <button onclick="logout()">Oyunu Kapat</button>
       </div>
 
       <div id="buildings" class="section">
@@ -123,11 +131,18 @@
         <button onclick="attack()">Saldır!</button>
         <p id="battleResult"></p>
       </div>
+
+      <div id="academy" class="section"><h2>Akademi</h2><p>Geliştirme alanı</p></div>
+      <div id="temple" class="section"><h2>Tapınak</h2><p>İnanç sistemi</p></div>
+      <div id="world" class="section"><h2>Dünya Haritası</h2><p>Global olaylar</p></div>
+      <div id="command" class="section"><h2>Komuta Merkezi</h2><p>Yönetim ekranı</p></div>
+      <div id="options" class="section"><h2>Seçenekler</h2><p>Oyun ayarları</p></div>
+      <div id="help" class="section"><h2>Yardım</h2><p>Oyun hakkında bilgiler</p></div>
     </div>
   </div>
 
   <script>
-    let gold = 100, wood = 100, stone = 100;
+    let gold = 10000, wood = 10000, stone = 10000;
     let farmLevel = 1, mineLevel = 1, barrackLevel = 1;
 
     function login() {
@@ -139,6 +154,10 @@
       } else {
         alert("Lütfen giriş bilgilerini girin!");
       }
+    }
+
+    function logout() {
+      location.reload();
     }
 
     function showSection(id) {
