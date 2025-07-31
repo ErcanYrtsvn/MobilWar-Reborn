@@ -5,76 +5,101 @@
   <title>MobilWar-Reborn</title>
   <style>
     body {
+      background-color: #3a240d;
+      color: #fff3c7;
       font-family: Arial, sans-serif;
-      background-color: #3b2a19;
-      color: #fff3c0;
-      text-align: center;
       margin: 0;
       padding: 0;
-    }
-    .logo {
-      width: 100px;
-      margin: 10px auto;
-    }
-    .resources {
-      background-color: #5a3e2b;
-      padding: 10px;
-      margin: 10px 0;
-      font-size: 18px;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
-    .button-grid {
-      display: grid;
-      grid-template-columns: repeat(2, auto);
-      gap: 10px;
-      justify-content: center;
-      margin: 10px;
-    }
-    button {
-      background-color: #ffcc00;
-      color: #000;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #e6b800;
+      text-align: center;
     }
     .section {
       display: none;
     }
-    .active {
+    #login-section, #game-section {
+      padding-top: 40px;
+    }
+    h1 {
+      font-size: 32px;
+    }
+    img.logo {
+      width: 100px;
+      margin: 20px auto;
       display: block;
+    }
+    input[type="text"], input[type="password"] {
+      padding: 10px;
+      margin: 10px auto;
+      width: 200px;
+      display: block;
+      border: none;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #ffd700;
+      border: none;
+      margin: 5px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .resources {
+      background-color: #5c3d1d;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .building-button {
+      display: inline-block;
+      margin: 5px;
+      width: 140px;
+    }
+    #structures h2 {
+      margin-top: 30px;
     }
   </style>
 </head>
 <body>
-  <div id="login-section">
+  <!-- Giriş Ekranı -->
+  <div id="login-section" class="section" style="display:block">
     <h1>MobilWar-Reborn</h1>
-    <img src="kilickalkan.png" alt="Logo" class="logo">
-    <input type="text" id="username" placeholder="Kullanıcı Adı"><br><br>
-    <input type="password" id="password" placeholder="Şifre"><br><br>
+    <img src="kilickalkan.png" class="logo" alt="Logo">
+    <input type="text" id="username" placeholder="Kullanıcı Adı">
+    <input type="password" id="password" placeholder="Şifre">
     <button onclick="login()">Giriş Yap</button>
-  </div>  <div id="game-section" style="display:none;">
+  </div>  <!-- Oyun Ekranı -->  <div id="game-section" class="section">
     <h1>MobilWar-Reborn</h1>
-    <img src="kilickalkan.png" alt="Logo" class="logo">
+    <img src="kilickalkan.png" class="logo" alt="Logo">
     <div class="resources">
-      <span>Altın: <span id="gold">0</span> 💰</span>
-      <span>Et: <span id="meat">80</span> 🍖</span>
-      <span>Taş: <span id="stone">45</span> 🪨</span>
-    </div>
-    <div class="button-grid">
-      <button>Yapılar</button><button>Baraka</button>
-      <button>Savunma</button><button>Akademi</button>
-      <button>Tapınak</button><button>Birlikler</button>
-      <button>Saldırı</button><button>Dünya</button>
-      <button>Komuta Merkezi</button><button>Seçenekler</button>
-      <button>Yardım</button><button>Oturumu Kapat</button>
-    </div>
+      Altın: <span id="gold">0</span> 💰
+      Et: <span id="food">80</span> 🥩
+      Taş: <span id="stone">45</span> 🪨
+    </div><!-- Ana Menü -->
+<div id="main-menu">
+  <button class="building-button" onclick="showSection('structures')">Yapılar</button>
+  <button class="building-button">Baraka</button>
+  <button class="building-button">Savunma</button>
+  <button class="building-button">Akademi</button>
+  <button class="building-button">Tapınak</button>
+  <button class="building-button">Birlikler</button>
+  <button class="building-button">Saldırı</button>
+  <button class="building-button">Dünya</button>
+  <button class="building-button">Komuta Merkezi</button>
+  <button class="building-button">Seçenekler</button>
+  <button class="building-button">Yardım</button>
+  <button class="building-button" onclick="logout()">Oturumu Kapat</button>
+</div>
+
+<!-- Yapılar Sekmesi -->
+<div id="structures" class="section">
+  <h2>Yapılar</h2>
+  <button class="building-button">🏹 Baraka</button>
+  <button class="building-button">🛡️ Savunma</button>
+  <button class="building-button">📚 Akademi</button>
+  <button class="building-button">⛪ Tapınak</button>
+  <button class="building-button">🌾 Çiftlik</button>
+  <button class="building-button">🪨 Taş Ocağı</button>
+  <button class="building-button">🏛 Maden</button>
+</div>
+
   </div>  <script>
     function login() {
       const u = document.getElementById("username").value;
@@ -85,6 +110,19 @@
       } else {
         alert("Lütfen kullanıcı adı ve şifre girin.");
       }
+    }
+
+    function logout() {
+      document.getElementById("game-section").style.display = "none";
+      document.getElementById("login-section").style.display = "block";
+    }
+
+    function showSection(id) {
+      const allSections = document.querySelectorAll('.section');
+      allSections.forEach(sec => {
+        if (sec.id !== "game-section") sec.style.display = "none";
+      });
+      document.getElementById(id).style.display = "block";
     }
   </script></body>
 </html>
