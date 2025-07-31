@@ -1,113 +1,152 @@
-<!DOCTYPE html><html lang="tr">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MobilWar-Reborn</title>
-  <style>
-    body {
-      background-color: #3b2a1a;
-      font-family: Arial, sans-serif;
-      color: #f5f5dc;
-      text-align: center;
-    }
-    .resource-bar {
-      background-color: #5a3e2b;
-      padding: 10px;
-      margin: 10px;
-      border-radius: 5px;
-    }
-    .menu {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-    }
-    .menu button {
-      background-color: #ffd700;
-      color: black;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      font-size: 16px;
-      font-weight: bold;
-    }
-    .structure-list {
-      background-color: #5a3e2b;
-      padding: 10px;
-      margin: 10px;
-      border-radius: 5px;
-      text-align: left;
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .structure {
-      background-color: #8b5e3c;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 5px;
-    }
-    .structure h3 {
-      margin: 0 0 10px 0;
-    }
-    .structure button {
-      background-color: #ffd700;
-      border: none;
-      padding: 8px 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>MobilWar-Reborn</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #222;
+            padding: 10px;
+            text-align: center;
+        }
+        .header img {
+            height: 50px;
+        }
+        .resources {
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+            background-color: #333;
+        }
+        .resource {
+            margin: 0 15px;
+        }
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 20px;
+        }
+        .menu button {
+            padding: 15px;
+            background-color: #444;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+        .structures {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 10px;
+        }
+        .structure {
+            background-color: #222;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            width: 150px;
+            text-align: center;
+        }
+        .structure img {
+            width: 64px;
+            height: 64px;
+        }
+        .structure .level, .structure .cost, .structure .time {
+            margin: 5px 0;
+        }
+        .structure button {
+            background-color: #666;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-  <h1>MobilWar-Reborn</h1>
-  <img src="logo.png" alt="Logo" width="120">  <div class="resource-bar">
-    Altın: <span id="gold">0</span> 💰
-    Et: <span id="food">80</span> 🍖
-    Taş: <span id="stone">45</span> 🪨
-  </div>  <div class="menu">
-    <button>Yapılar</button>
-    <button>Baraka</button>
-    <button>Savunma</button>
-    <button>Akademi</button>
-    <button>Tapınak</button>
-    <button>Birlikler</button>
-    <button>Saldırı</button>
-    <button>Dünya</button>
-    <button>Komuta Merkezi</button>
-    <button>Seçenekler</button>
-    <button>Yardım</button>
-    <button>Oturumu Kapat</button>
-  </div>  <h2>Yapılar</h2>
-  <div class="structure-list">
-    <div class="structure">
-      <h3>🏹 Baraka (Lv. 3) - Maliyet: 20 💰 | Süre: 14s</h3>
-      <button>Geliştir</button>
+    <div class="header">
+        <img src="kilickalkan.png" alt="MobilWar Logo">
+        <h1>MobilWar-Reborn</h1>
     </div>
-    <div class="structure">
-      <h3>🛡️ Savunma (Lv. 3) - Maliyet: 25 🪨 | Süre: 16s</h3>
-      <button>Geliştir</button>
+    <div class="resources">
+        <div class="resource">Altın: <span id="gold">1000</span></div>
+        <div class="resource">Et: <span id="meat">500</span></div>
+        <div class="resource">Taş: <span id="stone">300</span></div>
     </div>
-    <div class="structure">
-      <h3>📚 Akademi (Lv. 2) - Maliyet: 25 💰 | Süre: 17s</h3>
-      <button>Geliştir</button>
+    <div class="menu">
+        <button>Yapılar</button>
+        <button>Baraka</button>
+        <button>Savunma</button>
+        <button>Akademi</button>
+        <button>Tapınak</button>
+        <button>Birlikler</button>
+        <button>Saldırı</button>
+        <button>Dünya</button>
+        <button>Komuta Merkezi</button>
+        <button>Seçenekler</button>
+        <button>Yardım</button>
+        <button>Oturumu Kapat</button>
     </div>
-    <div class="structure">
-      <h3>⛪ Tapınak (Lv. 1) - Maliyet: 15 💰 | Süre: 12s</h3>
-      <button>Geliştir</button>
+    <div class="structures">
+        <div class="structure">
+            <img src="baraka.png" alt="Baraka">
+            <div class="level">Seviye: <span id="baraka-level">1</span></div>
+            <div class="cost">Maliyet: 100 Altın</div>
+            <div class="time">Süre: 60sn</div>
+            <button>Geliştir</button>
+        </div>
+        <div class="structure">
+            <img src="savunma.png" alt="Savunma">
+            <div class="level">Seviye: <span id="savunma-level">1</span></div>
+            <div class="cost">Maliyet: 150 Taş</div>
+            <div class="time">Süre: 90sn</div>
+            <button>Geliştir</button>
+        </div>
+        <div class="structure">
+            <img src="akademi.png" alt="Akademi">
+            <div class="level">Seviye: <span id="akademi-level">1</span></div>
+            <div class="cost">Maliyet: 200 Et</div>
+            <div class="time">Süre: 120sn</div>
+            <button>Geliştir</button>
+        </div>
+        <div class="structure">
+            <img src="tapinak.png" alt="Tapınak">
+            <div class="level">Seviye: <span id="tapinak-level">1</span></div>
+            <div class="cost">Maliyet: 300 Altın</div>
+            <div class="time">Süre: 180sn</div>
+            <button>Geliştir</button>
+        </div>
+        <div class="structure">
+            <img src="altinmadeni.png" alt="Altın Madeni">
+            <div class="level">Seviye: <span id="altin-level">1</span></div>
+            <div class="cost">Maliyet: 250 Altın</div>
+            <div class="time">Süre: 100sn</div>
+            <button>Geliştir</button>
+        </div>
+        <div class="structure">
+            <img src="tasocagi.png" alt="Taş Ocağı">
+            <div class="level">Seviye: <span id="tas-level">1</span></div>
+            <div class="cost">Maliyet: 200 Taş</div>
+            <div class="time">Süre: 110sn</div>
+            <button>Geliştir</button>
+        </div>
+        <div class="structure">
+            <img src="ciftlik.png" alt="Çiftlik">
+            <div class="level">Seviye: <span id="ciftlik-level">1</span></div>
+            <div class="cost">Maliyet: 180 Et</div>
+            <div class="time">Süre: 95sn</div>
+            <button>Geliştir</button>
+        </div>
     </div>
-    <div class="structure">
-      <h3>🏛️ Altın Madeni (Lv. 1) - Maliyet: 10 💰 | Süre: 10s</h3>
-      <button>Geliştir</button>
-    </div>
-    <div class="structure">
-      <h3>🪨 Taş Ocağı (Lv. 1) - Maliyet: 10 🪨 | Süre: 10s</h3>
-      <button>Geliştir</button>
-    </div>
-    <div class="structure">
-      <h3>🍖 Çiftlik (Lv. 1) - Maliyet: 10 🍖 | Süre: 10s</h3>
-      <button>Geliştir</button>
-    </div>
-  </div>
 </body>
 </html>
