@@ -1,129 +1,68 @@
-<!-- GÜNCELLENMİŞ KOD BAŞLANGICI: MENÜ + YAPILAR + BARAKA ÜRETİM TAM ENTEGRE --><!DOCTYPE html><html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!DOCTYPE html><html lang="tr"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MobilWar-Reborn</title>
-  <style>
-    body {
-      background-color: #2c1b0f;
-      color: #f5e6cc;
-      font-family: sans-serif;
-      text-align: center;
-    }
-    .menu-btn, .alt-btn, .uretim-btn {
-      background-color: #ffc400;
-      border: none;
-      padding: 10px 20px;
-      margin: 10px;
-      font-size: 18px;
-      border-radius: 5px;
-    }
-    .resource-bar {
-      background-color: #402d1e;
-      padding: 10px;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
-    .yapi-kart {
-      background-color: #533a28;
-      margin: 10px auto;
-      padding: 10px;
-      width: 90%;
-      border-radius: 8px;
-    }
-    .hidden { display: none; }
-    .asker-img { width: 40px; vertical-align: middle; }
-  </style>
-</head>
-<body>
-  <h1>MobilWar-Reborn</h1>
-  <img src="kilickalkan.png" width="100" />
-  <div class="resource-bar">
-    <div>Altın: <span id="altin">1000</span> 🪙</div>
-    <div>Yemek: <span id="yemek">1000</span> 🍗</div>
-    <div>Taş: <span id="tas">1000</span> 🪨</div>
-  </div>  <!-- ANA MENÜ -->  <div id="menu">
-    <button class="menu-btn" onclick="showSection('yapilar')">Yapılar</button>
-    <button class="menu-btn" onclick="showSection('baraka')">Baraka</button>
-    <button class="menu-btn">Savunma</button>
-    <button class="menu-btn">Akademi</button>
-    <button class="menu-btn">Tapınak</button>
-    <button class="menu-btn">Birlikler</button>
-    <button class="menu-btn">Komuta Merkezi</button>
-    <button class="menu-btn">Seçenekler</button>
-    <button class="menu-btn">Oturumu Kapat</button>
-  </div>  <!-- YAPILAR SEKME -->  <div id="yapilar" class="hidden">
+  <link rel="stylesheet" href="style.css">
+</head><body>
+  <div class="container">
+    <h1>MobilWar-Reborn</h1>
+    <img src="kilickalkan.png" alt="Logo" class="logo">
+    <div class="login-form">
+      <input type="text" id="username" placeholder="Kullanıcı Adı">
+      <input type="password" id="password" placeholder="Şifre">
+      <button onclick="login()">Giriş Yap</button>
+    </div><div id="game-interface" style="display:none">
+  <div class="resources">
+    <span>Altın: <span id="gold">0</span> 💰</span>
+    <span>Et: <span id="meat">80</span> 🍖</span>
+    <span>Taş: <span id="stone">45</span> 🪨</span>
+  </div>
+
+  <div class="menu">
+    <button onclick="showSection('structures')">Yapılar</button>
+    <button onclick="showSection('barracks')">Baraka</button>
+    <button onclick="showSection('defense')">Savunma</button>
+    <button onclick="showSection('academy')">Akademi</button>
+    <button onclick="showSection('temple')">Tapınak</button>
+    <button onclick="showSection('units')">Birlikler</button>
+    <button onclick="showSection('attack')">Saldırı</button>
+    <button onclick="showSection('world')">Dünya</button>
+    <button onclick="showSection('command')">Komuta Merkezi</button>
+    <button onclick="showSection('options')">Seçenekler</button>
+    <button onclick="showSection('help')">Yardım</button>
+    <button onclick="logout()">Oturumu Kapat</button>
+  </div>
+
+  <div id="structures" class="section">
     <h2>Yapılar</h2>
-    <div class="yapi-kart">🏹 Baraka (Lv. <span id="barakaSeviye">1</span>) - Maliyet: <span id="barakaMaliyet">20</span> 🪙 | Süre: <span id="barakaSure">10s</span>
-      <br><button class="alt-btn" onclick="gelistir('baraka')">Geliştir</button>
-    </div>
-  </div>  <!-- BARAKA ÜRETİM SEKME -->  <div id="baraka" class="hidden">
-    <h2>Baraka - Asker Üretimi</h2>
-    <div class="yapi-kart">
-      <img src="cuce.png" class="asker-img" /> Cüce <br>
-      Altın: 200 | Yemek: 450 | Süre: 90s <br>
-      <input type="number" id="cuceAdet" placeholder="Adet" min="1" style="width:60px;" />
-      <button class="uretim-btn" onclick="uret('cuce')">Üret</button>
-      <div id="cuceTimer"></div>
-    </div>
-    <!-- Buraya diğer askerler sırayla eklenecek -->
-  </div>  <script>
-    let altin = 1000;
-    let yemek = 1000;
-    let tas = 1000;
-    let barakaSeviye = 1;
+    <div class="building" id="structure-barracks"></div>
+    <div class="building" id="structure-defense"></div>
+    <div class="building" id="structure-academy"></div>
+    <div class="building" id="structure-temple"></div>
+    <div class="building" id="structure-gold"></div>
+    <div class="building" id="structure-stone"></div>
+    <div class="building" id="structure-farm"></div>
+  </div>
 
-    function showSection(id) {
-      document.querySelectorAll('#yapilar, #baraka').forEach(s => s.classList.add('hidden'));
-      document.getElementById(id).classList.remove('hidden');
-    }
+  <div id="barracks" class="section">
+    <h2>Baraka</h2>
+    <p>Asker üretim alanı.</p>
+  </div>
 
-    function gelistir(yapi) {
-      if (yapi === 'baraka') {
-        const maliyet = 20 * barakaSeviye;
-        if (altin >= maliyet) {
-          altin -= maliyet;
-          document.getElementById('altin').innerText = altin;
-          let zaman = 10 + barakaSeviye * 2;
-          let sayaç = setInterval(() => {
-            document.getElementById('barakaSure').innerText = `${zaman}s`;
-            zaman--;
-            if (zaman < 0) {
-              clearInterval(sayaç);
-              barakaSeviye++;
-              document.getElementById('barakaSeviye').innerText = barakaSeviye;
-              document.getElementById('barakaMaliyet').innerText = 20 * barakaSeviye;
-              document.getElementById('barakaSure').innerText = `${10 + barakaSeviye * 2}s`;
-            }
-          }, 1000);
-        }
-      }
-    }
+  <div id="defense" class="section">
+    <h2>Savunma</h2>
+    <p>Savunma sistemlerini geliştir.</p>
+  </div>
 
-    function uret(tip) {
-      const adet = parseInt(document.getElementById(tip + 'Adet').value);
-      if (!adet || adet <= 0) return;
-      const maliyetAltin = 200 * adet;
-      const maliyetYemek = 450 * adet;
-      if (altin >= maliyetAltin && yemek >= maliyetYemek) {
-        altin -= maliyetAltin;
-        yemek -= maliyetYemek;
-        document.getElementById('altin').innerText = altin;
-        document.getElementById('yemek').innerText = yemek;
-        let süre = 90 * adet;
-        const timerId = tip + 'Timer';
-        const timerEl = document.getElementById(timerId);
-        const sayaç = setInterval(() => {
-          timerEl.innerText = `Üretiliyor: ${süre}s kaldı`;
-          süre--;
-          if (süre < 0) {
-            clearInterval(sayaç);
-            timerEl.innerText = `${adet} adet üretildi!`;
-          }
-        }, 1000);
-      }
-    }
-  </script></body>
-</html>
-<!-- GÜNCELLENMİŞ KOD SONU -->
+  <div id="academy" class="section">
+    <h2>Akademi</h2>
+    <p>Bilim ve araştırma merkezi.</p>
+  </div>
+
+  <div id="temple" class="section">
+    <h2>Tapınak</h2>
+    <p>İnanç ve sihir yapıları.</p>
+  </div>
+</div>
+
+  </div>  <script src="script.js"></script></body></html>
