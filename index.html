@@ -66,17 +66,11 @@
       border-radius: 6px;
       margin-bottom: 1rem;
     }
-    .section {
-      display: none;
-      background-color: #3d2a12;
+    .structure {
+      background-color: #4b3220;
       padding: 1rem;
+      margin: 0.5rem 0;
       border-radius: 8px;
-    }
-    .building {
-      background: #4b3220;
-      padding: 0.5rem;
-      margin: 0.3rem 0;
-      border-radius: 6px;
     }
   </style>
 </head>
@@ -91,19 +85,17 @@
 
 <div id="game-section" style="display:none;">
   <div class="resource-bar">
-    <div>Altın: <span id="gold">1000</span> 💰</div>
-    <div>Yemek: <span id="food">1000</span> 🍖</div>
-    <div>Taş: <span id="stone">1000</span> 🪨</div>
+    <div>Altın: <span id="gold">100</span> 🪙</div>
+    <div>Yemek: <span id="food">100</span> 🍖</div>
+    <div>Taş: <span id="stone">100</span> 🪨</div>
   </div>
 
   <div class="menu">
     <button onclick="showSection('structures')">Yapılar</button>
-    <button onclick="showSection('barracks')">Baraka</button>
-    <button onclick="showSection('defense')">Savunma</button>
-    <button onclick="showSection('academy')">Akademi</button>
-    <button onclick="showSection('temple')">Tapınak</button>
-    <button onclick="showSection('units')">Birlikler</button>
-    <button onclick="showSection('battle')">Saldırı</button>
+    <button onclick="showSection('baraka')">Baraka</button>
+    <button onclick="showSection('savunma')">Savunma</button>
+    <button onclick="showSection('akademi')">Akademi</button>
+    <button onclick="showSection('tapinak')">Tapınak</button>
     <button onclick="showSection('world')">Dünya</button>
     <button onclick="showSection('command')">Komuta Merkezi</button>
     <button onclick="showSection('options')">Seçenekler</button>
@@ -116,28 +108,20 @@
     <div id="structureList"></div>
   </div>
 
-  <div id="barracks" class="section"><h2>Baraka</h2><p>Asker üretimi</p></div>
-  <div id="defense" class="section"><h2>Savunma</h2><p>Savunma sistemleri</p></div>
-  <div id="academy" class="section"><h2>Akademi</h2><p>Bilim ve teknoloji</p></div>
-  <div id="temple" class="section"><h2>Tapınak</h2><p>İnanç ve güç</p></div>
-  <div id="units" class="section"><h2>Birlikler</h2><p>Üretilen askerler</p></div>
-  <div id="battle" class="section"><h2>Saldırı</h2><p>Savaş ekranı</p></div>
-  <div id="world" class="section"><h2>Dünya</h2><p>Harita</p></div>
-  <div id="command" class="section"><h2>Komuta Merkezi</h2><p>Yönetim</p></div>
-  <div id="options" class="section"><h2>Seçenekler</h2><p>Ayarlar</p></div>
-  <div id="help" class="section"><h2>Yardım</h2><p>Bilgilendirme</p></div>
+  <!-- Diğer bölümler -->
 </div>
 
   </div>  <script>
-    let gold = 1000, food = 1000, stone = 1000;
+    let gold = 100, food = 100, stone = 100;
+
     const structures = [
-      { id: 'barracks', name: 'Baraka', icon: '🏹', level: 1, cost: 50, time: 10 },
-      { id: 'defense', name: 'Savunma', icon: '🛡️', level: 1, cost: 60, time: 12 },
-      { id: 'academy', name: 'Akademi', icon: '📚', level: 1, cost: 70, time: 14 },
-      { id: 'temple', name: 'Tapınak', icon: '⛪', level: 1, cost: 80, time: 16 },
-      { id: 'farm', name: 'Çiftlik', icon: '🍖', level: 1, cost: 90, time: 18 },
-      { id: 'quarry', name: 'Taş Ocağı', icon: '🪨', level: 1, cost: 100, time: 20 },
-      { id: 'mine', name: 'Maden', icon: '💰', level: 1, cost: 110, time: 22 }
+      { name: "Baraka", level: 1, baseCost: 50, baseTime: 10 },
+      { name: "Savunma", level: 1, baseCost: 60, baseTime: 12 },
+      { name: "Akademi", level: 1, baseCost: 70, baseTime: 14 },
+      { name: "Tapınak", level: 1, baseCost: 80, baseTime: 16 },
+      { name: "Çiftlik", level: 1, baseCost: 40, baseTime: 8 },
+      { name: "Taş Ocağı", level: 1, baseCost: 45, baseTime: 9 },
+      { name: "Maden", level: 1, baseCost: 55, baseTime: 11 }
     ];
 
     function login() {
@@ -162,31 +146,42 @@
     }
 
     function renderStructures() {
-      const container = document.getElementById("structureList");
-      container.innerHTML = "";
-      structures.forEach((structure, index) => {
-        const el = document.createElement("div");
-        el.className = "building";
-        el.innerHTML = `${structure.icon} ${structure.name} (Lv. ${structure.level}) - Geliştir (${structure.cost} 💰 - ${structure.time}s)
-        <button onclick="upgradeStructure(${index})">Geliştir</button>
-        <span id="progress-${structure.id}"></span>`;
-        container.appendChild(el);
+      const list = document.getElementById("structureList");
+      list.innerHTML = "";
+      structures.forEach((s, index) => {
+        const cost = s.baseCost * s.level;
+        const time = s.baseTime * s.level;
+        const div = document.createElement("div");
+        div.className = "structure";
+        div.innerHTML = `
+          <strong>${s.name} (Seviye ${s.level})</strong><br>
+          Maliyet: ${cost} 🪙<br>
+          Süre: <span id="timer-${index}">${time}</span> sn<br>
+          <button onclick="upgradeStructure(${index})">Geliştir</button>
+        `;
+        list.appendChild(div);
       });
     }
 
     function upgradeStructure(index) {
       const s = structures[index];
-      if (gold >= s.cost) {
-        gold -= s.cost;
+      const cost = s.baseCost * s.level;
+      const time = s.baseTime * s.level;
+      if (gold >= cost) {
+        gold -= cost;
         updateResources();
-        const progress = document.getElementById("progress-" + s.id);
-        progress.innerText = ` | Geliştiriliyor... (${s.time}s)`;
-        setTimeout(() => {
-          s.level++;
-          s.cost = Math.round(s.cost * 1.4);
-          s.time = Math.round(s.time * 1.2);
-          renderStructures();
-        }, s.time * 1000);
+        let remaining = time;
+        const timerSpan = document.getElementById(`timer-${index}`);
+        timerSpan.textContent = `${remaining} sn`;
+        const interval = setInterval(() => {
+          remaining--;
+          timerSpan.textContent = `${remaining} sn`;
+          if (remaining <= 0) {
+            clearInterval(interval);
+            structures[index].level++;
+            renderStructures();
+          }
+        }, 1000);
       } else {
         alert("Yetersiz altın!");
       }
