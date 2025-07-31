@@ -66,6 +66,18 @@
       border-radius: 6px;
       margin-bottom: 1rem;
     }
+    .section {
+      display: none;
+      background-color: #3d2a12;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .building {
+      background: #4b3220;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      border-radius: 6px;
+    }
   </style>
 </head>
 <body>
@@ -79,30 +91,52 @@
 
 <div id="game-section" style="display:none;">
   <div class="resource-bar">
-    <div>Altın: <span id="gold">100</span> 🪙</div>
-    <div>Yemek: <span id="wood">100</span> 🍖</div>
-    <div>Taş: <span id="stone">100</span> 🪨</div>
+    <div><span>💰</span> Altın: <span id="gold">100</span></div>
+    <div><span>🍖</span> Yemek: <span id="food">100</span></div>
+    <div><span>🪨</span> Taş: <span id="stone">100</span></div>
   </div>
 
   <div class="menu">
-    <button onclick="showSection('structures')">Yapılar</button>
+    <button onclick="showSection('yapilar')">Yapılar</button>
     <button onclick="showSection('baraka')">Baraka</button>
     <button onclick="showSection('savunma')">Savunma</button>
     <button onclick="showSection('akademi')">Akademi</button>
     <button onclick="showSection('tapinak')">Tapınak</button>
-    <button onclick="showSection('units')">Birlikler</button>
-    <button onclick="showSection('battle')">Saldırı</button>
-    <button onclick="showSection('world')">Dünya</button>
-    <button onclick="showSection('command')">Komuta Merkezi</button>
-    <button onclick="showSection('options')">Seçenekler</button>
-    <button onclick="showSection('help')">Yardım</button>
+    <button onclick="showSection('birlikler')">Birlikler</button>
+    <button onclick="showSection('saldiri')">Saldırı</button>
+    <button onclick="showSection('dunya')">Dünya</button>
+    <button onclick="showSection('komuta')">Komuta Merkezi</button>
+    <button onclick="showSection('secenekler')">Seçenekler</button>
+    <button onclick="showSection('yardim')">Yardım</button>
     <button onclick="logout()">Oturumu Kapat</button>
   </div>
 
-  <!-- Diğer sekmeler buraya eklenmeye devam edecek -->
+  <div id="yapilar" class="section">
+    <h2>Yapılar</h2>
+    <div class="building">🏹 Baraka (Lv. 1) - Maliyet: 10 💰 | Süre: 10s <button>Geliştir</button></div>
+    <div class="building">🛡️ Savunma (Lv. 1) - Maliyet: 15 🪨 | Süre: 12s <button>Geliştir</button></div>
+    <div class="building">📚 Akademi (Lv. 1) - Maliyet: 20 💰 | Süre: 15s <button>Geliştir</button></div>
+    <div class="building">⛪ Tapınak (Lv. 1) - Maliyet: 25 💰 | Süre: 18s <button>Geliştir</button></div>
+    <div class="building">🏛️ Altın Madeni (Lv. 1) - Maliyet: 20 💰 | Süre: 15s <button>Geliştir</button></div>
+    <div class="building">🪓 Taş Ocağı (Lv. 1) - Maliyet: 20 🪨 | Süre: 15s <button>Geliştir</button></div>
+    <div class="building">🌾 Çiftlik (Lv. 1) - Maliyet: 20 🍖 | Süre: 15s <button>Geliştir</button></div>
+  </div>
+
+  <div id="baraka" class="section"><h2>Baraka</h2><p>Baraka içeriği buraya gelecek.</p></div>
+  <div id="savunma" class="section"><h2>Savunma</h2><p>Savunma içeriği buraya gelecek.</p></div>
+  <div id="akademi" class="section"><h2>Akademi</h2><p>Akademi içeriği buraya gelecek.</p></div>
+  <div id="tapinak" class="section"><h2>Tapınak</h2><p>Tapınak içeriği buraya gelecek.</p></div>
+
+  <div id="birlikler" class="section"><h2>Birlikler</h2><p>Birlik içeriği</p></div>
+  <div id="saldiri" class="section"><h2>Saldırı</h2><p>Saldırı içeriği</p></div>
+  <div id="dunya" class="section"><h2>Dünya</h2><p>Dünya haritası</p></div>
+  <div id="komuta" class="section"><h2>Komuta Merkezi</h2><p>Komuta merkezi içeriği</p></div>
+  <div id="secenekler" class="section"><h2>Seçenekler</h2><p>Ayarlar ve tercihler</p></div>
+  <div id="yardim" class="section"><h2>Yardım</h2><p>Yardım ve destek</p></div>
 </div>
 
-  </div>  <script>
+  </div>
+  <script>
     function login() {
       const u = document.getElementById("username").value;
       const p = document.getElementById("password").value;
@@ -112,15 +146,16 @@
       } else {
         alert("Lütfen giriş bilgilerini girin!");
       }
-    }
+    }function logout() {
+  document.getElementById("game-section").style.display = "none";
+  document.getElementById("login-section").style.display = "block";
+}
 
-    function logout() {
-      location.reload();
-    }
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
+}
 
-    function showSection(id) {
-      document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-      document.getElementById(id)?.style.display = 'block';
-    }
-  </script></body>
+  </script>
+</body>
 </html>
