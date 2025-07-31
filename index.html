@@ -91,9 +91,9 @@
 
 <div id="game-section" style="display:none;">
   <div class="resource-bar">
-    <div>Altın: <span id="gold">100</span> 💰</div>
-    <div>Yemek: <span id="food">100</span> 🍖</div>
-    <div>Taş: <span id="stone">100</span> 🪨</div>
+    <div>Altın: <span id="gold">1000</span> 💰</div>
+    <div>Yemek: <span id="food">1000</span> 🍖</div>
+    <div>Taş: <span id="stone">1000</span> 🪨</div>
   </div>
 
   <div class="menu">
@@ -113,27 +113,32 @@
 
   <div id="structures" class="section">
     <h2>Yapılar</h2>
-    <div class="building">🏹 Baraka (Lv. <span id="barakaLevel">1</span>) <button onclick="upgrade('baraka')">Geliştir (10 💰, 10 🍖)</button></div>
-    <div class="building">🛡️ Savunma (Lv. <span id="defenseLevel">1</span>) <button onclick="upgrade('defense')">Geliştir (15 💰, 10 🪨)</button></div>
-    <div class="building">📚 Akademi (Lv. <span id="academyLevel">1</span>) <button onclick="upgrade('academy')">Geliştir (20 💰, 15 🪨)</button></div>
-    <div class="building">⛪ Tapınak (Lv. <span id="templeLevel">1</span>) <button onclick="upgrade('temple')">Geliştir (20 💰, 20 🍖)</button></div>
-    <div class="building">🍖 Çiftlik (Lv. <span id="farmLevel">1</span>) <button onclick="upgrade('farm')">Geliştir (15 💰)</button></div>
-    <div class="building">🪨 Taş Ocağı (Lv. <span id="quarryLevel">1</span>) <button onclick="upgrade('quarry')">Geliştir (15 💰)</button></div>
-    <div class="building">🏛️ Maden (Lv. <span id="mineLevel">1</span>) <button onclick="upgrade('mine')">Geliştir (15 💰)</button></div>
+    <div id="structureList"></div>
   </div>
+
+  <div id="barracks" class="section"><h2>Baraka</h2><p>Asker üretimi</p></div>
+  <div id="defense" class="section"><h2>Savunma</h2><p>Savunma sistemleri</p></div>
+  <div id="academy" class="section"><h2>Akademi</h2><p>Bilim ve teknoloji</p></div>
+  <div id="temple" class="section"><h2>Tapınak</h2><p>İnanç ve güç</p></div>
+  <div id="units" class="section"><h2>Birlikler</h2><p>Üretilen askerler</p></div>
+  <div id="battle" class="section"><h2>Saldırı</h2><p>Savaş ekranı</p></div>
+  <div id="world" class="section"><h2>Dünya</h2><p>Harita</p></div>
+  <div id="command" class="section"><h2>Komuta Merkezi</h2><p>Yönetim</p></div>
+  <div id="options" class="section"><h2>Seçenekler</h2><p>Ayarlar</p></div>
+  <div id="help" class="section"><h2>Yardım</h2><p>Bilgilendirme</p></div>
 </div>
 
   </div>  <script>
-    let gold = 100, food = 100, stone = 100;
-    let levels = {
-      baraka: 1,
-      defense: 1,
-      academy: 1,
-      temple: 1,
-      farm: 1,
-      quarry: 1,
-      mine: 1
-    };
+    let gold = 1000, food = 1000, stone = 1000;
+    const structures = [
+      { id: 'barracks', name: 'Baraka', icon: '🏹', level: 1, cost: 50, time: 10 },
+      { id: 'defense', name: 'Savunma', icon: '🛡️', level: 1, cost: 60, time: 12 },
+      { id: 'academy', name: 'Akademi', icon: '📚', level: 1, cost: 70, time: 14 },
+      { id: 'temple', name: 'Tapınak', icon: '⛪', level: 1, cost: 80, time: 16 },
+      { id: 'farm', name: 'Çiftlik', icon: '🍖', level: 1, cost: 90, time: 18 },
+      { id: 'quarry', name: 'Taş Ocağı', icon: '🪨', level: 1, cost: 100, time: 20 },
+      { id: 'mine', name: 'Maden', icon: '💰', level: 1, cost: 110, time: 22 }
+    ];
 
     function login() {
       const u = document.getElementById("username").value;
@@ -141,6 +146,7 @@
       if (u && p) {
         document.getElementById("login-section").style.display = "none";
         document.getElementById("game-section").style.display = "block";
+        renderStructures();
       } else {
         alert("Lütfen giriş bilgilerini girin!");
       }
@@ -155,20 +161,34 @@
       document.getElementById(id).style.display = 'block';
     }
 
-    function upgrade(structure) {
-      let costGold = 10 + levels[structure] * 5;
-      let costFood = structure === 'baraka' || structure === 'temple' ? 10 + levels[structure] * 2 : 0;
-      let costStone = structure === 'defense' || structure === 'academy' ? 10 + levels[structure] * 2 : 0;
-      if (gold >= costGold && food >= costFood && stone >= costStone) {
-        gold -= costGold;
-        food -= costFood;
-        stone -= costStone;
-        levels[structure]++;
-        document.getElementById(structure + 'Level').innerText = levels[structure];
+    function renderStructures() {
+      const container = document.getElementById("structureList");
+      container.innerHTML = "";
+      structures.forEach((structure, index) => {
+        const el = document.createElement("div");
+        el.className = "building";
+        el.innerHTML = `${structure.icon} ${structure.name} (Lv. ${structure.level}) - Geliştir (${structure.cost} 💰 - ${structure.time}s)
+        <button onclick="upgradeStructure(${index})">Geliştir</button>
+        <span id="progress-${structure.id}"></span>`;
+        container.appendChild(el);
+      });
+    }
+
+    function upgradeStructure(index) {
+      const s = structures[index];
+      if (gold >= s.cost) {
+        gold -= s.cost;
         updateResources();
-        alert(structure + " seviyesi geliştirildi!");
+        const progress = document.getElementById("progress-" + s.id);
+        progress.innerText = ` | Geliştiriliyor... (${s.time}s)`;
+        setTimeout(() => {
+          s.level++;
+          s.cost = Math.round(s.cost * 1.4);
+          s.time = Math.round(s.time * 1.2);
+          renderStructures();
+        }, s.time * 1000);
       } else {
-        alert("Yetersiz kaynak!");
+        alert("Yetersiz altın!");
       }
     }
 
