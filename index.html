@@ -66,7 +66,13 @@
       border-radius: 6px;
       margin-bottom: 1rem;
     }
-    .structure-card {
+    .section {
+      display: none;
+      background-color: #3d2a12;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .building {
       background: #4b3220;
       padding: 0.5rem;
       margin: 0.3rem 0;
@@ -92,26 +98,41 @@
 
   <div class="menu">
     <button onclick="showSection('structures')">Yapılar</button>
+    <button onclick="showSection('barracks')">Baraka</button>
+    <button onclick="showSection('defense')">Savunma</button>
+    <button onclick="showSection('academy')">Akademi</button>
+    <button onclick="showSection('temple')">Tapınak</button>
+    <button onclick="showSection('units')">Birlikler</button>
+    <button onclick="showSection('battle')">Saldırı</button>
+    <button onclick="showSection('world')">Dünya</button>
+    <button onclick="showSection('command')">Komuta Merkezi</button>
+    <button onclick="showSection('options')">Seçenekler</button>
+    <button onclick="showSection('help')">Yardım</button>
     <button onclick="logout()">Oturumu Kapat</button>
   </div>
 
   <div id="structures" class="section">
     <h2>Yapılar</h2>
-    <div id="structure-list"></div>
+    <div class="building">🏹 Baraka (Lv. <span id="barakaLevel">1</span>) <button onclick="upgrade('baraka')">Geliştir (10 💰, 10 🍖)</button></div>
+    <div class="building">🛡️ Savunma (Lv. <span id="defenseLevel">1</span>) <button onclick="upgrade('defense')">Geliştir (15 💰, 10 🪨)</button></div>
+    <div class="building">📚 Akademi (Lv. <span id="academyLevel">1</span>) <button onclick="upgrade('academy')">Geliştir (20 💰, 15 🪨)</button></div>
+    <div class="building">⛪ Tapınak (Lv. <span id="templeLevel">1</span>) <button onclick="upgrade('temple')">Geliştir (20 💰, 20 🍖)</button></div>
+    <div class="building">🍖 Çiftlik (Lv. <span id="farmLevel">1</span>) <button onclick="upgrade('farm')">Geliştir (15 💰)</button></div>
+    <div class="building">🪨 Taş Ocağı (Lv. <span id="quarryLevel">1</span>) <button onclick="upgrade('quarry')">Geliştir (15 💰)</button></div>
+    <div class="building">🏛️ Maden (Lv. <span id="mineLevel">1</span>) <button onclick="upgrade('mine')">Geliştir (15 💰)</button></div>
   </div>
 </div>
 
   </div>  <script>
-    let resources = { gold: 100, food: 100, stone: 100 };
-
-    let structures = {
-      baraka: { name: "🏹 Baraka", level: 1, cost: 20, time: 10, upgrading: false },
-      savunma: { name: "🛡️ Savunma", level: 1, cost: 25, time: 12, upgrading: false },
-      akademi: { name: "📚 Akademi", level: 1, cost: 30, time: 15, upgrading: false },
-      tapinak: { name: "⛪ Tapınak", level: 1, cost: 35, time: 18, upgrading: false },
-      ciftlik: { name: "🍖 Çiftlik", level: 1, cost: 15, time: 8, upgrading: false },
-      tasOcagi: { name: "🪨 Taş Ocağı", level: 1, cost: 20, time: 10, upgrading: false },
-      maden: { name: "🏛️ Maden", level: 1, cost: 25, time: 12, upgrading: false }
+    let gold = 100, food = 100, stone = 100;
+    let levels = {
+      baraka: 1,
+      defense: 1,
+      academy: 1,
+      temple: 1,
+      farm: 1,
+      quarry: 1,
+      mine: 1
     };
 
     function login() {
@@ -120,7 +141,6 @@
       if (u && p) {
         document.getElementById("login-section").style.display = "none";
         document.getElementById("game-section").style.display = "block";
-        renderStructures();
       } else {
         alert("Lütfen giriş bilgilerini girin!");
       }
@@ -135,58 +155,27 @@
       document.getElementById(id).style.display = 'block';
     }
 
-    function renderStructures() {
-      const list = document.getElementById("structure-list");
-      list.innerHTML = "";
-      Object.keys(structures).forEach(key => {
-        const s = structures[key];
-        list.innerHTML += `
-          <div class="structure-card">
-            <h3>${s.name} (Lv. <span id="${key}-level">${s.level}</span>)</h3>
-            <p>Maliyet: <span id="${key}-cost">${s.cost}</span> 💰 | Süre: <span id="${key}-time">${s.time}s</span></p>
-            <button onclick="upgradeStructure('${key}')" id="${key}-btn">Geliştir</button>
-          </div>
-        `;
-      });
-    }
-
-    function upgradeStructure(key) {
-      const s = structures[key];
-      if (resources.gold >= s.cost && !s.upgrading) {
-        resources.gold -= s.cost;
-        s.upgrading = true;
+    function upgrade(structure) {
+      let costGold = 10 + levels[structure] * 5;
+      let costFood = structure === 'baraka' || structure === 'temple' ? 10 + levels[structure] * 2 : 0;
+      let costStone = structure === 'defense' || structure === 'academy' ? 10 + levels[structure] * 2 : 0;
+      if (gold >= costGold && food >= costFood && stone >= costStone) {
+        gold -= costGold;
+        food -= costFood;
+        stone -= costStone;
+        levels[structure]++;
+        document.getElementById(structure + 'Level').innerText = levels[structure];
         updateResources();
-
-        const btn = document.getElementById(`${key}-btn`);
-        btn.disabled = true;
-        let countdown = s.time;
-        btn.textContent = `Gelişiyor... (${countdown}s)`;
-
-        const interval = setInterval(() => {
-          countdown--;
-          btn.textContent = `Gelişiyor... (${countdown}s)`;
-          if (countdown <= 0) {
-            clearInterval(interval);
-            s.level++;
-            s.cost += 10;
-            s.time += 5;
-            s.upgrading = false;
-            document.getElementById(`${key}-level`).textContent = s.level;
-            document.getElementById(`${key}-cost`).textContent = s.cost;
-            document.getElementById(`${key}-time`).textContent = s.time + 's';
-            btn.disabled = false;
-            btn.textContent = "Geliştir";
-          }
-        }, 1000);
+        alert(structure + " seviyesi geliştirildi!");
       } else {
-        alert("Yeterli altın yok veya geliştirme zaten aktif!");
+        alert("Yetersiz kaynak!");
       }
     }
 
     function updateResources() {
-      document.getElementById("gold").textContent = resources.gold;
-      document.getElementById("food").textContent = resources.food;
-      document.getElementById("stone").textContent = resources.stone;
+      document.getElementById("gold").innerText = gold;
+      document.getElementById("food").innerText = food;
+      document.getElementById("stone").innerText = stone;
     }
   </script></body>
 </html>
