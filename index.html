@@ -1,120 +1,125 @@
-<!DOCTYPE html>
-<html lang="tr">
+<!DOCTYPE html><html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MobilWar-Reborn</title>
   <style>
     body {
-      background-color: #3a2a1c;
       font-family: Arial, sans-serif;
-      color: #fff;
-      text-align: center;
+      background-color: #3a2a1c;
       margin: 0;
       padding: 0;
-    }
-    h1 {
-      font-size: 28px;
-      margin: 20px 0 5px;
-    }
-    #logo {
-      width: 100px;
-      margin-bottom: 10px;
-    }
-    .resources {
-      background-color: #5c4033;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      padding: 10px;
-      font-size: 18px;
-      border-radius: 5px;
-      margin: 10px;
-    }
-    .button-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      max-width: 400px;
-      margin: 20px auto;
-    }
-    button {
-      padding: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      background-color: #ffd700;
-      color: #000;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    #login-section {
-      margin-top: 100px;
-    }
-    input {
-      padding: 8px;
-      font-size: 16px;
-      margin: 5px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    #game-section {
-      display: none;
-    }
+      color: #fff;
+    }h1, h2 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.logo {
+  display: block;
+  margin: 10px auto;
+  width: 80px;
+  height: auto;
+}
+
+.resource-bar {
+  background-color: #5a3e2b;
+  padding: 10px;
+  margin: 0 10px;
+  text-align: center;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  max-width: 350px;
+  margin: 20px auto;
+}
+
+button {
+  background-color: #ffd700;
+  border: none;
+  padding: 12px;
+  font-weight: bold;
+  border-radius: 5px;
+  font-size: 16px;
+  color: #000;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+#login-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+input {
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  border: none;
+  width: 80%;
+  max-width: 300px;
+  font-size: 16px;
+}
+
+#game-section {
+  display: none;
+}
+
   </style>
 </head>
 <body>
-
-<!-- GİRİŞ EKRANI -->
-<div id="login-section">
-  <h1>MobilWar-Reborn</h1>
-  <img id="logo" src="kilickalkan.png" alt="Logo"><br>
-  <input type="text" id="username" placeholder="Kullanıcı Adı"><br>
-  <input type="password" id="password" placeholder="Şifre"><br>
-  <button onclick="login()">Giriş Yap</button>
-</div>
-
-<!-- OYUN ANA EKRANI -->
-<div id="game-section">
-  <h1>MobilWar-Reborn</h1>
-  <img id="logo" src="kilickalkan.png" alt="Logo">
-  <div class="resources">
-    <span>Altın: <span id="gold">0</span> 💰</span>
-    <span>Et: <span id="meat">80</span> 🍖</span>
-    <span>Taş: <span id="stone">45</span> 🪨</span>
-  </div>
-  <div class="button-grid">
-    <button>Yapılar</button>
-    <button>Baraka</button>
-    <button>Savunma</button>
-    <button>Akademi</button>
-    <button>Tapınak</button>
-    <button>Birlikler</button>
-    <button>Saldırı</button>
-    <button>Dünya</button>
-    <button>Komuta Merkezi</button>
-    <button>Seçenekler</button>
-    <button>Yardım</button>
-    <button onclick="logout()">Oturumu Kapat</button>
-  </div>
-</div>
-
-<script>
-  function login() {
-    const u = document.getElementById("username").value;
-    const p = document.getElementById("password").value;
-    if (u && p) {
-      document.getElementById("login-section").style.display = "none";
-      document.getElementById("game-section").style.display = "block";
-    } else {
-      alert("Lütfen kullanıcı adı ve şifre girin.");
+  <div id="login-section">
+    <h1>MobilWar-Reborn</h1>
+    <img src="logo.png" alt="Logo" class="logo">
+    <input type="text" id="username" placeholder="Kullanıcı Adı">
+    <input type="password" id="password" placeholder="Şifre">
+    <button onclick="login()">Giriş Yap</button>
+  </div>  <div id="game-section">
+    <h1>MobilWar-Reborn</h1>
+    <img src="logo.png" alt="Logo" class="logo">
+    <div class="resource-bar">
+      Altın: <span id="gold">0</span> 💰
+      Et: <span id="meat">80</span> 🍖
+      Taş: <span id="stone">45</span> 🪨
+    </div>
+    <div class="button-grid">
+      <button>Yapılar</button>
+      <button>Baraka</button>
+      <button>Savunma</button>
+      <button>Akademi</button>
+      <button>Tapınak</button>
+      <button>Birlikler</button>
+      <button>Saldırı</button>
+      <button>Dünya</button>
+      <button>Komuta Merkezi</button>
+      <button>Seçenekler</button>
+      <button>Yardım</button>
+      <button>Oturumu Kapat</button>
+    </div>
+  </div>  <script>
+    function login() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      if (username && password) {
+        document.getElementById("login-section").style.display = "none";
+        document.getElementById("game-section").style.display = "block";
+      } else {
+        alert("Lütfen kullanıcı adı ve şifre girin.");
+      }
     }
-  }
-
-  function logout() {
-    document.getElementById("game-section").style.display = "none";
-    document.getElementById("login-section").style.display = "block";
-  }
-</script>
-
-</body>
+  </script></body>
 </html>
