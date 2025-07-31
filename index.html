@@ -6,115 +6,80 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #3a2a1c;
+      background-color: #3b2a19;
+      color: #fff3c0;
+      text-align: center;
       margin: 0;
       padding: 0;
-      color: #fff;
-    }h1, h2 {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.logo {
-  display: block;
-  margin: 10px auto;
-  width: 80px;
-  height: auto;
-}
-
-.resource-bar {
-  background-color: #5a3e2b;
-  padding: 10px;
-  margin: 0 10px;
-  text-align: center;
-  font-size: 16px;
-  border-radius: 5px;
-}
-
-.button-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  max-width: 350px;
-  margin: 20px auto;
-}
-
-button {
-  background-color: #ffd700;
-  border: none;
-  padding: 12px;
-  font-weight: bold;
-  border-radius: 5px;
-  font-size: 16px;
-  color: #000;
-  cursor: pointer;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-  transition: transform 0.1s ease;
-}
-
-button:active {
-  transform: scale(0.98);
-}
-
-#login-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 20px;
-}
-
-input {
-  padding: 10px;
-  margin: 5px 0;
-  border-radius: 5px;
-  border: none;
-  width: 80%;
-  max-width: 300px;
-  font-size: 16px;
-}
-
-#game-section {
-  display: none;
-}
-
+    }
+    .logo {
+      width: 100px;
+      margin: 10px auto;
+    }
+    .resources {
+      background-color: #5a3e2b;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 18px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      gap: 10px;
+      justify-content: center;
+      margin: 10px;
+    }
+    button {
+      background-color: #ffcc00;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #e6b800;
+    }
+    .section {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
   </style>
 </head>
 <body>
   <div id="login-section">
     <h1>MobilWar-Reborn</h1>
-    <img src="logo.png" alt="Logo" class="logo">
-    <input type="text" id="username" placeholder="Kullanıcı Adı">
-    <input type="password" id="password" placeholder="Şifre">
+    <img src="kilickalkan.png" alt="Logo" class="logo">
+    <input type="text" id="username" placeholder="Kullanıcı Adı"><br><br>
+    <input type="password" id="password" placeholder="Şifre"><br><br>
     <button onclick="login()">Giriş Yap</button>
-  </div>  <div id="game-section">
+  </div>  <div id="game-section" style="display:none;">
     <h1>MobilWar-Reborn</h1>
-    <img src="logo.png" alt="Logo" class="logo">
-    <div class="resource-bar">
-      Altın: <span id="gold">0</span> 💰
-      Et: <span id="meat">80</span> 🍖
-      Taş: <span id="stone">45</span> 🪨
+    <img src="kilickalkan.png" alt="Logo" class="logo">
+    <div class="resources">
+      <span>Altın: <span id="gold">0</span> 💰</span>
+      <span>Et: <span id="meat">80</span> 🍖</span>
+      <span>Taş: <span id="stone">45</span> 🪨</span>
     </div>
     <div class="button-grid">
-      <button>Yapılar</button>
-      <button>Baraka</button>
-      <button>Savunma</button>
-      <button>Akademi</button>
-      <button>Tapınak</button>
-      <button>Birlikler</button>
-      <button>Saldırı</button>
-      <button>Dünya</button>
-      <button>Komuta Merkezi</button>
-      <button>Seçenekler</button>
-      <button>Yardım</button>
-      <button>Oturumu Kapat</button>
+      <button>Yapılar</button><button>Baraka</button>
+      <button>Savunma</button><button>Akademi</button>
+      <button>Tapınak</button><button>Birlikler</button>
+      <button>Saldırı</button><button>Dünya</button>
+      <button>Komuta Merkezi</button><button>Seçenekler</button>
+      <button>Yardım</button><button>Oturumu Kapat</button>
     </div>
   </div>  <script>
     function login() {
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-      if (username && password) {
+      const u = document.getElementById("username").value;
+      const p = document.getElementById("password").value;
+      if (u && p) {
         document.getElementById("login-section").style.display = "none";
         document.getElementById("game-section").style.display = "block";
       } else {
