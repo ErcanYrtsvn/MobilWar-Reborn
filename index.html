@@ -66,11 +66,17 @@
       border-radius: 6px;
       margin-bottom: 1rem;
     }
-    .structure {
-      background-color: #4b3220;
+    .section {
+      display: none;
+      background-color: #3d2a12;
       padding: 1rem;
-      margin: 0.5rem 0;
       border-radius: 8px;
+    }
+    .building {
+      background: #4b3220;
+      padding: 0.5rem;
+      margin: 0.3rem 0;
+      border-radius: 6px;
     }
   </style>
 </head>
@@ -85,44 +91,46 @@
 
 <div id="game-section" style="display:none;">
   <div class="resource-bar">
-    <div>Altın: <span id="gold">100</span> 🪙</div>
-    <div>Yemek: <span id="food">100</span> 🍖</div>
-    <div>Taş: <span id="stone">100</span> 🪨</div>
+    <div>💰 Altın: <span id="gold">100</span></div>
+    <div>🍖 Yemek: <span id="food">100</span></div>
+    <div>🪨 Taş: <span id="stone">100</span></div>
   </div>
 
   <div class="menu">
-    <button onclick="showSection('structures')">Yapılar</button>
-    <button onclick="showSection('baraka')">Baraka</button>
-    <button onclick="showSection('savunma')">Savunma</button>
-    <button onclick="showSection('akademi')">Akademi</button>
-    <button onclick="showSection('tapinak')">Tapınak</button>
-    <button onclick="showSection('world')">Dünya</button>
-    <button onclick="showSection('command')">Komuta Merkezi</button>
-    <button onclick="showSection('options')">Seçenekler</button>
-    <button onclick="showSection('help')">Yardım</button>
-    <button onclick="logout()">Oturumu Kapat</button>
+    <button onclick="showSection('structures')">🏠 Yapılar</button>
+    <button onclick="showSection('units')">🪖 Birlikler</button>
+    <button onclick="showSection('battle')">⚔️ Saldırı</button>
+    <button onclick="showSection('barracks')">🏹 Baraka</button>
+    <button onclick="showSection('defense')">🛡️ Savunma</button>
+    <button onclick="showSection('academy')">📘 Akademi</button>
+    <button onclick="showSection('temple')">⛪ Tapınak</button>
+    <button onclick="showSection('farm')">🍖 Çiftlik</button>
+    <button onclick="showSection('quarry')">🪨 Taş Ocağı</button>
+    <button onclick="showSection('mine')">🏛️ Maden</button>
+    <button onclick="showSection('command')">🎖️ Komuta Merkezi</button>
+    <button onclick="showSection('options')">⚙️ Seçenekler</button>
+    <button onclick="showSection('help')">❓ Yardım</button>
+    <button onclick="logout()">🚪 Oturumu Kapat</button>
   </div>
 
   <div id="structures" class="section">
     <h2>Yapılar</h2>
-    <div id="structureList"></div>
+    <div class="building">🏹 Baraka (Lv. <span id="barakaLevel">1</span>) <button onclick="upgrade('baraka')">Geliştir (20 Altın)</button></div>
+    <div class="building">🛡️ Savunma (Lv. <span id="savunmaLevel">1</span>) <button onclick="upgrade('savunma')">Geliştir (25 Altın)</button></div>
+    <div class="building">📘 Akademi (Lv. <span id="akademiLevel">1</span>) <button onclick="upgrade('akademi')">Geliştir (30 Altın)</button></div>
+    <div class="building">⛪ Tapınak (Lv. <span id="tapinakLevel">1</span>) <button onclick="upgrade('tapinak')">Geliştir (35 Altın)</button></div>
+    <div class="building">🍖 Çiftlik (Lv. <span id="ciftlikLevel">1</span>) <button onclick="upgrade('ciftlik')">Geliştir (15 Altın)</button></div>
+    <div class="building">🪨 Taş Ocağı (Lv. <span id="tasLevel">1</span>) <button onclick="upgrade('tas')">Geliştir (15 Altın)</button></div>
+    <div class="building">🏛️ Maden (Lv. <span id="madenLevel">1</span>) <button onclick="upgrade('maden')">Geliştir (15 Altın)</button></div>
   </div>
 
-  <!-- Diğer bölümler -->
+  <div id="help" class="section"><h2>Yardım</h2><p>Destek ve bilgiler</p></div>
 </div>
 
   </div>  <script>
     let gold = 100, food = 100, stone = 100;
-
-    const structures = [
-      { name: "Baraka", level: 1, baseCost: 50, baseTime: 10 },
-      { name: "Savunma", level: 1, baseCost: 60, baseTime: 12 },
-      { name: "Akademi", level: 1, baseCost: 70, baseTime: 14 },
-      { name: "Tapınak", level: 1, baseCost: 80, baseTime: 16 },
-      { name: "Çiftlik", level: 1, baseCost: 40, baseTime: 8 },
-      { name: "Taş Ocağı", level: 1, baseCost: 45, baseTime: 9 },
-      { name: "Maden", level: 1, baseCost: 55, baseTime: 11 }
-    ];
+    let barakaLevel = 1, savunmaLevel = 1, akademiLevel = 1, tapinakLevel = 1;
+    let ciftlikLevel = 1, tasLevel = 1, madenLevel = 1;
 
     function login() {
       const u = document.getElementById("username").value;
@@ -130,7 +138,6 @@
       if (u && p) {
         document.getElementById("login-section").style.display = "none";
         document.getElementById("game-section").style.display = "block";
-        renderStructures();
       } else {
         alert("Lütfen giriş bilgilerini girin!");
       }
@@ -145,43 +152,23 @@
       document.getElementById(id).style.display = 'block';
     }
 
-    function renderStructures() {
-      const list = document.getElementById("structureList");
-      list.innerHTML = "";
-      structures.forEach((s, index) => {
-        const cost = s.baseCost * s.level;
-        const time = s.baseTime * s.level;
-        const div = document.createElement("div");
-        div.className = "structure";
-        div.innerHTML = `
-          <strong>${s.name} (Seviye ${s.level})</strong><br>
-          Maliyet: ${cost} 🪙<br>
-          Süre: <span id="timer-${index}">${time}</span> sn<br>
-          <button onclick="upgradeStructure(${index})">Geliştir</button>
-        `;
-        list.appendChild(div);
-      });
-    }
+    function upgrade(building) {
+      let cost = 20;
+      if (building === 'savunma') cost = 25;
+      else if (building === 'akademi') cost = 30;
+      else if (building === 'tapinak') cost = 35;
+      else if (building === 'ciftlik' || building === 'tas' || building === 'maden') cost = 15;
 
-    function upgradeStructure(index) {
-      const s = structures[index];
-      const cost = s.baseCost * s.level;
-      const time = s.baseTime * s.level;
       if (gold >= cost) {
         gold -= cost;
+        if (building === 'baraka') document.getElementById("barakaLevel").innerText = ++barakaLevel;
+        if (building === 'savunma') document.getElementById("savunmaLevel").innerText = ++savunmaLevel;
+        if (building === 'akademi') document.getElementById("akademiLevel").innerText = ++akademiLevel;
+        if (building === 'tapinak') document.getElementById("tapinakLevel").innerText = ++tapinakLevel;
+        if (building === 'ciftlik') document.getElementById("ciftlikLevel").innerText = ++ciftlikLevel;
+        if (building === 'tas') document.getElementById("tasLevel").innerText = ++tasLevel;
+        if (building === 'maden') document.getElementById("madenLevel").innerText = ++madenLevel;
         updateResources();
-        let remaining = time;
-        const timerSpan = document.getElementById(`timer-${index}`);
-        timerSpan.textContent = `${remaining} sn`;
-        const interval = setInterval(() => {
-          remaining--;
-          timerSpan.textContent = `${remaining} sn`;
-          if (remaining <= 0) {
-            clearInterval(interval);
-            structures[index].level++;
-            renderStructures();
-          }
-        }, 1000);
       } else {
         alert("Yetersiz altın!");
       }
