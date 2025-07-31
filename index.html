@@ -72,7 +72,7 @@
       padding: 1rem;
       border-radius: 8px;
     }
-    .building {
+    .building, .unit {
       background: #4b3220;
       padding: 0.5rem;
       margin: 0.3rem 0;
@@ -91,20 +91,20 @@
 
 <div id="game-section" style="display:none;">
   <div class="resource-bar">
-    <div>⛅ Altın: <span id="gold">100</span></div>
-    <div>🍽️ Yemek: <span id="wood">100</span></div>
-    <div>🪨 Taş: <span id="stone">100</span></div>
+    <div>Altın: <span id="gold">100</span> 💰</div>
+    <div>Yemek: <span id="wood">100</span> 🍖</div>
+    <div>Taş: <span id="stone">100</span> 🪨</div>
   </div>
 
   <div class="menu">
     <button onclick="showSection('structures')">🏠 Yapılar</button>
-    <button onclick="showSection('units')">🧢 Birlikler</button>
+    <button onclick="showSection('units')">🪖 Birlikler</button>
     <button onclick="showSection('battle')">⚔️ Saldırı</button>
-    <button onclick="showSection('barracks')">🏋️‍♂️ Baraka</button>
+    <button onclick="showSection('barracks')">🏹 Baraka</button>
     <button onclick="showSection('defense')">🛡️ Savunma</button>
-    <button onclick="showSection('academy')">📘 Akademi</button>
-    <button onclick="showSection('temple')">⛩️ Tapınak</button>
-    <button onclick="showSection('world')">🌍 Dünya</button>
+    <button onclick="showSection('academy')">📚 Akademi</button>
+    <button onclick="showSection('temple')">⛪ Tapınak</button>
+    <button onclick="showSection('world')">🗺️ Dünya</button>
     <button onclick="showSection('command')">🎖️ Komuta Merkezi</button>
     <button onclick="showSection('options')">⚙️ Seçenekler</button>
     <button onclick="showSection('help')">❓ Yardım</button>
@@ -113,31 +113,37 @@
 
   <div id="structures" class="section">
     <h2>Yapılar</h2>
-    <div class="building">🏋️‍♂️ Baraka</div>
-    <div class="building">🛡️ Savunma</div>
-    <div class="building">📘 Akademi</div>
-    <div class="building">⛩️ Tapınak</div>
-    <div class="building">🍽️ Çiftlik</div>
-    <div class="building">🪨 Taş Ocağı</div>
-    <div class="building">💰 Maden</div>
+    <button><span style="font-size: 1.2em;">🏹</span> Baraka</button>
+    <button><span style="font-size: 1.2em;">🛡️</span> Savunma</button>
+    <button><span style="font-size: 1.2em;">📚</span> Akademi</button>
+    <button><span style="font-size: 1.2em;">⛪</span> Tapınak</button>
+    <button><span style="font-size: 1.2em;">🏛️</span> Altın Madeni</button>
+    <button><span style="font-size: 1.2em;">🪨</span> Taş Ocağı</button>
+    <button><span style="font-size: 1.2em;">🍖</span> Çiftlik</button>
   </div>
 
   <div id="units" class="section">
-    <h2>Birlikler</h2>
-    <p>Birlik listesi buraya gelecek</p>
+    <h2>Birlik Üretimi</h2>
+    <div class="unit">Cüce (10 Yemek) <button onclick="train('dwarf')">Üret</button></div>
+    <div class="unit">Elf (15 Taş) <button onclick="train('elf')">Üret</button></div>
+    <div class="unit">Süvari (20 Altın) <button onclick="train('cavalry')">Üret</button></div>
   </div>
-  <div id="battle" class="section"><h2>Saldırı</h2><p>Savaş ekranı</p></div>
-  <div id="barracks" class="section"><h2>Baraka</h2><p>Asker üretimi buraya gelecek</p></div>
-  <div id="defense" class="section"><h2>Savunma</h2><p>Savunma sistemleri</p></div>
-  <div id="academy" class="section"><h2>Akademi</h2><p>Teknoloji geliştirme</p></div>
-  <div id="temple" class="section"><h2>Tapınak</h2><p>Din ve sihir ekranı</p></div>
-  <div id="world" class="section"><h2>Dünya</h2><p>Harita ekranı</p></div>
+
+  <div id="battle" class="section">
+    <h2>Saldırı</h2>
+    <button onclick="attack()">Saldır!</button>
+    <p id="battleResult"></p>
+  </div>
+
+  <div id="world" class="section"><h2>Dünya</h2><p>Harita gelecek</p></div>
   <div id="command" class="section"><h2>Komuta Merkezi</h2><p>Yönetim ekranı</p></div>
   <div id="options" class="section"><h2>Seçenekler</h2><p>Ayarlar</p></div>
-  <div id="help" class="section"><h2>Yardım</h2><p>Destek ekranı</p></div>
+  <div id="help" class="section"><h2>Yardım</h2><p>Destek</p></div>
 </div>
 
   </div>  <script>
+    let gold = 100, wood = 100, stone = 100;
+
     function login() {
       const u = document.getElementById("username").value;
       const p = document.getElementById("password").value;
@@ -156,6 +162,33 @@
     function showSection(id) {
       document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
       document.getElementById(id).style.display = 'block';
+    }
+
+    function train(type) {
+      if (type === 'dwarf' && wood >= 10) wood -= 10;
+      else if (type === 'elf' && stone >= 15) stone -= 15;
+      else if (type === 'cavalry' && gold >= 20) gold -= 20;
+      else return alert("Yetersiz kaynak!");
+      updateResources();
+      alert(type + " üretildi!");
+    }
+
+    function attack() {
+      const win = Math.random() > 0.5;
+      if (win) {
+        gold += 10;
+        document.getElementById("battleResult").innerText = "Zafer! 10 altın kazandın.";
+      } else {
+        gold -= 5;
+        document.getElementById("battleResult").innerText = "Kaybettin. 5 altın kaybettin.";
+      }
+      updateResources();
+    }
+
+    function updateResources() {
+      document.getElementById("gold").innerText = gold;
+      document.getElementById("wood").innerText = wood;
+      document.getElementById("stone").innerText = stone;
     }
   </script></body>
 </html>
