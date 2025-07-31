@@ -1,128 +1,192 @@
 <!DOCTYPE html><html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MobilWar-Reborn</title>
   <style>
     body {
-      background-color: #3a240d;
-      color: #fff3c7;
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      text-align: center;
+      background-color: #2c1f0f;
+      color: #f5deb3;
     }
-    .section {
-      display: none;
-    }
-    #login-section, #game-section {
-      padding-top: 40px;
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 1rem;
     }
     h1 {
-      font-size: 32px;
+      text-align: center;
+      color: #f5deb3;
+      margin-top: 1.5rem;
+      font-size: 2em;
     }
-    img.logo {
-      width: 100px;
-      margin: 20px auto;
+    .logo-image {
       display: block;
-    }
-    input[type="text"], input[type="password"] {
-      padding: 10px;
-      margin: 10px auto;
-      width: 200px;
-      display: block;
-      border: none;
-      border-radius: 5px;
+      margin: 0 auto 1rem auto;
+      width: 120px;
+      max-width: 50%;
+      height: auto;
+      filter: drop-shadow(0 0 6px rgba(0,0,0,0.4));
+      border-radius: 6px;
     }
     button {
-      padding: 10px 20px;
-      background-color: #ffd700;
+      padding: 0.5rem;
+      margin: 0.3rem 0;
+      width: 100%;
+      background-color: #ffcc00;
       border: none;
-      margin: 5px;
       border-radius: 5px;
       font-weight: bold;
+      cursor: pointer;
     }
-    .resources {
-      background-color: #5c3d1d;
-      padding: 10px;
-      margin-bottom: 10px;
+    input {
+      padding: 0.5rem;
+      width: 100%;
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
     }
-    .building-button {
-      display: inline-block;
-      margin: 5px;
-      width: 140px;
+    .menu {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 1rem 0;
     }
-    #structures h2 {
-      margin-top: 30px;
+    .menu button {
+      flex: 1 1 45%;
+    }
+    .resource-bar {
+      display: flex;
+      justify-content: space-around;
+      background: #5a3f2b;
+      padding: 0.5rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+    .structure-card {
+      background: #4b3220;
+      padding: 0.5rem;
+      margin: 0.3rem 0;
+      border-radius: 6px;
     }
   </style>
 </head>
 <body>
-  <!-- Giriş Ekranı -->
-  <div id="login-section" class="section" style="display:block">
+  <div class="container">
     <h1>MobilWar-Reborn</h1>
-    <img src="kilickalkan.png" class="logo" alt="Logo">
-    <input type="text" id="username" placeholder="Kullanıcı Adı">
-    <input type="password" id="password" placeholder="Şifre">
-    <button onclick="login()">Giriş Yap</button>
-  </div>  <!-- Oyun Ekranı -->  <div id="game-section" class="section">
-    <h1>MobilWar-Reborn</h1>
-    <img src="kilickalkan.png" class="logo" alt="Logo">
-    <div class="resources">
-      Altın: <span id="gold">0</span> 💰
-      Et: <span id="food">80</span> 🥩
-      Taş: <span id="stone">45</span> 🪨
-    </div><!-- Ana Menü -->
-<div id="main-menu">
-  <button class="building-button" onclick="showSection('structures')">Yapılar</button>
-  <button class="building-button">Baraka</button>
-  <button class="building-button">Savunma</button>
-  <button class="building-button">Akademi</button>
-  <button class="building-button">Tapınak</button>
-  <button class="building-button">Birlikler</button>
-  <button class="building-button">Saldırı</button>
-  <button class="building-button">Dünya</button>
-  <button class="building-button">Komuta Merkezi</button>
-  <button class="building-button">Seçenekler</button>
-  <button class="building-button">Yardım</button>
-  <button class="building-button" onclick="logout()">Oturumu Kapat</button>
+    <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" /><div id="login-section">
+  <input type="text" id="username" placeholder="Oyuncu Adı">
+  <input type="password" id="password" placeholder="Şifre">
+  <button onclick="login()">Giriş Yap</button>
 </div>
 
-<!-- Yapılar Sekmesi -->
-<div id="structures" class="section">
-  <h2>Yapılar</h2>
-  <button class="building-button">🏹 Baraka</button>
-  <button class="building-button">🛡️ Savunma</button>
-  <button class="building-button">📚 Akademi</button>
-  <button class="building-button">⛪ Tapınak</button>
-  <button class="building-button">🌾 Çiftlik</button>
-  <button class="building-button">🪨 Taş Ocağı</button>
-  <button class="building-button">🏛 Maden</button>
+<div id="game-section" style="display:none;">
+  <div class="resource-bar">
+    <div>Altın: <span id="gold">100</span> 💰</div>
+    <div>Yemek: <span id="food">100</span> 🍖</div>
+    <div>Taş: <span id="stone">100</span> 🪨</div>
+  </div>
+
+  <div class="menu">
+    <button onclick="showSection('structures')">Yapılar</button>
+    <button onclick="logout()">Oturumu Kapat</button>
+  </div>
+
+  <div id="structures" class="section">
+    <h2>Yapılar</h2>
+    <div id="structure-list"></div>
+  </div>
 </div>
 
   </div>  <script>
+    let resources = { gold: 100, food: 100, stone: 100 };
+
+    let structures = {
+      baraka: { name: "🏹 Baraka", level: 1, cost: 20, time: 10, upgrading: false },
+      savunma: { name: "🛡️ Savunma", level: 1, cost: 25, time: 12, upgrading: false },
+      akademi: { name: "📚 Akademi", level: 1, cost: 30, time: 15, upgrading: false },
+      tapinak: { name: "⛪ Tapınak", level: 1, cost: 35, time: 18, upgrading: false },
+      ciftlik: { name: "🍖 Çiftlik", level: 1, cost: 15, time: 8, upgrading: false },
+      tasOcagi: { name: "🪨 Taş Ocağı", level: 1, cost: 20, time: 10, upgrading: false },
+      maden: { name: "🏛️ Maden", level: 1, cost: 25, time: 12, upgrading: false }
+    };
+
     function login() {
       const u = document.getElementById("username").value;
       const p = document.getElementById("password").value;
       if (u && p) {
         document.getElementById("login-section").style.display = "none";
         document.getElementById("game-section").style.display = "block";
+        renderStructures();
       } else {
-        alert("Lütfen kullanıcı adı ve şifre girin.");
+        alert("Lütfen giriş bilgilerini girin!");
       }
     }
 
     function logout() {
-      document.getElementById("game-section").style.display = "none";
-      document.getElementById("login-section").style.display = "block";
+      location.reload();
     }
 
     function showSection(id) {
-      const allSections = document.querySelectorAll('.section');
-      allSections.forEach(sec => {
-        if (sec.id !== "game-section") sec.style.display = "none";
+      document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+    }
+
+    function renderStructures() {
+      const list = document.getElementById("structure-list");
+      list.innerHTML = "";
+      Object.keys(structures).forEach(key => {
+        const s = structures[key];
+        list.innerHTML += `
+          <div class="structure-card">
+            <h3>${s.name} (Lv. <span id="${key}-level">${s.level}</span>)</h3>
+            <p>Maliyet: <span id="${key}-cost">${s.cost}</span> 💰 | Süre: <span id="${key}-time">${s.time}s</span></p>
+            <button onclick="upgradeStructure('${key}')" id="${key}-btn">Geliştir</button>
+          </div>
+        `;
       });
-      document.getElementById(id).style.display = "block";
+    }
+
+    function upgradeStructure(key) {
+      const s = structures[key];
+      if (resources.gold >= s.cost && !s.upgrading) {
+        resources.gold -= s.cost;
+        s.upgrading = true;
+        updateResources();
+
+        const btn = document.getElementById(`${key}-btn`);
+        btn.disabled = true;
+        let countdown = s.time;
+        btn.textContent = `Gelişiyor... (${countdown}s)`;
+
+        const interval = setInterval(() => {
+          countdown--;
+          btn.textContent = `Gelişiyor... (${countdown}s)`;
+          if (countdown <= 0) {
+            clearInterval(interval);
+            s.level++;
+            s.cost += 10;
+            s.time += 5;
+            s.upgrading = false;
+            document.getElementById(`${key}-level`).textContent = s.level;
+            document.getElementById(`${key}-cost`).textContent = s.cost;
+            document.getElementById(`${key}-time`).textContent = s.time + 's';
+            btn.disabled = false;
+            btn.textContent = "Geliştir";
+          }
+        }, 1000);
+      } else {
+        alert("Yeterli altın yok veya geliştirme zaten aktif!");
+      }
+    }
+
+    function updateResources() {
+      document.getElementById("gold").textContent = resources.gold;
+      document.getElementById("food").textContent = resources.food;
+      document.getElementById("stone").textContent = resources.stone;
     }
   </script></body>
 </html>
