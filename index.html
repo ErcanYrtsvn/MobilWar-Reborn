@@ -72,12 +72,11 @@
       padding: 1rem;
       border-radius: 8px;
     }
-    .structure {
-      margin-bottom: 1rem;
-    }
-    .countdown {
-      font-size: 0.9rem;
-      color: #ffcc00;
+    .building {
+      background: #4b3220;
+      padding: 0.5rem;
+      margin: 0.3rem 0;
+      border-radius: 6px;
     }
   </style>
 </head>
@@ -92,15 +91,16 @@
 
 <div id="game-section" style="display:none;">
   <div class="resource-bar">
-    <div>Altın: <span id="gold">1000</span> 💰</div>
-    <div>Yemek: <span id="food">1000</span> 🍖</div>
-    <div>Taş: <span id="stone">1000</span> 🪨</div>
+    <div>⛅ Altın: <span id="gold">100</span></div>
+    <div>🍽️ Yemek: <span id="wood">100</span></div>
+    <div>🪨 Taş: <span id="stone">100</span></div>
   </div>
+
   <div class="menu">
     <button onclick="showSection('structures')">🏠 Yapılar</button>
-    <button onclick="showSection('units')">🪖 Birlikler</button>
+    <button onclick="showSection('units')">🧢 Birlikler</button>
     <button onclick="showSection('battle')">⚔️ Saldırı</button>
-    <button onclick="showSection('barracks')">🏹 Baraka</button>
+    <button onclick="showSection('barracks')">🏋️‍♂️ Baraka</button>
     <button onclick="showSection('defense')">🛡️ Savunma</button>
     <button onclick="showSection('academy')">📘 Akademi</button>
     <button onclick="showSection('temple')">⛩️ Tapınak</button>
@@ -113,48 +113,31 @@
 
   <div id="structures" class="section">
     <h2>Yapılar</h2>
-    <div class="structure">🏹 Baraka (Seviye <span id="barakaLevel">1</span>) <button onclick="upgrade('baraka')">Geliştir (100 Altın, 10 sn)</button> <span id="barakaTimer" class="countdown"></span></div>
-    <div class="structure">🛡️ Savunma (Seviye <span id="savunmaLevel">1</span>) <button onclick="upgrade('savunma')">Geliştir (150 Altın, 15 sn)</button> <span id="savunmaTimer" class="countdown"></span></div>
-    <div class="structure">📘 Akademi (Seviye <span id="akademiLevel">1</span>) <button onclick="upgrade('akademi')">Geliştir (200 Altın, 20 sn)</button> <span id="akademiTimer" class="countdown"></span></div>
-    <div class="structure">⛩️ Tapınak (Seviye <span id="tapinakLevel">1</span>) <button onclick="upgrade('tapinak')">Geliştir (250 Altın, 25 sn)</button> <span id="tapinakTimer" class="countdown"></span></div>
-    <div class="structure">🍖 Çiftlik (Seviye <span id="ciftlikLevel">1</span>) <button onclick="upgrade('ciftlik')">Geliştir (120 Altın, 12 sn)</button> <span id="ciftlikTimer" class="countdown"></span></div>
-    <div class="structure">🪨 Taş Ocağı (Seviye <span id="tasLevel">1</span>) <button onclick="upgrade('tas')">Geliştir (130 Altın, 13 sn)</button> <span id="tasTimer" class="countdown"></span></div>
-    <div class="structure">💰 Maden (Seviye <span id="madenLevel">1</span>) <button onclick="upgrade('maden')">Geliştir (140 Altın, 14 sn)</button> <span id="madenTimer" class="countdown"></span></div>
+    <div class="building">🏋️‍♂️ Baraka</div>
+    <div class="building">🛡️ Savunma</div>
+    <div class="building">📘 Akademi</div>
+    <div class="building">⛩️ Tapınak</div>
+    <div class="building">🍽️ Çiftlik</div>
+    <div class="building">🪨 Taş Ocağı</div>
+    <div class="building">💰 Maden</div>
   </div>
 
-  <!-- Diğer bölümler aynı kalacak -->
+  <div id="units" class="section">
+    <h2>Birlikler</h2>
+    <p>Birlik listesi buraya gelecek</p>
+  </div>
+  <div id="battle" class="section"><h2>Saldırı</h2><p>Savaş ekranı</p></div>
+  <div id="barracks" class="section"><h2>Baraka</h2><p>Asker üretimi buraya gelecek</p></div>
+  <div id="defense" class="section"><h2>Savunma</h2><p>Savunma sistemleri</p></div>
+  <div id="academy" class="section"><h2>Akademi</h2><p>Teknoloji geliştirme</p></div>
+  <div id="temple" class="section"><h2>Tapınak</h2><p>Din ve sihir ekranı</p></div>
+  <div id="world" class="section"><h2>Dünya</h2><p>Harita ekranı</p></div>
+  <div id="command" class="section"><h2>Komuta Merkezi</h2><p>Yönetim ekranı</p></div>
+  <div id="options" class="section"><h2>Seçenekler</h2><p>Ayarlar</p></div>
+  <div id="help" class="section"><h2>Yardım</h2><p>Destek ekranı</p></div>
 </div>
 
   </div>  <script>
-    let gold = 1000, food = 1000, stone = 1000;
-    const levels = {
-      baraka: 1,
-      savunma: 1,
-      akademi: 1,
-      tapinak: 1,
-      ciftlik: 1,
-      tas: 1,
-      maden: 1
-    };
-    const costs = {
-      baraka: 100,
-      savunma: 150,
-      akademi: 200,
-      tapinak: 250,
-      ciftlik: 120,
-      tas: 130,
-      maden: 140
-    };
-    const durations = {
-      baraka: 10,
-      savunma: 15,
-      akademi: 20,
-      tapinak: 25,
-      ciftlik: 12,
-      tas: 13,
-      maden: 14
-    };
-
     function login() {
       const u = document.getElementById("username").value;
       const p = document.getElementById("password").value;
@@ -173,35 +156,6 @@
     function showSection(id) {
       document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
       document.getElementById(id).style.display = 'block';
-    }
-
-    function upgrade(name) {
-      if (gold >= costs[name]) {
-        gold -= costs[name];
-        updateResources();
-        let timeLeft = durations[name];
-        const timer = document.getElementById(name + "Timer");
-        timer.innerText = ` Geliştirme başlatıldı: ${timeLeft} sn`;
-        const interval = setInterval(() => {
-          timeLeft--;
-          if (timeLeft > 0) {
-            timer.innerText = ` Kalan süre: ${timeLeft} sn`;
-          } else {
-            clearInterval(interval);
-            levels[name]++;
-            document.getElementById(name + "Level").innerText = levels[name];
-            timer.innerText = ` ✅ Geliştirildi!`;
-          }
-        }, 1000);
-      } else {
-        alert("Yetersiz altın!");
-      }
-    }
-
-    function updateResources() {
-      document.getElementById("gold").innerText = gold;
-      document.getElementById("food").innerText = food;
-      document.getElementById("stone").innerText = stone;
     }
   </script></body>
 </html>
