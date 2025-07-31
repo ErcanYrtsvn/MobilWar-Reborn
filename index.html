@@ -1,68 +1,114 @@
-<!DOCTYPE html><html lang="tr"><head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html><html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MobilWar-Reborn</title>
-  <link rel="stylesheet" href="style.css">
-</head><body>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #2c1f0f;
+      color: #f5deb3;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 1rem;
+    }
+    h1 {
+      text-align: center;
+      color: #f5deb3;
+      margin-top: 1.5rem;
+      font-size: 2em;
+    }
+    .logo-image {
+      display: block;
+      margin: 0 auto 1rem auto;
+      width: 120px;
+      max-width: 50%;
+      height: auto;
+      filter: drop-shadow(0 0 6px rgba(0,0,0,0.4));
+      border-radius: 6px;
+    }
+    button {
+      padding: 0.5rem;
+      margin: 0.3rem 0;
+      width: 100%;
+      background-color: #ffcc00;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    input {
+      padding: 0.5rem;
+      width: 100%;
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    .menu {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    .menu button {
+      flex: 1 1 45%;
+    }
+    .resource-bar {
+      display: flex;
+      justify-content: space-around;
+      background: #5a3f2b;
+      padding: 0.5rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
   <div class="container">
-    <h1>MobilWar-Reborn</h1>
-    <img src="kilickalkan.png" alt="Logo" class="logo">
-    <div class="login-form">
-      <input type="text" id="username" placeholder="Kullanıcı Adı">
+    <div id="login-section">
+      <h1>MobilWar-Reborn</h1>
+      <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" />
+      <input type="text" id="username" placeholder="Oyuncu Adı">
       <input type="password" id="password" placeholder="Şifre">
       <button onclick="login()">Giriş Yap</button>
-    </div><div id="game-interface" style="display:none">
-  <div class="resources">
-    <span>Altın: <span id="gold">0</span> 💰</span>
-    <span>Et: <span id="meat">80</span> 🍖</span>
-    <span>Taş: <span id="stone">45</span> 🪨</span>
+    </div><div id="game-section" style="display: none;">
+  <h1>MobilWar-Reborn</h1>
+  <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" />
+  <div class="resource-bar">
+    <div>Altın: 100</div>
+    <div>Et: 100 🍖</div>
+    <div>Taş: 100</div>
   </div>
-
   <div class="menu">
-    <button onclick="showSection('structures')">Yapılar</button>
-    <button onclick="showSection('barracks')">Baraka</button>
-    <button onclick="showSection('defense')">Savunma</button>
-    <button onclick="showSection('academy')">Akademi</button>
-    <button onclick="showSection('temple')">Tapınak</button>
-    <button onclick="showSection('units')">Birlikler</button>
-    <button onclick="showSection('attack')">Saldırı</button>
-    <button onclick="showSection('world')">Dünya</button>
-    <button onclick="showSection('command')">Komuta Merkezi</button>
-    <button onclick="showSection('options')">Seçenekler</button>
-    <button onclick="showSection('help')">Yardım</button>
-    <button onclick="logout()">Oturumu Kapat</button>
-  </div>
-
-  <div id="structures" class="section">
-    <h2>Yapılar</h2>
-    <div class="building" id="structure-barracks"></div>
-    <div class="building" id="structure-defense"></div>
-    <div class="building" id="structure-academy"></div>
-    <div class="building" id="structure-temple"></div>
-    <div class="building" id="structure-gold"></div>
-    <div class="building" id="structure-stone"></div>
-    <div class="building" id="structure-farm"></div>
-  </div>
-
-  <div id="barracks" class="section">
-    <h2>Baraka</h2>
-    <p>Asker üretim alanı.</p>
-  </div>
-
-  <div id="defense" class="section">
-    <h2>Savunma</h2>
-    <p>Savunma sistemlerini geliştir.</p>
-  </div>
-
-  <div id="academy" class="section">
-    <h2>Akademi</h2>
-    <p>Bilim ve araştırma merkezi.</p>
-  </div>
-
-  <div id="temple" class="section">
-    <h2>Tapınak</h2>
-    <p>İnanç ve sihir yapıları.</p>
+    <button>Yapılar</button>
+    <button>Savunma</button>
+    <button>Birlikler</button>
+    <button>Saldırı</button>
+    <button>Akademi</button>
+    <button>Tapınak</button>
+    <button>Dünya</button>
+    <button>Komuta Merkezi</button>
+    <button>Seçenekler</button>
+    <button>Yardım</button>
+    <button>Oturumu Kapat</button>
   </div>
 </div>
 
-  </div>  <script src="script.js"></script></body></html>
+  </div>  <script>
+    function login() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      if (username && password) {
+        document.getElementById("login-section").style.display = "none";
+        document.getElementById("game-section").style.display = "block";
+      } else {
+        alert("Lütfen kullanıcı adı ve şifre girin.");
+      }
+    }
+  </script></body>
+</html>
