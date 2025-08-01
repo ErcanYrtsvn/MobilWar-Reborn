@@ -1,24 +1,24 @@
-const kaynaklar = {
+let kaynaklar = {
   altin: 100000,
   et: 100000
 };
 
-const birlikler = [
-  { ad: "Casus Kuş", ikon: "🕊️", altin: 100, et: 200, sure: "00:00:30", seviye: 1 },
-  { ad: "Cüce", ikon: "⛏️", altin: 200, et: 450, sure: "00:01:30", seviye: 2 },
-  { ad: "Yük Arabası", ikon: "🚛", altin: 1000, et: 1000, sure: "00:01:50", seviye: 3 },
-  { ad: "Elf", ikon: "🏹", altin: 400, et: 600, sure: "00:02:00", seviye: 4 },
-  { ad: "Gnom", ikon: "🧙", altin: 1600, et: 1600, sure: "00:02:20", seviye: 5 },
-  { ad: "Şaman", ikon: "🪄", altin: 2000, et: 2000, sure: "00:02:40", seviye: 6 },
-  { ad: "Süvari", ikon: "🐎", altin: 1200, et: 2400, sure: "00:02:50", seviye: 7 },
-  { ad: "Mancınık", ikon: "🎯", altin: 6000, et: 12000, sure: "00:04:30", seviye: 8 },
-  { ad: "Pegasus", ikon: "🦄", altin: 4000, et: 3200, sure: "00:04:00", seviye: 9 },
-  { ad: "Ogre", ikon: "👹", altin: 18000, et: 18000, sure: "00:05:20", seviye: 10 },
-  { ad: "Ejderha", ikon: "🐉", altin: 40000, et: 24000, sure: "00:07:00", seviye: 11 },
-  { ad: "Kaos", ikon: "☠️", altin: 100000, et: 100000, sure: "02:00:00", seviye: 12 }
-];
+let barakaSeviye = 12;
 
-const barakaSeviye = 12;
+const birlikler = [
+  { id: "casusKus", ad: "Casus Kuş", ikon: "🕊️", altin: 100, et: 200, sure: "00:00:30", seviye: 1 },
+  { id: "cuce", ad: "Cüce", ikon: "⛏️", altin: 200, et: 450, sure: "00:01:30", seviye: 2 },
+  { id: "yukArabasi", ad: "Yük Arabası", ikon: "🚛", altin: 1000, et: 1000, sure: "00:01:50", seviye: 3 },
+  { id: "elf", ad: "Elf", ikon: "🏹", altin: 400, et: 600, sure: "00:02:00", seviye: 4 },
+  { id: "gnom", ad: "Gnom", ikon: "🧙", altin: 1600, et: 1600, sure: "00:02:20", seviye: 5 },
+  { id: "saman", ad: "Şaman", ikon: "🪄", altin: 2000, et: 2000, sure: "00:02:40", seviye: 6 },
+  { id: "suvari", ad: "Süvari", ikon: "🐎", altin: 1200, et: 2400, sure: "00:02:50", seviye: 7 },
+  { id: "mancinak", ad: "Mancınık", ikon: "🎯", altin: 6000, et: 12000, sure: "00:04:30", seviye: 8 },
+  { id: "pegasus", ad: "Pegasus", ikon: "🦄", altin: 4000, et: 3200, sure: "00:04:00", seviye: 9 },
+  { id: "ogre", ad: "Ogre", ikon: "👹", altin: 18000, et: 18000, sure: "00:05:20", seviye: 10 },
+  { id: "ejderha", ad: "Ejderha", ikon: "🐉", altin: 40000, et: 24000, sure: "00:07:00", seviye: 11 },
+  { id: "kaos", ad: "Kaos", ikon: "☠️", altin: 100000, et: 100000, sure: "02:00:00", seviye: 12 }
+];
 
 function timeToMs(sure) {
   const [saat, dakika, saniye] = sure.split(":").map(Number);
@@ -32,14 +32,15 @@ function guncelleKaynakGosterimi() {
 
 function olusturBarakaPaneli() {
   const panel = document.getElementById("barakaPanel");
+  if (!panel) return;
   panel.innerHTML = "";
   guncelleKaynakGosterimi();
 
   birlikler.forEach((birlik) => {
     const birlikDiv = document.createElement("div");
-    birlikDiv.style.border = "1px solid #555";
-    birlikDiv.style.padding = "0.8rem";
     birlikDiv.style.marginBottom = "1rem";
+    birlikDiv.style.padding = "1rem";
+    birlikDiv.style.border = "1px solid #555";
     birlikDiv.style.borderRadius = "6px";
     birlikDiv.style.backgroundColor = "#2a1b0a";
 
@@ -52,24 +53,15 @@ function olusturBarakaPaneli() {
       input.type = "number";
       input.min = 1;
       input.value = 1;
-      input.style.marginTop = "0.5rem";
-      input.style.padding = "0.4rem";
       input.style.width = "60px";
+      input.style.marginRight = "10px";
 
       const buton = document.createElement("button");
-      buton.innerText = "Üret";
-      buton.style.display = "block";
-      buton.style.marginTop = "0.5rem";
-      buton.style.backgroundColor = "#ffcc00";
-      buton.style.color = "#000";
-      buton.style.border = "none";
-      buton.style.padding = "0.5rem 1rem";
-      buton.style.cursor = "pointer";
-      buton.style.fontWeight = "bold";
-      buton.style.borderRadius = "5px";
+      buton.textContent = "Üret";
+      buton.style.marginRight = "10px";
 
       const durum = document.createElement("div");
-      durum.style.marginTop = "0.5rem";
+      durum.style.marginTop = "8px";
       durum.style.fontSize = "0.9rem";
 
       buton.onclick = () => {
@@ -77,32 +69,48 @@ function olusturBarakaPaneli() {
         const toplamAltin = birlik.altin * adet;
         const toplamEt = birlik.et * adet;
         const sureMs = timeToMs(birlik.sure);
+        const toplamSure = sureMs;
 
         if (kaynaklar.altin >= toplamAltin && kaynaklar.et >= toplamEt) {
           kaynaklar.altin -= toplamAltin;
           kaynaklar.et -= toplamEt;
           guncelleKaynakGosterimi();
-          durum.innerHTML = `Üretim başladı (${adet}x ${birlik.ad})<br>`;
 
-          for (let i = 0; i < adet; i++) {
-            const kalanSpan = document.createElement("span");
-            kalanSpan.innerText = `⏳ ${birlik.ad} kalan süre: ${birlik.sure}`;
-            durum.appendChild(kalanSpan);
-            durum.appendChild(document.createElement("br"));
+          const satir = document.createElement("div");
+          let kalan = toplamSure / 1000;
+          const span = document.createElement("span");
+          const iptal = document.createElement("button");
+          iptal.textContent = "İptal";
+          iptal.style.marginLeft = "10px";
+          iptal.style.backgroundColor = "#800";
+          iptal.style.color = "#fff";
+          iptal.style.border = "none";
+          iptal.style.padding = "4px 8px";
+          iptal.style.cursor = "pointer";
+          iptal.style.borderRadius = "4px";
 
-            let kalan = sureMs / 1000;
-            const interval = setInterval(() => {
-              kalan--;
-              if (kalan > 0) {
-                const dk = String(Math.floor(kalan / 60)).padStart(2, "0");
-                const sn = String(kalan % 60).padStart(2, "0");
-                kalanSpan.innerText = `⏳ ${birlik.ad} kalan süre: 00:${dk}:${sn}`;
-              } else {
-                clearInterval(interval);
-                kalanSpan.innerText = `✅ ${birlik.ad} üretildi!`;
-              }
-            }, 1000);
-          }
+          satir.appendChild(span);
+          satir.appendChild(iptal);
+          durum.appendChild(satir);
+
+          const interval = setInterval(() => {
+            kalan--;
+            if (kalan > 0) {
+              const dk = String(Math.floor(kalan / 60)).padStart(2, "0");
+              const sn = String(kalan % 60).padStart(2, "0");
+              span.innerText = `⏳ ${birlik.ad} (${adet}x) kalan süre: 00:${dk}:${sn}`;
+            } else {
+              clearInterval(interval);
+              span.innerText = `✅ ${birlik.ad} üretildi (${adet}x)`;
+              iptal.remove();
+            }
+          }, 1000);
+
+          iptal.onclick = () => {
+            clearInterval(interval);
+            satir.remove();
+          };
+
         } else {
           alert("Yetersiz kaynak!");
         }
@@ -112,10 +120,9 @@ function olusturBarakaPaneli() {
       birlikDiv.appendChild(buton);
       birlikDiv.appendChild(durum);
     } else {
-      const kilitli = document.createElement("div");
-      kilitli.innerHTML = "🔒 Seviye yetersiz";
-      kilitli.style.marginTop = "0.5rem";
-      birlikDiv.appendChild(kilitli);
+      const kilit = document.createElement("div");
+      kilit.textContent = "🔒 Seviye yetersiz";
+      birlikDiv.appendChild(kilit);
     }
 
     panel.appendChild(birlikDiv);
