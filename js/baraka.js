@@ -1,30 +1,24 @@
-// 🔰 Baraka Birlik Üretim Sistemi
-
-// Kaynaklar
-let altin = 100000;
-let et = 100000;
-let barakaSeviye = 1; // Bu seviye arttıkça yeni birlikler açılacak
-
-// Süre formatı "hh:mm:ss" → Görseldeki süreler baz alınarak
-const birlikler = [
-  { seviye: 1,  ad: "Casus Kuş", altin: 100, et: 200, sure: "00:00:30", ikon: "🕊️" },
-  { seviye: 2,  ad: "Cüce", altin: 200, et: 450, sure: "00:01:30", ikon: "🔨" },
-  { seviye: 3,  ad: "Yük Arabası", altin: 1000, et: 1000, sure: "00:01:50", ikon: "🛺" },
-  { seviye: 4,  ad: "Elf", altin: 400, et: 600, sure: "00:02:00", ikon: "🏹" },
-  { seviye: 5,  ad: "Gnom", altin: 1600, et: 1600, sure: "00:02:20", ikon: "🧙" },
-  { seviye: 6,  ad: "Şaman", altin: 2000, et: 2000, sure: "00:02:40", ikon: "🪄" },
-  { seviye: 7,  ad: "Süvari", altin: 1200, et: 2400, sure: "00:02:50", ikon: "🐎" },
-  { seviye: 8,  ad: "Mancınık", altin: 6000, et: 12000, sure: "00:04:30", ikon: "🛠️" },
-  { seviye: 9,  ad: "Pegasus", altin: 4000, et: 3200, sure: "00:04:00", ikon: "🦄" },
-  { seviye: 10, ad: "Ogre", altin: 18000, et: 18000, sure: "00:05:20", ikon: "👹" },
-  { seviye: 11, ad: "Ejderha", altin: 40000, et: 24000, sure: "00:07:00", ikon: "🐉" },
-  { seviye: 12, ad: "Kaos", altin: 100000, et: 100000, sure: "02:00:00", ikon: "☠️" },
-];
-
-// Sayfa yüklendiğinde
 window.addEventListener("DOMContentLoaded", () => {
   const panel = document.getElementById("barakaPanel");
   const kaynakGoster = document.getElementById("kaynakDurumu");
+
+  if (!panel || !kaynakGoster) {
+    console.error("❌ Baraka paneli veya kaynakDurumu DOM'da bulunamadı.");
+    return;
+  }
+
+  let altin = 100000;
+  let et = 100000;
+
+  const birlikler = [
+    { seviye: 1, ad: "Casus Kuş", altin: 100, et: 200, sure: "00:00:30", ikon: "🕊️" },
+    { seviye: 2, ad: "Cüce", altin: 200, et: 450, sure: "00:01:30", ikon: "🔨" },
+    { seviye: 3, ad: "Yük Arabası", altin: 1000, et: 1000, sure: "00:01:50", ikon: "🛺" },
+    { seviye: 4, ad: "Elf", altin: 400, et: 600, sure: "00:02:00", ikon: "🏹" }
+    // Geri kalanlar eklenebilir
+  ];
+
+  let barakaSeviye = 1;
 
   function guncelleKaynak() {
     kaynakGoster.textContent = `Altın: ${altin} | Et: ${et}`;
@@ -32,7 +26,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function timeToMs(t) {
     const [hh, mm, ss] = t.split(":").map(Number);
-    return ((hh * 60 * 60) + (mm * 60) + ss) * 1000;
+    return ((hh * 3600) + (mm * 60) + ss) * 1000;
   }
 
   function birligiUret(birlik, adet, durumAlani) {
