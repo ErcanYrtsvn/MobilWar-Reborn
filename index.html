@@ -112,10 +112,6 @@
     <button onclick="logout()">🚪 Oturumu Kapat</button>
   </div>
 
-<!-- Baraka üretim paneli -->
-<div id="kaynakDurumu" style="margin: 1rem 0; font-weight: bold;"></div>
-<div id="barakaPanel" class="section"></div>
-
   <div id="structures" class="section">
     <h2>Yapılar</h2>
     <div class="structure">🏹 Baraka (Seviye <span id="barakaLevel">1</span>) <button onclick="upgrade('baraka')">Geliştir (100 Altın, 10 sn)</button> <span id="barakaTimer" class="countdown"></span></div>
@@ -216,6 +212,6 @@
       document.getElementById("stone").innerText = stone;
     }
   </script>
-  <script src="baraka.js" defer></script>
+  <script src="js/baraka.js" defer></script>
 </body>
 </html>
