@@ -1,96 +1,87 @@
-console.log("savunma.js yüklendi");
+document.addEventListener("DOMContentLoaded", () => {
+    const defensePanel = document.getElementById("savunmaPanel");
 
-const savunmaYapilari = [
-  { ad: "kale", ikon: "🏰", adLabel: "Kale", tabanMaliyet: 200, tabanSure: 600 },
-  { ad: "okcukulesi", ikon: "🏹", adLabel: "Okçu Kulesi", tabanMaliyet: 180, tabanSure: 480 },
-  { ad: "siper", ikon: "🧱", adLabel: "Siper", tabanMaliyet: 150, tabanSure: 360 },
-  { ad: "tuzak", ikon: "🪤", adLabel: "Tuzak", tabanMaliyet: 160, tabanSure: 420 },
-  { ad: "katran", ikon: "🔥", adLabel: "Katran Kazanı", tabanMaliyet: 170, tabanSure: 540 }
-];
-
-let savunmaSeviyeleri = {};
-let savunmaSayaçlar = {};
-let suanGelistirilen = null;
-
-savunmaYapilari.forEach(yapi => {
-  savunmaSeviyeleri[yapi.ad] = 1;
-});
-
-function guncelleToplamSavunmaGucu() {
-  const toplamGuc = savunmaYapilari.reduce((toplam, yapi) => {
-    return toplam + savunmaSeviyeleri[yapi.ad] * 100;
-  }, 0);
-  const bar = document.getElementById("toplamSavunmaGucu");
-  if (bar) bar.innerText = `🛡️ Toplam Savunma Gücü: ${toplamGuc}`;
-}
-
-function olusturSavunmaPaneli() {
-  const panel = document.getElementById("savunmaPanel");
-  panel.innerHTML = "";
-
-  const gucDiv = document.createElement("div");
-  gucDiv.id = "toplamSavunmaGucu";
-  gucDiv.style.fontWeight = "bold";
-  gucDiv.style.marginBottom = "1rem";
-  panel.appendChild(gucDiv);
-
-  guncelleToplamSavunmaGucu();
-
-  savunmaYapilari.forEach(yapi => {
-    const div = document.createElement("div");
-    div.className = "structure";
-    const seviye = savunmaSeviyeleri[yapi.ad];
-    const maliyet = Math.floor(yapi.tabanMaliyet * (1 + seviye * 0.5));
-    const sure = yapi.tabanSure + (seviye * 60);
-
-    div.innerHTML = `${yapi.ikon} ${yapi.adLabel} (Seviye <span id="${yapi.ad}Level">${seviye}</span>) 
-      <button onclick="gelistirSavunma('${yapi.ad}')" ${suanGelistirilen ? 'disabled' : ''}>
-        Geliştir (${maliyet} Altın, ${(sure / 60).toFixed(0)} dk)
-      </button> 
-      <button onclick="iptalEt('${yapi.ad}')" id="${yapi.ad}Cancel" style="display:none;">İptal</button>
-      <span id="${yapi.ad}Timer" class="countdown"></span>`;
-    panel.appendChild(div);
-  });
-}
-
-function gelistirSavunma(ad) {
-  if (suanGelistirilen) return alert("Şu anda başka bir savunma geliştiriliyor!");
-  const yapi = savunmaYapilari.find(y => y.ad === ad);
-  const seviye = savunmaSeviyeleri[ad];
-  const maliyet = Math.floor(yapi.tabanMaliyet * (1 + seviye * 0.5));
-  const sure = yapi.tabanSure + (seviye * 60);
-
-  if (gold < maliyet) return alert("Yetersiz altın!");
-  gold -= maliyet;
-  updateResources();
-
-  suanGelistirilen = ad;
-  const cancelBtn = document.getElementById(ad + "Cancel");
-  const timerSpan = document.getElementById(ad + "Timer");
-  cancelBtn.style.display = "inline";
-  let kalan = sure;
-  timerSpan.innerText = ` ⏱️ ${Math.floor(kalan / 60)} dk`;
-
-  savunmaSayaçlar[ad] = setInterval(() => {
-    kalan--;
-    timerSpan.innerText = ` ⏱️ ${Math.floor(kalan / 60)} dk ${kalan % 60} sn`;
-    if (kalan <= 0) {
-      clearInterval(savunmaSayaçlar[ad]);
-      savunmaSeviyeleri[ad]++;
-      suanGelistirilen = null;
-      olusturSavunmaPaneli();
+    if (!defensePanel) {
+        console.error("❌ HATA: savunmaPanel bulunamadı!");
+        return;
     }
-  }, 1000);
-}
 
-function iptalEt(ad) {
-  clearInterval(savunmaSayaçlar[ad]);
-  suanGelistirilen = null;
-  olusturSavunmaPaneli();
-}
+    const defenses = [
+        {
+            name: "🏰 Kale",
+            gold: 100,
+            food: 200,
+            stone: 300,
+            duration: 60
+        },
+        {
+            name: "🏹 Okçu Kulesi",
+            gold: 150,
+            food: 100,
+            stone: 250,
+            duration: 90
+        },
+        {
+            name: "🔥 Yağ Kazanı",
+            gold: 200,
+            food: 150,
+            stone: 100,
+            duration: 75
+        },
+        {
+            name: "🛡️ Surlar",
+            gold: 300,
+            food: 100,
+            stone: 200,
+            duration: 120
+        },
+        {
+            name: "🚪 Demir Kapı",
+            gold: 250,
+            food: 200,
+            stone: 150,
+            duration: 105
+        }
+    ];
 
+    defenses.forEach(defense => {
+        const container = document.createElement("div");
+        container.className = "defense-item";
+        container.style.border = "1px solid #ccc";
+        container.style.padding = "10px";
+        container.style.marginBottom = "10px";
+        container.style.background = "#3e2b1c";
+        container.style.borderRadius = "8px";
 
+        const title = document.createElement("h3");
+        title.textContent = `${defense.name}`;
+        title.style.marginBottom = "5px";
 
+        const info = document.createElement("p");
+        info.innerHTML = `
+            💰 ${defense.gold} 
+            🍖 ${defense.food} 
+            🪨 ${defense.stone} 
+            ⏳ ${formatTime(defense.duration)}
+        `;
 
+        const btn = document.createElement("button");
+        btn.textContent = "Geliştir";
+        btn.style.marginTop = "5px";
+        btn.onclick = () => {
+            alert(`${defense.name} geliştirme başladı!`);
+            // Geliştirme animasyonu/süreci buraya entegre edilebilir
+        };
 
-document.addEventListener("DOMContentLoaded", olusturSavunmaPanel);
+        container.appendChild(title);
+        container.appendChild(info);
+        container.appendChild(btn);
+        defensePanel.appendChild(container);
+    });
+
+    function formatTime(seconds) {
+        const mins = String(Math.floor(seconds / 60)).padStart(2, "0");
+        const secs = String(seconds % 60).padStart(2, "0");
+        return `${mins}:${secs}`;
+    }
+});
