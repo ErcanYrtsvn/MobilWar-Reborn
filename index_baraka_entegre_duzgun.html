@@ -1,0 +1,221 @@
+
+<!DOCTYPE html><html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MobilWar-Reborn</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #2c1f0f;
+      color: #f5deb3;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 1rem;
+    }
+    h1 {
+      text-align: center;
+      color: #f5deb3;
+      margin-top: 1.5rem;
+      font-size: 2em;
+    }
+    .logo-image {
+      display: block;
+      margin: 0 auto 1rem auto;
+      width: 120px;
+      max-width: 50%;
+      height: auto;
+      filter: drop-shadow(0 0 6px rgba(0,0,0,0.4));
+      border-radius: 6px;
+    }
+    button {
+      padding: 0.5rem;
+      margin: 0.3rem 0;
+      width: 100%;
+      background-color: #ffcc00;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    input {
+      padding: 0.5rem;
+      width: 100%;
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    .menu {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    .menu button {
+      flex: 1 1 45%;
+    }
+    .resource-bar {
+      display: flex;
+      justify-content: space-around;
+      background: #5a3f2b;
+      padding: 0.5rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+    .section {
+      display: none;
+      background-color: #3d2a12;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .structure {
+      margin-bottom: 1rem;
+    }
+    .countdown {
+      font-size: 0.9rem;
+      color: #ffcc00;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>MobilWar-Reborn</h1>
+    <img src="KilicKalkan.png" alt="MobilWar Logo" class="logo-image" /><div id="login-section">
+  <input type="text" id="username" placeholder="Oyuncu Adı">
+  <input type="password" id="password" placeholder="Şifre">
+  <button onclick="login()">Giriş Yap</button>
+</div>
+
+<div id="game-section" style="display:none;">
+  <div class="resource-bar">
+    <div>Altın: <span id="gold">1000</span> 💰</div>
+    <div>Yemek: <span id="food">1000</span> 🍖</div>
+    <div>Taş: <span id="stone">1000</span> 🪨</div>
+  </div>
+  <div class="menu">
+    <button onclick="showSection('structures')">🏠 Yapılar</button>
+    <button onclick="showSection('units')">🪖 Birlikler</button>
+    <button onclick="showSection('battle')">⚔️ Saldırı</button>
+    <button onclick="showSection('barracks')">🏹 Baraka</button>
+    <button onclick="showSection('defense')">🛡️ Savunma</button>
+    <button onclick="showSection('academy')">📘 Akademi</button>
+    <button onclick="showSection('temple')">⛩️ Tapınak</button>
+    <button onclick="showSection('world')">🌍 Dünya</button>
+    <button onclick="showSection('command')">🎖️ Komuta Merkezi</button>
+    <button onclick="showSection('options')">⚙️ Seçenekler</button>
+    <button onclick="showSection('help')">❓ Yardım</button>
+    <button onclick="logout()">🚪 Oturumu Kapat</button>
+  </div>
+
+<!-- Baraka üretim paneli -->
+<div id="kaynakDurumu" style="margin: 1rem 0; font-weight: bold;"></div>
+<div id="barakaPanel" class="section"></div>
+
+  <div id="structures" class="section">
+    <h2>Yapılar</h2>
+    <div class="structure">🏹 Baraka (Seviye <span id="barakaLevel">1</span>) <button onclick="upgrade('baraka')">Geliştir (100 Altın, 10 sn)</button> <span id="barakaTimer" class="countdown"></span></div>
+    <div class="structure">🛡️ Savunma (Seviye <span id="savunmaLevel">1</span>) <button onclick="upgrade('savunma')">Geliştir (150 Altın, 15 sn)</button> <span id="savunmaTimer" class="countdown"></span></div>
+    <div class="structure">📘 Akademi (Seviye <span id="akademiLevel">1</span>) <button onclick="upgrade('akademi')">Geliştir (200 Altın, 20 sn)</button> <span id="akademiTimer" class="countdown"></span></div>
+    <div class="structure">⛩️ Tapınak (Seviye <span id="tapinakLevel">1</span>) <button onclick="upgrade('tapinak')">Geliştir (250 Altın, 25 sn)</button> <span id="tapinakTimer" class="countdown"></span></div>
+    <div class="structure">🍖 Çiftlik (Seviye <span id="ciftlikLevel">1</span>) <button onclick="upgrade('ciftlik')">Geliştir (120 Altın, 12 sn)</button> <span id="ciftlikTimer" class="countdown"></span></div>
+    <div class="structure">🪨 Taş Ocağı (Seviye <span id="tasLevel">1</span>) <button onclick="upgrade('tas')">Geliştir (130 Altın, 13 sn)</button> <span id="tasTimer" class="countdown"></span></div>
+    <div class="structure">💰 Maden (Seviye <span id="madenLevel">1</span>) <button onclick="upgrade('maden')">Geliştir (140 Altın, 14 sn)</button> <span id="madenTimer" class="countdown"></span></div>
+  </div>
+
+  
+<div id="barracks" class="section">
+  <h2>Baraka</h2>
+  <div id="kaynakDurumu" style="margin: 1rem 0; font-weight: bold;"></div>
+  <div id="barakaPanel"></div>
+</div>
+
+<!-- Diğer bölümler aynı kalacak -->
+</div>
+
+  </div>  <script>
+    let gold = 1000, food = 1000, stone = 1000;
+    const levels = {
+      baraka: 1,
+      savunma: 1,
+      akademi: 1,
+      tapinak: 1,
+      ciftlik: 1,
+      tas: 1,
+      maden: 1
+    };
+    const costs = {
+      baraka: 100,
+      savunma: 150,
+      akademi: 200,
+      tapinak: 250,
+      ciftlik: 120,
+      tas: 130,
+      maden: 140
+    };
+    const durations = {
+      baraka: 10,
+      savunma: 15,
+      akademi: 20,
+      tapinak: 25,
+      ciftlik: 12,
+      tas: 13,
+      maden: 14
+    };
+
+    function login() {
+      const u = document.getElementById("username").value;
+      const p = document.getElementById("password").value;
+      if (u && p) {
+        document.getElementById("login-section").style.display = "none";
+        document.getElementById("game-section").style.display = "block";
+      } else {
+        alert("Lütfen giriş bilgilerini girin!");
+      }
+    }
+
+    function logout() {
+      location.reload();
+    }
+
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+    }
+
+    function upgrade(name) {
+      if (gold >= costs[name]) {
+        gold -= costs[name];
+        updateResources();
+        let timeLeft = durations[name];
+        const timer = document.getElementById(name + "Timer");
+        timer.innerText = ` Geliştirme başlatıldı: ${timeLeft} sn`;
+        const interval = setInterval(() => {
+          timeLeft--;
+          if (timeLeft > 0) {
+            timer.innerText = ` Kalan süre: ${timeLeft} sn`;
+          } else {
+            clearInterval(interval);
+            levels[name]++;
+            document.getElementById(name + "Level").innerText = levels[name];
+            timer.innerText = ` ✅ Geliştirildi!`;
+          }
+        }, 1000);
+      } else {
+        alert("Yetersiz altın!");
+      }
+    }
+
+    function updateResources() {
+      document.getElementById("gold").innerText = gold;
+      document.getElementById("food").innerText = food;
+      document.getElementById("stone").innerText = stone;
+    }
+  </script>
+  <script src="js/baraka.js" defer></script>
+</body>
+</html>
