@@ -1,4 +1,3 @@
-
 let kaynaklar = {
   altin: 100000,
   et: 100000
@@ -26,6 +25,14 @@ function timeToMs(sure) {
   return ((saat * 3600) + (dakika * 60) + saniye) * 1000;
 }
 
+function msToTime(ms) {
+  const sn = Math.floor(ms / 1000);
+  const saat = String(Math.floor(sn / 3600)).padStart(2, "0");
+  const dk = String(Math.floor((sn % 3600) / 60)).padStart(2, "0");
+  const saniye = String(sn % 60).padStart(2, "0");
+  return `${saat}:${dk}:${saniye}`;
+}
+
 function guncelleKaynakGosterimi() {
   const el = document.getElementById("kaynakDurumu");
   if (el) el.innerText = `Altın: ${kaynaklar.altin.toLocaleString()} | Et: ${kaynaklar.et.toLocaleString()}`;
@@ -46,7 +53,9 @@ function olusturBarakaPaneli() {
     birlikDiv.style.backgroundColor = "#2a1b0a";
 
     const header = document.createElement("div");
-    header.innerHTML = `<strong>${birlik.ikon} ${birlik.ad}</strong> | Altın: ${birlik.altin}, Et: ${birlik.et}, Süre: ${birlik.sure}`;
+    header.innerHTML = `
+      <strong>${birlik.ikon} ${birlik.ad}</strong> | 
+      💰 ${birlik.altin} | 🍖 ${birlik.et} | ⏱️ ${birlik.sure}`;
     birlikDiv.appendChild(header);
 
     if (barakaSeviye >= birlik.seviye) {
@@ -69,7 +78,8 @@ function olusturBarakaPaneli() {
         const adet = parseInt(input.value);
         const toplamAltin = birlik.altin * adet;
         const toplamEt = birlik.et * adet;
-        const sureMs = timeToMs(birlik.sure);
+        const birlikSuresiMs = timeToMs(birlik.sure);
+        const toplamSureMs = birlikSuresiMs * adet;
 
         if (kaynaklar.altin >= toplamAltin && kaynaklar.et >= toplamEt) {
           kaynaklar.altin -= toplamAltin;
@@ -77,7 +87,7 @@ function olusturBarakaPaneli() {
           guncelleKaynakGosterimi();
 
           const satir = document.createElement("div");
-          let kalan = adet;
+          let kalanMs = toplamSureMs;
           const span = document.createElement("span");
           const iptal = document.createElement("button");
           iptal.textContent = "İptal";
@@ -93,19 +103,18 @@ function olusturBarakaPaneli() {
           satir.appendChild(iptal);
           durum.appendChild(satir);
 
-          let queue = kalan;
-          span.innerText = `⏳ ${birlik.ad} (${adet}x) kalan: ${queue}`;
+          span.innerText = `⏳ ${birlik.ad} (${adet}x) kalan süre: ${msToTime(kalanMs)}`;
 
           const interval = setInterval(() => {
-            queue--;
-            if (queue > 0) {
-              span.innerText = `⏳ ${birlik.ad} (${adet}x) kalan: ${queue}`;
+            kalanMs -= 1000;
+            if (kalanMs > 0) {
+              span.innerText = `⏳ ${birlik.ad} (${adet}x) kalan süre: ${msToTime(kalanMs)}`;
             } else {
               clearInterval(interval);
               span.innerText = `✅ ${birlik.ad} üretildi (${adet}x)`;
               iptal.remove();
             }
-          }, sureMs);
+          }, 1000);
 
           iptal.onclick = () => {
             clearInterval(interval);
