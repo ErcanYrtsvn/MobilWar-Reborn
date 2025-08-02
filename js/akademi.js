@@ -1,4 +1,6 @@
-const akademiSeviyesi = 1;
+
+document.addEventListener("DOMContentLoaded", () => {
+  const akademiSeviyesi = 1;
   const akademiPanel = document.getElementById("akademiPanel");
 
   const arastirmalar = [
@@ -91,3 +93,4 @@ const akademiSeviyesi = 1;
     const s = sec % 60;
     return `${m}dk ${s < 10 ? "0" : ""}${s}sn`;
   }
+});
