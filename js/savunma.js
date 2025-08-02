@@ -1,45 +1,116 @@
-// Savunma sistemine ait güncel JS
+document.addEventListener("DOMContentLoaded", () => {
+  const defensePanel = document.getElementById("savunmaPanel");
 
-let totalDefensePoints = 0; const defenseUnits = [ { name: "Kale", icon: "🏰", cost: 500, time: 300, // 5 dk point: 200, level: 1, upgrading: false }, { name: "Okçu Kulesi", icon: "🌀", cost: 300, time: 360, // 6 dk point: 120, level: 1, upgrading: false }, { name: "Yağ Kazanı", icon: "🔥", cost: 400, time: 420, // 7 dk point: 150, level: 1, upgrading: false }, { name: "Surlar", icon: "🛡️", cost: 350, time: 480, // 8 dk point: 180, level: 1, upgrading: false }, { name: "Demir Kapı", icon: "🛋️", cost: 450, time: 540, // 9 dk point: 160, level: 1, upgrading: false } ];
-
-function formatTime(seconds) { const m = String(Math.floor(seconds / 60)).padStart(2, '0'); const s = String(seconds % 60).padStart(2, '0'); return `${m}:${s}`; }
-
-function renderDefense() { const panel = document.getElementById("savunmaPanel"); panel.innerHTML = `<h3 style="color: gold">Toplam Savunma Puanı: ${totalDefensePoints}</h3>`;
-
-defenseUnits.forEach((unit, index) => { const box = document.createElement("div"); box.className = "defense-box"; const id = `unit-${index}`;
-
-box.innerHTML = `
-  <h4>${unit.icon} ${unit.name} (Seviye ${unit.level})</h4>
-  <button id="${id}" ${unit.upgrading ? "disabled" : ""}>
-    Geliştir (${unit.cost} Altın, ${formatTime(unit.time)})
-  </button>
-  <div id="time-${index}" style="margin-top:5px;"></div>
-`;
-
-panel.appendChild(box);
-
-const btn = document.getElementById(id);
-const timeDiv = document.getElementById(`time-${index}`);
-
-btn.onclick = () => {
-  if (unit.upgrading) return;
-  unit.upgrading = true;
-  let remaining = unit.time;
-  btn.disabled = true;
-  const interval = setInterval(() => {
-    remaining--;
-    timeDiv.innerText = `Kalan süre: ${formatTime(remaining)}`;
-    if (remaining <= 0) {
-      clearInterval(interval);
-      unit.upgrading = false;
-      unit.level++;
-      totalDefensePoints += unit.point;
-      renderDefense();
+  const defenses = [
+    {
+      name: "🏰 Kale",
+      cost: 300,
+      stone: 200,
+      duration: 300,
+      level: 1,
+      power: 200
+    },
+    {
+      name: "🏹 Okçu Kulesi",
+      cost: 400,
+      stone: 250,
+      duration: 360,
+      level: 1,
+      power: 150
+    },
+    {
+      name: "🔥 Yağ Kazanı",
+      cost: 500,
+      stone: 150,
+      duration: 420,
+      level: 1,
+      power: 180
+    },
+    {
+      name: "🛡️ Surlar",
+      cost: 600,
+      stone: 300,
+      duration: 480,
+      level: 1,
+      power: 220
+    },
+    {
+      name: "🚪 Demir Kapı",
+      cost: 700,
+      stone: 400,
+      duration: 540,
+      level: 1,
+      power: 250
     }
-  }, 1000);
-};
+  ];
 
-}); }
+  let gold = parseInt(document.getElementById("gold").innerText);
+  let stone = parseInt(document.getElementById("stone").innerText);
+  let totalDefensePower = 0;
 
-document.addEventListener("DOMContentLoaded", () => { renderDefense(); });
+  function updateResources() {
+    document.getElementById("gold").innerText = gold;
+    document.getElementById("stone").innerText = stone;
+  }
 
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}dk ${s}sn`;
+  }
+
+  defensePanel.innerHTML = `<h3 style="color: gold;">Toplam Savunma Puanı: <span id="totalPower">0</span></h3>`;
+
+  defenses.forEach((unit, index) => {
+    const div = document.createElement("div");
+    div.className = "structure";
+
+    const levelSpan = document.createElement("span");
+    levelSpan.id = `defense${index}Level`;
+    levelSpan.innerText = unit.level;
+
+    const timerSpan = document.createElement("span");
+    timerSpan.id = `defense${index}Timer`;
+    timerSpan.className = "countdown";
+
+    const button = document.createElement("button");
+    button.innerText = `Geliştir (💰${unit.cost}, 🪨${unit.stone}, ⏳${formatTime(unit.duration)})`;
+    button.onclick = () => {
+      if (gold >= unit.cost && stone >= unit.stone) {
+        gold -= unit.cost;
+        stone -= unit.stone;
+        updateResources();
+
+        let timeLeft = unit.duration;
+        timerSpan.innerText = `⏳ ${formatTime(timeLeft)}`;
+        button.disabled = true;
+
+        const interval = setInterval(() => {
+          timeLeft--;
+          timerSpan.innerText = `⏳ ${formatTime(timeLeft)}`;
+          if (timeLeft <= 0) {
+            clearInterval(interval);
+            unit.level++;
+            totalDefensePower += unit.power;
+            levelSpan.innerText = unit.level;
+            document.getElementById("totalPower").innerText = totalDefensePower;
+            timerSpan.innerText = `✅ Geliştirildi!`;
+            button.disabled = false;
+          }
+        }, 1000);
+      } else {
+        alert("Yetersiz kaynak!");
+      }
+    };
+
+    div.innerHTML = `<b>${unit.name}</b> (Seviye `;
+    div.appendChild(levelSpan);
+    div.innerHTML += `)`;
+    div.appendChild(button);
+    div.appendChild(timerSpan);
+
+    defensePanel.appendChild(div);
+  });
+
+  updateResources();
+});
