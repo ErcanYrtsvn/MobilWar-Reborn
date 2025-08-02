@@ -1,7 +1,3 @@
-let kaynaklar = {
-  altin: 100000,
-  et: 100000
-};
 
 let barakaSeviye = 12;
 
