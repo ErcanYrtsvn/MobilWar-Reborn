@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
   const units = [
     { name: "🕊️ Casus Kuş", gold: 100, food: 200, duration: 30 },
@@ -15,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { name: "☠️ Kaos", gold: 100000, food: 100000, duration: 7200 }
   ];
 
+  let barakaLevel = 3; // Gelişmiş sistemde dinamik olarak çekilecek
   const panel = document.getElementById("barakaPanel");
 
   units.forEach((unit, index) => {
@@ -36,23 +36,24 @@ document.addEventListener("DOMContentLoaded", () => {
     button.addEventListener("click", () => {
       const adet = parseInt(input.value);
       if (!adet || adet <= 0) return alert("Geçerli bir adet giriniz.");
+      if (index + 1 > barakaLevel) return alert("Bu birlik henüz Baraka seviyeniz için kilitli!");
 
       const totalGold = unit.gold * adet;
       const totalFood = unit.food * adet;
 
-      let currentGold = parseInt(document.getElementById("gold").innerText);
-      let currentFood = parseInt(document.getElementById("food").innerText);
+      let gold = parseInt(document.getElementById("gold").innerText);
+      let food = parseInt(document.getElementById("food").innerText);
 
-      if (currentGold < totalGold || currentFood < totalFood) {
-        alert("Yetersiz kaynak!");
+      if (gold < totalGold || food < totalFood) {
+        alert("Kaynak yetersiz!");
         return;
       }
 
-      currentGold -= totalGold;
-      currentFood -= totalFood;
+      gold -= totalGold;
+      food -= totalFood;
 
-      document.getElementById("gold").innerText = currentGold;
-      document.getElementById("food").innerText = currentFood;
+      document.getElementById("gold").innerText = gold;
+      document.getElementById("food").innerText = food;
 
       let kalanSure = unit.duration * adet;
       timerSpan.innerText = `⏳ ${Math.floor(kalanSure / 60)}dk ${kalanSure % 60}sn kaldı`;
@@ -74,9 +75,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       iptalBtn.onclick = () => {
         clearInterval(interval);
-        timerSpan.innerText = "❌ Üretim iptal edildi.";
-        document.getElementById("gold").innerText = currentGold + totalGold;
-        document.getElementById("food").innerText = currentFood + totalFood;
+        timerSpan.innerText = `❌ Üretim iptal edildi.`;
+        gold += totalGold;
+        food += totalFood;
+        document.getElementById("gold").innerText = gold;
+        document.getElementById("food").innerText = food;
         iptalBtn.remove();
       };
 
