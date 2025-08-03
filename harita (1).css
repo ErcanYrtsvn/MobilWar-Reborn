@@ -1,0 +1,33 @@
+
+body {
+  margin: 0;
+  overflow: hidden;
+}
+#map-container {
+  width: 5000px;
+  height: 5000px;
+  background: url('https://i.imgur.com/BEfHY8j.jpg'); /* grass texture */
+  position: relative;
+  cursor: grab;
+}
+.tile {
+  position: absolute;
+  font-size: 24px;
+  cursor: pointer;
+}
+.castle {
+  font-size: 32px;
+}
+.popup {
+  position: fixed;
+  background: #222;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  z-index: 100;
+  top: 20px;
+  left: 20px;
+}
+.hidden {
+  display: none;
+}
