@@ -1,22 +1,68 @@
-
 body {
     margin: 0;
-    overflow: hidden;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #111;
+    color: #fff;
 }
+
+button {
+    cursor: pointer;
+}
+
+.container {
+    padding: 20px;
+}
+
+/* Harita alanı */
 #mapContainer {
     width: 100vw;
     height: 100vh;
     position: relative;
-    background-color: #222;
+    background: url('map_bg.png') no-repeat center center;
+    background-size: cover;
+    overflow: auto;
 }
-#mapBackground {
-    width: 2000px;
-    height: 2000px;
-    position: absolute;
-}
+
+/* Harita ikonları */
 .mapIcon {
-    width: 48px;
-    height: 48px;
     position: absolute;
+    width: 64px;
+    height: 64px;
     cursor: pointer;
+}
+
+.kale {
+    top: 200px;
+    left: 300px;
+}
+
+.sehir {
+    top: 400px;
+    left: 500px;
+}
+
+/* Açılır menü (saldırı/destek/casusluk/mesaj) */
+.actionMenu {
+    position: absolute;
+    background-color: #222;
+    border: 1px solid #555;
+    padding: 10px;
+    display: none;
+    z-index: 10;
+}
+
+.actionMenu button {
+    display: block;
+    width: 100%;
+    margin: 5px 0;
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.actionMenu button:hover {
+    background-color: #555;
 }
