@@ -1,0 +1,22 @@
+
+body {
+    margin: 0;
+    overflow: hidden;
+}
+#mapContainer {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    background-color: #222;
+}
+#mapBackground {
+    width: 2000px;
+    height: 2000px;
+    position: absolute;
+}
+.mapIcon {
+    width: 48px;
+    height: 48px;
+    position: absolute;
+    cursor: pointer;
+}
