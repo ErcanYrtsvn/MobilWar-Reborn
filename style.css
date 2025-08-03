@@ -1,39 +1,41 @@
 #mapContainer {
-    width: 3000px;
-    height: 3000px;
+    width: 10000px;
+    height: 10000px;
     position: relative;
     background: url('map_bg.png') repeat;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .mapIcon {
     position: absolute;
-    width: 64px;
-    height: 64px;
+    width: 128px;
+    height: 128px;
     cursor: pointer;
 }
 
 #konumPanel {
     position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 999;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 10px;
-    border-radius: 8px;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 14px;
+    border-radius: 10px;
     color: #fff;
+    font-size: 18px;
 }
 
 #konumPanel button {
-    padding: 6px 12px;
-    margin-bottom: 8px;
-    background: #333;
+    padding: 10px 20px;
+    margin-bottom: 12px;
+    background: #222;
     border: none;
     color: white;
-    border-radius: 4px;
+    border-radius: 6px;
+    font-size: 16px;
     cursor: pointer;
 }
 
 #konumPanel button:hover {
-    background: #555;
+    background: #444;
 }
