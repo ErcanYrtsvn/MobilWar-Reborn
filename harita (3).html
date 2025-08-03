@@ -1,0 +1,29 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>MobilWar Harita</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Konum paneli -->
+    <div id="konumPanel">
+        <button onclick="konumaGit()">Konuma Git</button>
+        <div id="koordinatlar">X: 0, Y: 0</div>
+    </div>
+
+    <!-- Harita alanı -->
+    <div id="mapContainer">
+        <!-- Oyuncu kalesi -->
+        <img src="kale1.png" class="mapIcon" id="oyuncuKalesi" style="top: 5000px; left: 5000px;" alt="Kale">
+
+        <!-- Küçük şehirler -->
+        <img src="sehir1.png" class="mapIcon" style="top: 800px; left: 1200px;" alt="Küçük Şehir">
+        <img src="sehir1.png" class="mapIcon" style="top: 7800px; left: 1400px;" alt="Küçük Şehir">
+        <img src="sehir1.png" class="mapIcon" style="top: 2000px; left: 9000px;" alt="Küçük Şehir">
+    </div>
+
+    <script src="harita.js"></script>
+</body>
+</html>
