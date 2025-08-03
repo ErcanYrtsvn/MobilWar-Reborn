@@ -2,7 +2,7 @@ const mapContainer = document.getElementById("mapContainer");
 const koordinatDiv = document.getElementById("koordinatlar");
 
 window.onload = function () {
-    window.scrollTo(1500 - window.innerWidth / 2, 1500 - window.innerHeight / 2);
+    window.scrollTo(5000 - window.innerWidth / 2, 5000 - window.innerHeight / 2);
     guncelleKonum();
 };
 
@@ -13,7 +13,7 @@ mapContainer.addEventListener("mousemove", function (e) {
 });
 
 function konumaGit() {
-    window.scrollTo(1500 - window.innerWidth / 2, 1500 - window.innerHeight / 2);
+    window.scrollTo(5000 - window.innerWidth / 2, 5000 - window.innerHeight / 2);
 }
 
 function guncelleKonum() {
