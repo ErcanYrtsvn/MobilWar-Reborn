@@ -1,31 +1,25 @@
+const mapContainer = document.getElementById("mapContainer");
+const koordinatDiv = document.getElementById("koordinatlar");
 
-let map = document.getElementById("mapContainer"); // Düzeltilmiş ID
-let isDragging = false;
-let startX, startY, scrollLeft, scrollTop;
+window.onload = function () {
+    window.scrollTo(1500 - window.innerWidth / 2, 1500 - window.innerHeight / 2);
+    guncelleKonum();
+};
 
-map.addEventListener("mousedown", (e) => {
-    isDragging = true;
-    startX = e.pageX - map.offsetLeft;
-    startY = e.pageY - map.offsetTop;
-    scrollLeft = map.scrollLeft;
-    scrollTop = map.scrollTop;
+mapContainer.addEventListener("mousemove", function (e) {
+    const x = e.pageX;
+    const y = e.pageY;
+    koordinatDiv.textContent = `X: ${x}, Y: ${y}`;
 });
 
-map.addEventListener("mouseleave", () => {
-    isDragging = false;
-});
+function konumaGit() {
+    window.scrollTo(1500 - window.innerWidth / 2, 1500 - window.innerHeight / 2);
+}
 
-map.addEventListener("mouseup", () => {
-    isDragging = false;
-});
+function guncelleKonum() {
+    const x = window.scrollX + window.innerWidth / 2;
+    const y = window.scrollY + window.innerHeight / 2;
+    koordinatDiv.textContent = `X: ${Math.floor(x)}, Y: ${Math.floor(y)}`;
+}
 
-map.addEventListener("mousemove", (e) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    const x = e.pageX - map.offsetLeft;
-    const y = e.pageY - map.offsetTop;
-    const walkX = x - startX;
-    const walkY = y - startY;
-    map.scrollLeft = scrollLeft - walkX;
-    map.scrollTop = scrollTop - walkY;
-});
+window.addEventListener("scroll", guncelleKonum);
