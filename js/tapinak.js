@@ -1,82 +1,91 @@
+let tapinakSeviye = 1;
+let tapinakGelistirmeDevamEdiyor = false;
+let tapinakGelistirmeSure = 0;
+let tapinakGelistirmeInterval;
+let tapinakIptalButonu;
 
-// js/tapinak.js
-
-let tapinakTimer = null;
-let duaAktif = false;
-let duaKalanSure = 0;
-let tapinakVergi = {
-  gold: 0,
-  food: 0,
-  stone: 0
+const tapinakMaliyetHesapla = () => {
+    const altin = 1000 * tapinakSeviye;
+    const tas = 800 * tapinakSeviye;
+    const sure = 300 + (tapinakSeviye - 1) * 60;
+    return { altin, tas, sure };
 };
 
-function getTapinakSeviyeBonus() {
-  const seviye = levels["tapinak"];
-  if (seviye === 1) return 0.05;
-  if (seviye === 2) return 0.1;
-  if (seviye === 3) return 0.15;
-  if (seviye === 4) return 0.2;
-  if (seviye >= 5) return 0.25;
-  return 0;
-}
-
-function tapinakDuaBaslat() {
-  if (duaAktif) {
-    alert("Zaten aktif bir dua var!");
-    return;
-  }
-
-  duaAktif = true;
-  const bonus = getTapinakSeviyeBonus();
-  const sureDakika = 10;
-  duaKalanSure = sureDakika * 60;
-
-  document.getElementById("duaDurumu").innerHTML = 
-    `Dua aktif! Üretim +${Math.floor(bonus * 100)}% <br><span id="duaSure"></span> <button onclick="tapinakDuaIptal()">❌ İptal Et</button>`;
-
-  tapinakTimer = setInterval(() => {
-    duaKalanSure--;
-    const dakika = Math.floor(duaKalanSure / 60);
-    const saniye = duaKalanSure % 60;
-    document.getElementById("duaSure").innerText = `Kalan: ${dakika}dk ${saniye}s`;
-    if (duaKalanSure <= 0) {
-      clearInterval(tapinakTimer);
-      document.getElementById("duaDurumu").innerText = "Dua süresi sona erdi.";
-      duaAktif = false;
+const tapinakBonusAciklama = (seviye) => {
+    switch (seviye) {
+        case 1: return "☀️ Moral artışı: Savaşlarda %5 güç bonusu";
+        case 2: return "⏱️ Üretim süresi azalır: Baraka %3 daha hızlı";
+        case 3: return "🛡️ Kutsal koruma: İlk saldırıda %10 hasar emilimi";
+        case 4: return "⚡ Aura: Birlik gücüne +2 bonus";
+        case 5: return "🔁 Yenilenme: Ölen birliklerin %10’u geri döner";
+        default: return "✨ Gizemli güçler Tapınak'ta saklı...";
     }
-  }, 1000);
-}
+};
 
-function tapinakDuaIptal() {
-  clearInterval(tapinakTimer);
-  duaAktif = false;
-  document.getElementById("duaDurumu").innerText = "Dua iptal edildi.";
-}
+const tapinakGelistir = () => {
+    if (tapinakGelistirmeDevamEdiyor) return;
 
-function vergiGonder(goldMiktar, foodMiktar, stoneMiktar) {
-  if (gold >= goldMiktar && food >= foodMiktar && stone >= stoneMiktar) {
-    gold -= goldMiktar;
-    food -= foodMiktar;
-    stone -= stoneMiktar;
+    const { altin, tas, sure } = tapinakMaliyetHesapla();
+    if (kaynaklar.altin < altin || kaynaklar.tas < tas) {
+        alert("Yetersiz kaynak!");
+        return;
+    }
 
-    tapinakVergi.gold += goldMiktar;
-    tapinakVergi.food += foodMiktar;
-    tapinakVergi.stone += stoneMiktar;
+    kaynaklar.altin -= altin;
+    kaynaklar.tas -= tas;
+    guncelleKaynakGosterimi();
 
-    updateResources();
-    document.getElementById("vergiDurumu").innerText = `Vergide biriken kaynaklar: 💰 ${tapinakVergi.gold} | 🍖 ${tapinakVergi.food} | 🪨 ${tapinakVergi.stone}`;
-  } else {
-    alert("Yeterli kaynağın yok!");
-  }
-}
+    tapinakGelistirmeDevamEdiyor = true;
+    tapinakGelistirmeSure = sure;
 
-function vergiTahsilEt() {
-  gold += tapinakVergi.gold;
-  food += tapinakVergi.food;
-  stone += tapinakVergi.stone;
+    const tapinakDiv = document.getElementById("tapinak");
+    const bilgiDiv = tapinakDiv.querySelector(".bilgi");
+    bilgiDiv.innerHTML = `⏳ Geliştiriliyor... Kalan süre: <span id="tapinakSure">${formatSure(tapinakGelistirmeSure)}</span>`;
 
-  tapinakVergi = { gold: 0, food: 0, stone: 0 };
+    tapinakIptalButonu = document.createElement("button");
+    tapinakIptalButonu.innerText = "İptal Et";
+    tapinakIptalButonu.onclick = tapinakIptalEt;
+    bilgiDiv.appendChild(tapinakIptalButonu);
 
-  updateResources();
-  document.getElementById("vergiDurumu").innerText = "Vergi kaynakları tahsil edildi.";
-}
+    tapinakGelistirmeInterval = setInterval(() => {
+        tapinakGelistirmeSure--;
+        document.getElementById("tapinakSure").innerText = formatSure(tapinakGelistirmeSure);
+
+        if (tapinakGelistirmeSure <= 0) {
+            clearInterval(tapinakGelistirmeInterval);
+            tapinakSeviye++;
+            tapinakGelistirmeDevamEdiyor = false;
+            bilgiDiv.innerHTML = `✅ Tapınak seviyesi arttı! Yeni seviye: ${tapinakSeviye}<br>${tapinakBonusAciklama(tapinakSeviye)}`;
+        }
+    }, 1000);
+};
+
+const tapinakIptalEt = () => {
+    clearInterval(tapinakGelistirmeInterval);
+    tapinakGelistirmeDevamEdiyor = false;
+
+    const { altin, tas } = tapinakMaliyetHesapla();
+    kaynaklar.altin += altin;
+    kaynaklar.tas += tas;
+    guncelleKaynakGosterimi();
+
+    const tapinakDiv = document.getElementById("tapinak");
+    const bilgiDiv = tapinakDiv.querySelector(".bilgi");
+    bilgiDiv.innerHTML = `❌ Geliştirme iptal edildi. Tapınak seviyesi: ${tapinakSeviye}`;
+};
+
+const tapinakArayuzOlustur = () => {
+    const { altin, tas, sure } = tapinakMaliyetHesapla();
+
+    return `
+        <div class="yapi-kutu" id="tapinak">
+            <img src="img/tapinak.png" class="yapi-icon">
+            <div class="yapi-isim">Tapınak (Seviye ${tapinakSeviye})</div>
+            <div class="bilgi">${tapinakBonusAciklama(tapinakSeviye)}</div>
+            <div class="maliyet">
+                💰 ${altin} &nbsp; 🪨 ${tas} &nbsp; ⏳ ${formatSure(sure)}
+            </div>
+            <button onclick="tapinakGelistir()">Geliştir</button>
+        </div>
+    `;
+};
