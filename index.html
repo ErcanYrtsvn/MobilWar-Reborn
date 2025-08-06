@@ -104,7 +104,13 @@
 <div>Taş: <span id="stone">1000000</span> 🪨</div>
 </div>
 <div class="menu">
-<button onclick="showSection('structures')">🏠 Yapılar</button>
+<!-- Ortalanmış Yeni Yapılar Butonu -->
+<div style="width: 100%; display: flex; justify-content: center;">
+  <button style="width: 60%;" onclick="showSection('structures')">🏠 Yapılar</button>
+</div>
+
+<!-- Yeni Mağara Butonu -->
+<button onclick="showSection('magara')">🏔️ Mağara</button>
 <button onclick="showSection('units')">🪖 Birlikler</button>
 <button onclick="showSection('battle')">⚔️ Saldırı</button>
 <button onclick="showSection('barracks')">🏹 Baraka</button>
