@@ -513,3 +513,16 @@
   }
 
 })();
+// === Açılışta benim kaleye ortala (append-only) ===
+(function(){
+  const map = document.getElementById('mapContainer');
+  const my  = document.getElementById('oyuncuKalesi');
+  if (!map || !my) return;
+  function px(n){ return parseFloat(String(n||'').replace('px',''))||0; }
+  window.addEventListener('load', ()=>{
+    const x = px(my.style.left) + my.offsetWidth/2;
+    const y = px(my.style.top)  + my.offsetHeight/2;
+    window.scrollTo(Math.max(0, x - window.innerWidth/2),
+                    Math.max(0, y - window.innerHeight/2));
+  });
+})();
