@@ -617,3 +617,180 @@ window.addEventListener("scroll", guncelleKonum);
   // ----- 6) Güvenli: şehir/yaratık mevcut click’leri bozmadan çalıştır -----
   // (mevcut attackMonster ve şehir click’leri durur; biz sadece üzerine katman ekledik)
 })();
+// === ENEMY CASTLE PANEL (append-only, no break) ===
+(function(){
+  if (window.__ENEMY_CASTLE_UI__) return; window.__ENEMY_CASTLE_UI__=true;
+
+  // ---- Basit CSS ----
+  const css = `
+  #ecOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:11000;display:none;}
+  #ecModal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(92vw,880px);background:#2d261e;color:#ffe9b0;z-index:11001;
+    border:6px solid #d4b15f;border-radius:22px;box-shadow:0 10px 30px rgba(0,0,0,.5);font-family:inherit;display:none;}
+  .ec-head{display:flex;justify-content:space-between;align-items:center;padding:22px 24px;border-bottom:1px solid rgba(212,177,95,.35);font-size:30px;font-weight:900;}
+  .ec-body{padding:22px 24px;font-size:20px;line-height:1.5;}
+  .ec-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .ec-tab{padding:10px 14px;border-radius:12px;background:#4a3b28;color:#ffe9b0;cursor:pointer;font-weight:800;border:0}
+  .ec-tab.ec-on{background:#ffcc00;color:#352b17}
+  .ec-row{margin:8px 0}
+  .ec-actions{display:flex;gap:10px;margin-top:14px}
+  .ec-actions button{flex:1;padding:14px 16px;font-size:20px;font-weight:900;border-radius:12px;border:0;cursor:pointer}
+  .ec-primary{background:#ffcc00;color:#352b17}
+  .ec-ghost{background:#3a2f1e;color:#ffe9b0}
+  input.ec-num{width:110px;padding:6px;border-radius:8px;border:1px solid #c9b07a;background:#1f1913;color:#ffe9b0}
+  table.ec-table{width:100%;border-collapse:collapse;margin-top:10px}
+  table.ec-table th,table.ec-table td{border-bottom:1px solid rgba(212,177,95,.25);padding:6px 4px;text-align:left}
+  `;
+  const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+
+  // ---- DOM ----
+  const overlay=document.createElement('div'); overlay.id='ecOverlay';
+  const modal=document.createElement('div'); modal.id='ecModal';
+  modal.innerHTML = `
+    <div class="ec-head">
+      <div>🏰 Oyuncu Kalesi</div>
+      <button id="ecClose" style="background:transparent;border:0;color:#ffe9b0;font-size:28px;cursor:pointer">✖</button>
+    </div>
+    <div class="ec-body">
+      <div class="ec-tabs">
+        <button class="ec-tab ec-on" data-ec-tab="attack">Saldır</button>
+        <button class="ec-tab" data-ec-tab="spy">Casusluk</button>
+        <button class="ec-tab" data-ec-tab="support">Destek</button>
+        <button class="ec-tab" data-ec-tab="message">Mesaj</button>
+      </div>
+      <div id="ecView"></div>
+      <div class="ec-actions">
+        <button id="ecDo" class="ec-primary">Gönder</button>
+        <button id="ecCancel" class="ec-ghost">Kapat</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay); document.body.appendChild(modal);
+
+  const $ = s => modal.querySelector(s);
+  function show(){ overlay.style.display='block'; modal.style.display='block'; }
+  function hide(){ overlay.style.display='none'; modal.style.display='none'; }
+  $('#ecClose').onclick = hide; $('#ecCancel').onclick = hide; overlay.onclick = hide;
+
+  // ---- Data helpers ----
+  const birlikGucu = {
+    "Casus Kuş": 1,"Cüce": 3,"Yük Arabası": 0,"Elf": 5,"Gnom": 2,"Şaman": 1,
+    "Süvari": 6,"Mancınık": 4,"Pegasus": 7,"Ogre": 8,"Ejderha": 10,"Kaos": 12
+  };
+  const CART_CAP = 100; // Yük Arabası taşıma kapasitesi (adet başına)
+  function getKaleBirlik(){ try{return JSON.parse(localStorage.getItem('kaleBirlikleri')||'{}');}catch(_){return{}} }
+  function sumPower(sel){ let p=0; Object.keys(sel).forEach(k=>{ const adet=+sel[k]||0; p+=adet*(birlikGucu[k]||0) }); return p; }
+
+  // ---- UI renderers ----
+  function renderAttack(targetEl){
+    const kb=getKaleBirlik();
+    const rows = Object.keys(birlikGucu).map(n=>{
+      const own=kb[n]||0;
+      return `<tr>
+        <td>${n}</td>
+        <td>${own}</td>
+        <td><input class="ec-num" type="number" min="0" max="${own}" value="0" data-ec-unit="${n}"></td>
+      </tr>`;
+    }).join('');
+    $('#ecView').innerHTML = `
+      <div class="ec-row">Saldırmak istediğin birlikleri seç:</div>
+      <table class="ec-table">
+        <thead><tr><th>Birlik</th><th>Mevcut</th><th>Gönder</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+    $('#ecDo').onclick = function(){
+      const inputs = modal.querySelectorAll('input[data-ec-unit]');
+      const sel={}; inputs.forEach(i=>{ const n=i.getAttribute('data-ec-unit'); const v=Math.max(0,parseInt(i.value||'0')); if(v>0) sel[n]=v; });
+      if (!Object.keys(sel).length) { alert('Birlik seçmedin.'); return; }
+      const power = sumPower(sel);
+      // (İleri aşamada seçilen birlikleri gerçekten düşürmek istiyorsan burada localStorage azaltılabilir)
+      if (typeof MW_startMarchTo==='function'){
+        MW_startMarchTo(targetEl, { title:'🏰 Oyuncu Kalesi', power, loot:{gold:0,food:0} });
+        hide();
+      } else alert('Sefer sistemi yok (MW_startMarchTo).');
+    };
+  }
+
+  function renderSpy(targetEl){
+    const kb=getKaleBirlik(); const own=kb['Casus Kuş']||0;
+    $('#ecView').innerHTML = `
+      <div class="ec-row">Kaç <b>Casus Kuş</b> göndermek istiyorsun?</div>
+      <input class="ec-num" id="ecSpyCount" type="number" min="1" max="${own}" value="${Math.min(1,own)}">
+      <div class="ec-row" style="opacity:.8">Mevcut: ${own}</div>
+    `;
+    $('#ecDo').onclick = function(){
+      const adet = parseInt($('#ecSpyCount').value||'0');
+      if (isNaN(adet) || adet<1){ alert('Geçerli bir sayı gir.'); return; }
+      if (typeof MW_startMarchTo==='function'){
+        MW_startMarchTo(targetEl, { title:`🕵️ Casusluk (${adet})`, power:0, loot:{} });
+        hide();
+      } else alert('Sefer sistemi yok (MW_startMarchTo).');
+    };
+  }
+
+  function renderSupport(targetEl){
+    const kb=getKaleBirlik(); const carts = kb['Yük Arabası']||0; const cap = carts*CART_CAP;
+    $('#ecView').innerHTML = `
+      <div class="ec-row">Göndereceğin ganimeti seç (max kapasite: <b>${cap}</b>)</div>
+      <div class="ec-row">Altın: <input class="ec-num" id="ecGold" type="number" min="0" value="0"></div>
+      <div class="ec-row">Yemek: <input class="ec-num" id="ecFood" type="number" min="0" value="0"></div>
+      <div class="ec-row" style="opacity:.8">Yük Arabası: ${carts} (kapasite/birim: ${CART_CAP})</div>
+    `;
+    $('#ecDo').onclick = function(){
+      const g = parseInt($('#ecGold').value||'0');
+      const f = parseInt($('#ecFood').value||'0');
+      const need = (g+f);
+      if (need<=0){ alert('Gönderilecek ganimet yok.'); return; }
+      if (need>cap){ alert('Kapasite yetersiz.'); return; }
+      // Not: Gerçekten kasadan düşmek için burada resource sistemine bağlanmamız gerekir.
+      if (typeof MW_startMarchTo==='function'){
+        MW_startMarchTo(targetEl, { title:'📦 Destek Konvoyu', power:0, loot:{} });
+        hide();
+      } else alert('Sefer sistemi yok (MW_startMarchTo).');
+    };
+  }
+
+  function renderMessage(targetEl){
+    $('#ecView').innerHTML = `
+      <div class="ec-row">Mesaj (yakında online sistemle):</div>
+      <textarea id="ecMsg" style="width:100%;min-height:120px;border-radius:12px;border:1px solid #c9b07a;background:#1f1913;color:#ffe9b0;padding:10px"></textarea>
+      <div class="ec-row" style="opacity:.7">Şimdilik localStorage’da logluyoruz; online aktif olunca buradan gidecek.</div>
+    `;
+    $('#ecDo').onclick = function(){
+      const txt = (modal.querySelector('#ecMsg').value||'').trim();
+      if (!txt){ alert('Mesaj boş.'); return; }
+      const logs = JSON.parse(localStorage.getItem('mw_messages')||'[]');
+      logs.push({ t:Date.now(), to:'enemyCastle', msg:txt });
+      localStorage.setItem('mw_messages', JSON.stringify(logs));
+      alert('Mesaj kaydedildi (online gelince gönderilecek).');
+      hide();
+    };
+  }
+
+  function setTab(tab, targetEl){
+    modal.querySelectorAll('.ec-tab').forEach(b=>b.classList.toggle('ec-on', b.getAttribute('data-ec-tab')===tab));
+    if      (tab==='attack')  renderAttack(targetEl);
+    else if (tab==='spy')     renderSpy(targetEl);
+    else if (tab==='support') renderSupport(targetEl);
+    else                      renderMessage(targetEl);
+  }
+
+  function openFor(targetEl){
+    show(); setTab('attack', targetEl);
+    modal.querySelectorAll('.ec-tab').forEach(btn=>{
+      btn.onclick = ()=> setTab(btn.getAttribute('data-ec-tab'), targetEl);
+    });
+  }
+
+  // ---- Bağlama: enemyCastle'a tıklandığında paneli aç ----
+  function bindEnemyCastles(){
+    document.querySelectorAll('.enemyCastle').forEach(el=>{
+      if (el.__ecBound) return; el.__ecBound = true;
+      el.style.cursor='pointer';
+      el.addEventListener('click', ()=> openFor(el));
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindEnemyCastles);
+  else bindEnemyCastles();
+})();
