@@ -1270,3 +1270,59 @@ window.addEventListener("scroll", guncelleKonum);
     if (changed) save(ms);
   }, 200);
 })();
+// === ENEMY CASTLE NEVER HIDE (append-only, garanti) ===
+(function(){
+  if (window.__EC_NEVER_HIDE_FIX__) return; window.__EC_NEVER_HIDE_FIX__ = true;
+
+  function isEnemyCastle(el){
+    return !!(el && el.classList && el.classList.contains('enemyCastle'));
+  }
+  function unhide(el){
+    try{
+      el.style.display = '';
+      el.hidden = false;
+      el.__mwRemoved = false;
+    }catch(_){}
+  }
+
+  // 1) Sefer başlarken kaleyi "asla saklama" işaretle
+  if (typeof window.MW_startMarchTo === 'function'){
+    const prev = window.MW_startMarchTo;
+    window.MW_startMarchTo = function(targetEl, cfg){
+      if (isEnemyCastle(targetEl)) targetEl.__mwNeverHide = true;
+      return prev(targetEl, cfg);
+    };
+  }
+
+  // 2) Savaştan sonra gizleme kuyruğuna kaleyi SOKMA
+  window.__mwHideQueue = window.__mwHideQueue || [];
+  if (!window.__mwHideQueue.__patchedPush){
+    const oldPush = window.__mwHideQueue.push;
+    window.__mwHideQueue.push = function(el){
+      if (isEnemyCastle(el)) return this.length; // kaleyi hiç kuyruğa alma
+      return oldPush.apply(this, arguments);
+    };
+    window.__mwHideQueue.__patchedPush = true;
+  }
+
+  // 3) Watchdog: her 500ms'de bir saklanmış kale varsa geri görünür yap
+  setInterval(()=>{
+    document.querySelectorAll('.enemyCastle').forEach(el=>{
+      if (el && (el.style.display === 'none' || el.hidden || el.__mwRemoved)){
+        unhide(el);
+      }
+    });
+  }, 500);
+
+  // 4) Ek güvence: sefer kayıtlarından hedefi bulup yine görünür yap
+  const KEY="mw_marches_v3";
+  setInterval(()=>{
+    try{
+      const ms = JSON.parse(localStorage.getItem(KEY) || '[]');
+      ms.forEach(m=>{
+        const t = window.__MW_TARGETS__ && window.__MW_TARGETS__.get(m.id);
+        if (isEnemyCastle(t)) unhide(t);
+      });
+    }catch(_){}
+  }, 1000);
+})();k
