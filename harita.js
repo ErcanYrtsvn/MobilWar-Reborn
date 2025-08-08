@@ -1,468 +1,48 @@
+/* =========================================================
+   MobilWar — Harita (final tek dosya)
+   - Koordinat HUD + Git (X,Y)
+   - Büyük modal
+   - Sefer sistemi: gidiş → savaş → dönüş (🚩 işaretçisi)
+   - Şehir tıklama (kendi kaleyi hariç)
+   - Yaratık sistemi + fazlaca spawn
+   - EnemyCastle panel (Saldır / Casusluk / Destek / Mesaj)
+   - Hedef gizleme kuralı: 
+        • enemyCastle ASLA gizlenmez
+        • şehir/yaratık: varışta savaş, dönüşe BAŞLARKEN gizlenir
+   - Koordinat toast & güvenlik yamaları
+   - Idempotent (yeniden yüklense bile tek kez bağlar)
+   ========================================================= */
 
-// === BASE: Harita temel fonksiyonları (koordinat, konumaGit) ===
-const mapContainer = document.getElementById("mapContainer");
-const koordinatDiv = document.getElementById("koordinatlar");
-
-window.onload = function () {
-    window.scrollTo(5000 - window.innerWidth / 2, 5000 - window.innerHeight / 2);
-    guncelleKonum();
-};
-
-if (mapContainer && koordinatDiv){
-  mapContainer.addEventListener("mousemove", function (e) {
-      const x = e.pageX;
-      const y = e.pageY;
-      koordinatDiv.textContent = `X: ${x}, Y: ${y}`;
-  });
-}
-
-function konumaGit() {
-    window.scrollTo(5000 - window.innerWidth / 2, 5000 - window.innerHeight / 2);
-}
-
-function guncelleKonum() {
-    if (!koordinatDiv) return;
-    const x = window.scrollX + window.innerWidth / 2;
-    const y = window.scrollY + window.innerHeight / 2;
-    koordinatDiv.textContent = `X: ${Math.floor(x)}, Y: ${Math.floor(y)}`;
-}
-
-window.addEventListener("scroll", guncelleKonum);
-
-// ---- Harita genişletme & HUD koordinat güncelleme hook ----
 (function(){
-  const mapContainer = document.getElementById("mapContainer");
-  const koordinatDiv = document.getElementById("koordinatlar");
-  function guncelleKonum(){
-    if(!koordinatDiv) return;
-    const WORLD_W = mapContainer ? mapContainer.scrollWidth : window.innerWidth;
-    const WORLD_H = mapContainer ? mapContainer.scrollHeight : window.innerHeight;
-    const x = Math.max(0, Math.min(WORLD_W, window.scrollX + window.innerWidth / 2));
-    const y = Math.max(0, Math.min(WORLD_H, window.scrollY + window.innerHeight / 2));
-    koordinatDiv.textContent = `X: ${Math.floor(x)}, Y: ${Math.floor(y)}`;
-  }
-  window.addEventListener("scroll", guncelleKonum);
-  window.addEventListener("load", guncelleKonum);
-})();
+  if (window.__MW_FINAL_SINGLE__) return; 
+  window.__MW_FINAL_SINGLE__ = true;
 
-// ---- Yaratık sistemi (küçük/orta/büyük) ----
-(function(){
-  if (window.__monsters_injected__) return; // idempotent
-  window.__monsters_injected__ = true;
-
-  const mapContainer = document.getElementById("mapContainer");
-  if(!mapContainer) return;
-
-  const CREATURES = [
-    {type:'küçük', src:'monster_small.png', power: 20, loot:{gold: 60, food: 40}, size: 200},
-    {type:'orta',  src:'monster_mid.png',   power: 100, loot:{gold:200, food:140}, size: 280},
-    {type:'büyük', src:'monster_big.png',   power: 260, loot:{gold:520, food:360}, size: 360},
-  ];
-  const SPAWN_COUNT = 24;
-
-  function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
-
-  function spawnMonsters(){
-    for(let i=0;i<SPAWN_COUNT;i++){
-      const data = CREATURES[Math.floor(Math.random()*CREATURES.length)];
-      const x = randInt(300, (mapContainer.scrollWidth||22000)-300);
-      const y = randInt(300, (mapContainer.scrollHeight||22000)-300);
-      const el = document.createElement('img');
-      el.src = data.src;
-      el.alt = data.type + ' yaratık';
-      el.className = 'monster';
-      el.style.left = x + 'px';
-      el.style.top  = y + 'px';
-      el.style.width = data.size + 'px';
-      el.style.height = data.size + 'px';
-      el.addEventListener('click', () => attackMonster({el, data}));
-      mapContainer.appendChild(el);
-    }
-  }
-
-  // otomatik spawn
-  if (document.readyState === "complete") spawnMonsters();
-  else window.addEventListener("load", spawnMonsters);
-})();
-
-// ---- Şehir ganimeti & savunma (mevcut .mapIcon'lara tıklama) ----
-(function(){
-  const cities = Array.from(document.querySelectorAll('.mapIcon'));
-  if (!cities.length) return;
-
-  const base = {gold: 600, food: 400, power: 280};
-  function scaled(i){
-    return {
-      gold: base.gold + i*120,
-      food: base.food + i*90,
-      power: base.power + i*60
-    };
-  }
-
-  cities.forEach((el, i) => {
-    el.style.cursor = 'pointer';
-    el.addEventListener('click', () => {
-      const cfg = scaled(i);
-      // Eski basit akış: direkt uyarı (modali patch override edecektir)
-      const myPower = window.getArmyPower ? window.getArmyPower() : 9999;
-      if (myPower >= cfg.power){
-        // not: loot patch tarafında dönüşte yazılıyor olacak
-        alert(`🏙️ Şehir hedefi\nGüç: ${cfg.power}\nGanimet: +${cfg.gold} altın, +${cfg.food} yemek`);
-      } else {
-        alert(`🛡️ Şehir savunması güçlü (Senin güç: ${myPower}, Gereken: ${cfg.power})`);
-      }
-    });
-  });
-})();
-
-// === MobilWar Modal + Sefer Patch (INLINE, FULL, BIG UI, v3) ===
-(function(){
-  if (window.__MW_PATCHED_V3__) return;
-  window.__MW_PATCHED_V3__ = true;
-
-  // ---------- CSS (BÜYÜK) ----------
-  const css = `
-  #mwOverlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:10000; display:none; }
-  #mwModal{
-    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
-    width:min(92vw, 840px); background:#2d261e; color:#ffe9b0; z-index:10001;
-    border:6px solid #d4b15f; border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,.5);
-    font-family:inherit; display:none;
-  }
-  .mw-modal-header{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:22px 24px; border-bottom:1px solid rgba(212,177,95,.35);
-    font-size:36px; font-weight:900;
-  }
-  .mw-modal-header button{ background:transparent; border:0; color:#ffe9b0; font-size:34px; cursor:pointer; }
-  .mw-modal-body{ padding:22px 24px; font-size:28px; line-height:1.6; }
-  .mw-row{ margin:10px 0; }
-  .mw-modal-actions{ display:flex; gap:16px; padding:22px 24px; border-top:1px solid rgba(212,177,95,.35); }
-  .mw-modal-actions button{
-    flex:1; padding:18px 22px; font-size:28px; font-weight:800; border:0; border-radius:16px; cursor:pointer;
-  }
-  #mwAttackBtn{ background:#ffcc00; color:#352b17; }
-  #mwCancelBtn{ background:#4a3b28; color:#ffe9b0; }
-
-  .mw-march{
-    position:absolute; width:72px; height:72px; z-index:9998;
-    display:flex; align-items:center; justify-content:center;
-    font-size:48px; line-height:1; filter: drop-shadow(0 2px 4px rgba(0,0,0,.45));
-    animation: mwPulse 1.2s infinite ease-in-out; pointer-events:none;
-  }
-  @keyframes mwPulse{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
-  `;
-  const styleEl = document.createElement('style');
-  styleEl.textContent = css;
-  document.head.appendChild(styleEl);
-
-  // ---------- MODAL DOM ----------
-  const overlay = document.createElement('div'); overlay.id='mwOverlay';
-  const modal   = document.createElement('div'); modal.id='mwModal';
-  modal.innerHTML = `
-    <div class="mw-modal-header">
-      <div id="mwTitle">Hedef</div>
-      <button id="mwCloseBtn" aria-label="Kapat">✖</button>
-    </div>
-    <div class="mw-modal-body">
-      <div class="mw-row" id="mwPower">Gerekli güç: -</div>
-      <div class="mw-row" id="mwLoot">Ganimet: -</div>
-      <div class="mw-row" id="mwETA">Tahmini varış: - sn</div>
-      <div class="mw-row" id="mwInfo"></div>
-    </div>
-    <div class="mw-modal-actions">
-      <button id="mwAttackBtn">Saldır</button>
-      <button id="mwCancelBtn">Kapat</button>
-    </div>
-  `;
-  document.body.appendChild(overlay);
-  document.body.appendChild(modal);
-
-  // ---------- Modal Ref'leri ----------
-  const tEl = modal.querySelector('#mwTitle');
-  const pEl = modal.querySelector('#mwPower');
-  const lEl = modal.querySelector('#mwLoot');
-  const etaEl = modal.querySelector('#mwETA');
-  const iEl = modal.querySelector('#mwInfo');
-  const attackBtn = modal.querySelector('#mwAttackBtn');
-  const closeBtn  = modal.querySelector('#mwCloseBtn');
-  const cancelBtn = modal.querySelector('#mwCancelBtn');
-  let current = null;
-
-  function show(el){ el && (el.style.display='block'); }
-  function hide(el){ el && (el.style.display='none'); }
-  function openModal(cfg){
-    current = cfg;
-    tEl.textContent = cfg.title || 'Hedef';
-    pEl.textContent = 'Gerekli güç: ' + (cfg.power ?? '-');
-    const loot = cfg.loot || {};
-    const lootStr = [
-      loot.gold ? (loot.gold+' altın') : null,
-      loot.food ? (loot.food+' yemek') : null,
-      loot.stone? (loot.stone+' taş')  : null
-    ].filter(Boolean).join(', ');
-    lEl.textContent = 'Ganimet: ' + (lootStr || '-');
-    etaEl.textContent = 'Tahmini varış: ' + (cfg.etaSecs ?? '-') + ' sn';
-    iEl.textContent = cfg.info || '';
-    show(overlay); show(modal);
-  }
-  function closeModal(){ hide(modal); hide(overlay); current = null; }
-  closeBtn.addEventListener('click', closeModal);
-  cancelBtn.addEventListener('click', closeModal);
-  overlay.addEventListener('click', closeModal);
-
-  // ---------- Sefer Sistemi ----------
-  const PX_PER_SEC = 350; // yaklaşık hız
-  const KEY = "mw_marches_v3";
-  const map = document.getElementById('mapContainer');
-  const castleEl = document.getElementById('oyuncuKalesi');
-
-  const num = v => parseFloat(String(v).replace('px',''))||0;
-  function centerPos(el){
-    if (!el) return {x:0,y:0};
-    const left = num(el.style.left);
-    const top  = num(el.style.top);
-    if (!isNaN(left) && !isNaN(top) && (left || top)){
-      return { x: left + el.offsetWidth/2, y: top + el.offsetHeight/2 };
-    }
-    // Fallback: hesaplamayı mapContainer'a göre yap
-    const mapRect = map.getBoundingClientRect();
-    const r = el.getBoundingClientRect();
-    return { x: (r.left - mapRect.left) + r.width/2, y: (r.top - mapRect.top) + r.height/2 };
-  }
-  const dist = (a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-  const lerp = (a,b,t)=>a+(b-a)*t;
-  const clamp01 = v=>Math.max(0,Math.min(1,v));
-  const secsFor = d => Math.max(3, Math.round(d / PX_PER_SEC));
-
-  const load = ()=> JSON.parse(localStorage.getItem(KEY)||"[]");
-  const save = a => localStorage.setItem(KEY, JSON.stringify(a));
-
-  // HUD sayaç
-  const hud = document.getElementById('konumPanel');
-  const listId = 'mwMarchList';
-  if (hud && !document.getElementById(listId)){
-    const box = document.createElement('div');
-    box.id = listId; box.style.marginTop='10px'; box.style.fontSize='16px';
-    hud.appendChild(box);
-  }
-  function renderHud(){
-    const box = document.getElementById(listId); if(!box) return;
-    const ms = load(); const now=Date.now();
-    box.innerHTML = ms.map(m=>{
-      const remain = Math.max(0, Math.ceil((m.endsAt - now)/1000));
-      const phaseTxt = (m.phase==='going'?'Gidiş':'Dönüş');
-      return `<div>🚩 ${m.title} — ${phaseTxt} ⏳ ${remain}s</div>`;
-    }).join('');
-  }
-
-  // Haritada yürüyen bayrak
-  const markers = new Map();
-  function ensureMarker(m){
-    if (markers.has(m.id)) return markers.get(m.id);
-    const el = document.createElement('div');
-    el.className = 'mw-march';
-    el.textContent = '🚩';
-    map.appendChild(el);
-    const o = { el }; markers.set(m.id, o); return o;
-  }
-  function removeMarker(id){ const o = markers.get(id); if(o){ o.el.remove(); markers.delete(id); } }
-  function positionFor(m, tNorm){
-    const from = m.from, to = m.to;
-    const t = (m.phase==='going') ? tNorm : 1 - tNorm;
-    return { x: lerp(from.x, to.x, t), y: lerp(from.y, to.y, t) };
-  }
-
-  function tick(){
-    const now = Date.now();
-    let ms = load(); let changed=false;
-
-    ms.forEach(m=>{
-      const total = m.travelSecs*1000;
-      const elapsed = total - Math.max(0, m.endsAt - now);
-      const tNorm = clamp01(elapsed / total);
-
-      const mk = ensureMarker(m);
-      const p = positionFor(m, tNorm);
-      mk.el.style.left = (p.x - 36) + 'px';
-      mk.el.style.top  = (p.y - 36) + 'px';
-
-      if (now >= m.endsAt){
-        if (m.phase==='going'){
-          // Varışta savaş sonucu
-          const myPower = (typeof getArmyPower==='function') ? getArmyPower() : 9999;
-          m.win = (myPower >= (m.power||0));
-          m.phase = 'returning';
-          m.startedAt = now;
-          m.endsAt = now + m.travelSecs*1000;
-          changed = true;
-        } else if (m.phase==='returning'){
-          // Dönüşte loot yaz
-          if (m.win && m.loot){
-            if (typeof addGold === "function" && m.loot.gold) addGold(m.loot.gold);
-            if (typeof addFood === "function" && m.loot.food) addFood(m.loot.food);
-            if (typeof addStone === "function" && m.loot.stone) addStone(m.loot.stone);
-          }
-          removeMarker(m.id);
-          m._done = true;
-          changed = true;
-        }
-      }
-    });
-
-    const before = ms.length;
-    ms = ms.filter(m=>!m._done);
-    if (changed || ms.length!==before){ save(ms); renderHud(); }
-
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-  setInterval(renderHud, 1000);
-
-  // Dışa aç: sefer başlat
-  window.MW_startMarchTo = function(targetEl, cfg){
-    if (!map || !castleEl || !targetEl){
-      alert('Sefer başlatılamadı (eksik eleman).'); return;
-    }
-    const from = centerPos(castleEl);
-    const to   = centerPos(targetEl);
-    const d = dist(from,to);
-    const travelSecs = secsFor(d);
-    const now = Date.now();
-    const m = {
-      id: 'm'+Math.random().toString(36).slice(2),
-      title: cfg.title||'Hedef',
-      power: cfg.power||0,
-      loot:  cfg.loot || {gold:0, food:0, stone:0},
-      from, to, travelSecs,
-      phase: 'going',
-      startedAt: now,
-      endsAt: now + travelSecs*1000,
-      win: false
-    };
-    const ms = load(); ms.push(m); save(ms); renderHud();
+  /* ---------- CONFIG ---------- */
+  const CFG = {
+    WORLD_W: 120000,
+    WORLD_H: 120000,
+    SPEED_PX_PER_SEC: 800,          // sefer hızı
+    MARCH_ICON: "🚩",
+    CREATURE_SPAWN: 150,            // ekstra yaratık
+    CITY_SPAWN: 80,                 // ekstra şehir
+    CREATURES: [
+      {type:'küçük', src:'monster_small.png', size:200, power: 20,  loot:{gold:60,  food:40}},
+      {type:'orta',  src:'monster_mid.png',   size:280, power: 100, loot:{gold:200, food:140}},
+      {type:'büyük', src:'monster_big.png',   size:360, power: 260, loot:{gold:520, food:360}},
+    ],
+    CART_CAP: 100,                  // Yük Arabası kapasite
+    MAX_MARCHES: 30
   };
 
-  // Dışa aç: modalı ETA ile aç
-  window.MW_openBattleModal = function(cfg){
-    try{
-      const from = centerPos(castleEl);
-      const to   = centerPos(cfg.targetEl);
-      const d = dist(from,to);
-      const eta = Math.max(3, Math.round(d / PX_PER_SEC));
-      cfg.etaSecs = eta;
-    }catch(e){ cfg.etaSecs = '-'; }
-    openModal(cfg);
-  };
+  /* ---------- DOM GET ---------- */
+  const map = document.getElementById("mapContainer");
+  const hud = document.getElementById("konumPanel");
+  const coordDiv = document.getElementById("koordinatlar");
+  const myCastle = document.getElementById("oyuncuKalesi");
 
-  // ---------- PATCH: yaratık tıklaması ----------
-  window.attackMonster = function(m){
-    MW_openBattleModal({
-      title: `👹 ${m.data.type.toUpperCase()} Yaratık`,
-      power: m.data.power,
-      loot: m.data.loot,
-      targetEl: m.el,
-      info: 'Yenersen ganimet dönüşte kasana eklenecek.'
-    });
-  };
+  if (map) { map.style.width = CFG.WORLD_W + "px"; map.style.height = CFG.WORLD_H + "px"; }
 
-  // ---------- PATCH: şehir tıklamaları (kendi kaleyi hariç) ----------
-  function rebindCities(){
-    const cities = Array.from(document.querySelectorAll('.mapIcon')).filter(el => el.id !== 'oyuncuKalesi');
-    cities.forEach((el, i) => {
-      const clone = el.cloneNode(true);
-      el.parentNode.replaceChild(clone, el);
-
-      const base = {gold: 600, food: 400, power: 280};
-      const cfg = {
-        gold: base.gold + i*120,
-        food: base.food + i*90,
-        power: base.power + i*60
-      };
-      clone.style.cursor = 'pointer';
-      clone.addEventListener('click', () => {
-        MW_openBattleModal({
-          title: '🏙️ Şehir',
-          power: cfg.power,
-          loot: { gold: cfg.gold, food: cfg.food },
-          targetEl: clone,
-          info: 'Şehri ele geçirirsen ganimet dönüşte kasana eklenecek.'
-        });
-      });
-    });
-  }
-
-  // ---------- Kendi kalen: menüye dön ----------
-  (function bindOwnCastle(){
-    const myCastle = document.getElementById('oyuncuKalesi');
-    if (myCastle && !myCastle.__mwBound__) {
-      myCastle.__mwBound__ = true;
-      myCastle.style.cursor = 'pointer';
-      myCastle.addEventListener('click', () => {
-        if (document.referrer && document.referrer.includes('index.html')) {
-          history.back();
-        } else {
-          window.location.href = 'index.html';
-        }
-      });
-    }
-  })();
-
-  if (document.readyState === 'complete' || document.readyState === 'interactive'){
-    setTimeout(rebindCities, 0);
-  } else {
-    window.addEventListener('DOMContentLoaded', rebindCities);
-  }
-})();
-
-// ==== SALDIR ÇALIŞTIRICI - RESCUE (bozmadan ek) ====
-(function(){
-  if (window.__MW_ATTACK_RESCUE__) return; window.__MW_ATTACK_RESCUE__=true;
-
-  // 1) Saldır butonuna delegasyon (modal içinden yakala)
-  document.addEventListener('click', function(e){
-    if (!e.target) return;
-    const btn = e.target.closest && e.target.closest('#mwAttackBtn');
-    if (!btn) return;
-
-    // Modal açılırken kaydedilen hedef/config
-    const cfg = window.MW__lastCfg || window.__MW_current;
-    if (!cfg || !cfg.targetEl){
-      alert('Hedef bulunamadı.'); 
-      return;
-    }
-
-    // Sefer fonksiyonu varsa tetikle
-    if (typeof window.MW_startMarchTo === 'function'){
-      window.MW_startMarchTo(cfg.targetEl, {
-        title: cfg.title,
-        power: cfg.power,
-        loot:  cfg.loot
-      });
-      // Modali kapat
-      const ov = document.getElementById('mwOverlay'); 
-      const md = document.getElementById('mwModal');
-      if (ov) ov.style.display='none';
-      if (md) md.style.display='none';
-      // İstersen geçici bildirim
-      // alert('Sefer başlatıldı!');
-    } else {
-      alert('Sefer sistemi yüklenmemiş (MW_startMarchTo yok).');
-    }
-  }, true);
-
-  // 2) Modal açma fonksiyonunu sar: cfg'yi global sakla
-  const oldOpen = window.MW_openBattleModal;
-  window.MW_openBattleModal = function(cfg){
-    try { window.MW__lastCfg = cfg; } catch(e){}
-    if (typeof oldOpen === 'function') return oldOpen(cfg);
-  };
-})();
-// ==== HARİTA FİNAL PATCH v4 (bozmadan ek) ====
-(function(){
-  if (window.__MW_FINAL_V4__) return; window.__MW_FINAL_V4__ = true;
-
-  // ----- 0) Mini toast -----
+  /* ---------- TOAST ---------- */
   function toast(msg){
     let box = document.getElementById('mwToastBox');
     if(!box){
@@ -475,372 +55,23 @@ window.addEventListener("scroll", guncelleKonum);
     t.style.cssText = 'margin-top:8px;background:#2d261e;color:#ffe9b0;border:2px solid #d4b15f;border-radius:12px;padding:10px 14px;font-weight:800;font-size:18px;box-shadow:0 6px 16px rgba(0,0,0,.45)';
     t.textContent = msg;
     box.appendChild(t);
-    setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .35s'; setTimeout(()=>t.remove(), 400); }, 2000);
+    setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .35s'; setTimeout(()=>t.remove(),400); }, 2000);
   }
 
-  // ----- 1) Hedef kilidi (ikinci saldırıyı engelle) -----
-  const busyTargets = new WeakSet();
-
-  // ----- 2) Rescue: Saldır butonu her koşulda tetiklesin -----
-  document.addEventListener('click', function(e){
-    const btn = e.target && e.target.closest && e.target.closest('#mwAttackBtn');
-    if (!btn) return;
-    const cfg = window.MW__lastCfg || window.__MW_current;
-    if (!cfg || !cfg.targetEl){ alert('Hedef bulunamadı.'); return; }
-    if (typeof window.MW_startMarchTo === 'function'){
-      window.MW_startMarchTo(cfg.targetEl, { title: cfg.title, power: cfg.power, loot: cfg.loot });
-      // modalı kapat
-      const ov = document.getElementById('mwOverlay'); const md = document.getElementById('mwModal');
-      if (ov) ov.style.display='none'; if (md) md.style.display='none';
-    } else {
-      alert('Sefer sistemi yüklenmemiş (MW_startMarchTo yok).');
-    }
-  }, true);
-
-  // Modal açılırken hedef meşgulse engelle + cfg’yi sakla
-  if (typeof window.MW_openBattleModal === 'function'){
-    const oldOpen = window.MW_openBattleModal;
-    window.MW_openBattleModal = function(cfg){
-      try { window.MW__lastCfg = cfg; } catch(e){}
-      if (cfg?.targetEl && busyTargets.has(cfg.targetEl)){
-        toast('❗ Bu hedefe zaten sefer var.');
-        return;
-      }
-      return oldOpen(cfg);
-    };
+  /* ---------- HUD: Konum ve Git(X,Y) ---------- */
+  function hudUpdate(){
+    if (!coordDiv) return;
+    const x = Math.max(0, Math.min(CFG.WORLD_W, window.scrollX + window.innerWidth / 2));
+    const y = Math.max(0, Math.min(CFG.WORLD_H, window.scrollY + window.innerHeight / 2));
+    coordDiv.textContent = `X: ${Math.floor(x)}, Y: ${Math.floor(y)}`;
   }
+  window.addEventListener("scroll", hudUpdate);
+  window.addEventListener("load", hudUpdate);
 
-  // ----- 3) Sefer başlat: hedefi hemen kaldır, respawn planla -----
-  const RESPAWN_MONSTERS = true;
-  const RESPAWN_CITIES   = false; // şehirler tekrar belirmesin istiyorsan false kalsın
-  const RESPAWN_DELAY = { small: 10*60*1000, mid: 20*60*1000, big: 30*60*1000 }; // 10/20/30 dk
-
-  function scheduleMonsterRespawn(meta){
-    if (!RESPAWN_MONSTERS) return;
-    const delay = (meta.kindSize==='küçük') ? RESPAWN_DELAY.small :
-                  (meta.kindSize==='orta')  ? RESPAWN_DELAY.mid   :
-                  RESPAWN_DELAY.big;
-    setTimeout(()=> {
-      const map = document.getElementById('mapContainer');
-      if (!map) return;
-      const el = document.createElement('img');
-      el.src = meta.src;
-      el.alt = meta.kindSize + ' yaratık';
-      el.className = 'monster';
-      el.style.left  = meta.left;
-      el.style.top   = meta.top;
-      el.style.width = meta.width;
-      el.style.height= meta.height;
-      // attackMonster için data oluştur
-      const data = { type: meta.kindSize, power: meta.power, loot: {gold: meta.gold, food: meta.food} };
-      el.addEventListener('click', () => window.attackMonster && window.attackMonster({el, data}));
-      map.appendChild(el);
-    }, delay);
-  }
-
-  function scheduleCityRespawn(meta){
-    if (!RESPAWN_CITIES) return;
-    setTimeout(()=> {
-      const map = document.getElementById('mapContainer');
-      if (!map) return;
-      const el = document.createElement('img');
-      el.src = meta.src; el.className='mapIcon'; el.alt='Küçük Şehir';
-      el.style.left= meta.left; el.style.top = meta.top; el.style.width= meta.width; el.style.height= meta.height;
-      map.appendChild(el);
-    }, 15*60*1000); // örnek 15 dk
-  }
-
-  if (typeof window.MW_startMarchTo === 'function'){
-    const oldStart = window.MW_startMarchTo;
-    window.MW_startMarchTo = function(targetEl, cfg){
-      if (!targetEl){ toast('Hedef bulunamadı.'); return; }
-      if (busyTargets.has(targetEl)){ toast('❗ Bu hedefe zaten sefer var.'); return; }
-      busyTargets.add(targetEl);
-
-      // Meta bilgileri çıkar (respawn için)
-      const meta = {
-        left: targetEl.style.left, top: targetEl.style.top,
-        width: targetEl.style.width, height: targetEl.style.height,
-        src: targetEl.getAttribute('src') || '',
-        isMonster: targetEl.classList.contains('monster'),
-        isCity:     targetEl.classList.contains('mapIcon') && targetEl.id !== 'oyuncuKalesi',
-        // modal cfg’den tip/ganimet gücünü yakala
-        kindSize: (cfg.title||'').toLowerCase().includes('küçük') ? 'küçük' :
-                  (cfg.title||'').toLowerCase().includes('orta')   ? 'orta'   :
-                  (cfg.title||'').toLowerCase().includes('büyük')  ? 'büyük'  : 'büyük',
-        power: cfg.power||0,
-        gold:  (cfg.loot&&cfg.loot.gold)||0,
-        food:  (cfg.loot&&cfg.loot.food)||0
-      };
-
-      // Hedefi görünmez yap (kayıtlı kalsın)
-      if (targetEl.parentNode){
-        targetEl.style.display='none';
-        targetEl.__mwRemoved = true;
-      }
-
-      // Respawn planı (isteğe bağlı)
-      if (meta.isMonster) scheduleMonsterRespawn(meta);
-      else if (meta.isCity) scheduleCityRespawn(meta);
-
-      // Gerçek seferi başlat
-      const r = oldStart(targetEl, cfg);
-      toast('🚩 Sefer başladı!');
-      return r;
-    };
-  } else {
-    console.warn('MW_startMarchTo yok – sefer sistemi yüklenmeli.');
-  }
-
-  // ----- 4) Geri dönüşte loot bildirimi (addGold/food/stone sar) -----
-  (function(){
-    const wrap = (name, text) => {
-      const orig = window[name];
-      window[name] = function(n){
-        try{ if (typeof orig === 'function') orig(n); }catch(e){}
-        if (n && n > 0) toast(`+${n} ${text} kasana eklendi`);
-      };
-    };
-    wrap('addGold','altın'); wrap('addFood','yemek'); wrap('addStone','taş');
-  })();
-
-  // ----- 5) Kendi kale: menüye dönüş (güvence) -----
-  (function(){
-    const myCastle = document.getElementById('oyuncuKalesi');
-    if (myCastle && !myCastle.__mwGoBack){
-      myCastle.__mwGoBack = true;
-      myCastle.style.cursor='pointer';
-      myCastle.addEventListener('click', ()=>{ window.location.href='index.html'; });
-    }
-  })();
-
-  // ----- 6) Güvenli: şehir/yaratık mevcut click’leri bozmadan çalıştır -----
-  // (mevcut attackMonster ve şehir click’leri durur; biz sadece üzerine katman ekledik)
-})();
-// === ENEMY CASTLE PANEL (append-only, no break) ===
-(function(){
-  if (window.__ENEMY_CASTLE_UI__) return; window.__ENEMY_CASTLE_UI__=true;
-
-  // ---- Basit CSS ----
-  const css = `
-  #ecOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:11000;display:none;}
-  #ecModal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:min(92vw,880px);background:#2d261e;color:#ffe9b0;z-index:11001;
-    border:6px solid #d4b15f;border-radius:22px;box-shadow:0 10px 30px rgba(0,0,0,.5);font-family:inherit;display:none;}
-  .ec-head{display:flex;justify-content:space-between;align-items:center;padding:22px 24px;border-bottom:1px solid rgba(212,177,95,.35);font-size:30px;font-weight:900;}
-  .ec-body{padding:22px 24px;font-size:20px;line-height:1.5;}
-  .ec-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-  .ec-tab{padding:10px 14px;border-radius:12px;background:#4a3b28;color:#ffe9b0;cursor:pointer;font-weight:800;border:0}
-  .ec-tab.ec-on{background:#ffcc00;color:#352b17}
-  .ec-row{margin:8px 0}
-  .ec-actions{display:flex;gap:10px;margin-top:14px}
-  .ec-actions button{flex:1;padding:14px 16px;font-size:20px;font-weight:900;border-radius:12px;border:0;cursor:pointer}
-  .ec-primary{background:#ffcc00;color:#352b17}
-  .ec-ghost{background:#3a2f1e;color:#ffe9b0}
-  input.ec-num{width:110px;padding:6px;border-radius:8px;border:1px solid #c9b07a;background:#1f1913;color:#ffe9b0}
-  table.ec-table{width:100%;border-collapse:collapse;margin-top:10px}
-  table.ec-table th,table.ec-table td{border-bottom:1px solid rgba(212,177,95,.25);padding:6px 4px;text-align:left}
-  `;
-  const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
-
-  // ---- DOM ----
-  const overlay=document.createElement('div'); overlay.id='ecOverlay';
-  const modal=document.createElement('div'); modal.id='ecModal';
-  modal.innerHTML = `
-    <div class="ec-head">
-      <div>🏰 Oyuncu Kalesi</div>
-      <button id="ecClose" style="background:transparent;border:0;color:#ffe9b0;font-size:28px;cursor:pointer">✖</button>
-    </div>
-    <div class="ec-body">
-      <div class="ec-tabs">
-        <button class="ec-tab ec-on" data-ec-tab="attack">Saldır</button>
-        <button class="ec-tab" data-ec-tab="spy">Casusluk</button>
-        <button class="ec-tab" data-ec-tab="support">Destek</button>
-        <button class="ec-tab" data-ec-tab="message">Mesaj</button>
-      </div>
-      <div id="ecView"></div>
-      <div class="ec-actions">
-        <button id="ecDo" class="ec-primary">Gönder</button>
-        <button id="ecCancel" class="ec-ghost">Kapat</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(overlay); document.body.appendChild(modal);
-
-  const $ = s => modal.querySelector(s);
-  function show(){ overlay.style.display='block'; modal.style.display='block'; }
-  function hide(){ overlay.style.display='none'; modal.style.display='none'; }
-  $('#ecClose').onclick = hide; $('#ecCancel').onclick = hide; overlay.onclick = hide;
-
-  // ---- Data helpers ----
-  const birlikGucu = {
-    "Casus Kuş": 1,"Cüce": 3,"Yük Arabası": 0,"Elf": 5,"Gnom": 2,"Şaman": 1,
-    "Süvari": 6,"Mancınık": 4,"Pegasus": 7,"Ogre": 8,"Ejderha": 10,"Kaos": 12
-  };
-  const CART_CAP = 100; // Yük Arabası taşıma kapasitesi (adet başına)
-  function getKaleBirlik(){ try{return JSON.parse(localStorage.getItem('kaleBirlikleri')||'{}');}catch(_){return{}} }
-  function sumPower(sel){ let p=0; Object.keys(sel).forEach(k=>{ const adet=+sel[k]||0; p+=adet*(birlikGucu[k]||0) }); return p; }
-
-  // ---- UI renderers ----
-  function renderAttack(targetEl){
-    const kb=getKaleBirlik();
-    const rows = Object.keys(birlikGucu).map(n=>{
-      const own=kb[n]||0;
-      return `<tr>
-        <td>${n}</td>
-        <td>${own}</td>
-        <td><input class="ec-num" type="number" min="0" max="${own}" value="0" data-ec-unit="${n}"></td>
-      </tr>`;
-    }).join('');
-    $('#ecView').innerHTML = `
-      <div class="ec-row">Saldırmak istediğin birlikleri seç:</div>
-      <table class="ec-table">
-        <thead><tr><th>Birlik</th><th>Mevcut</th><th>Gönder</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    `;
-    $('#ecDo').onclick = function(){
-      const inputs = modal.querySelectorAll('input[data-ec-unit]');
-      const sel={}; inputs.forEach(i=>{ const n=i.getAttribute('data-ec-unit'); const v=Math.max(0,parseInt(i.value||'0')); if(v>0) sel[n]=v; });
-      if (!Object.keys(sel).length) { alert('Birlik seçmedin.'); return; }
-      const power = sumPower(sel);
-      // (İleri aşamada seçilen birlikleri gerçekten düşürmek istiyorsan burada localStorage azaltılabilir)
-      if (typeof MW_startMarchTo==='function'){
-        MW_startMarchTo(targetEl, { title:'🏰 Oyuncu Kalesi', power, loot:{gold:0,food:0} });
-        hide();
-      } else alert('Sefer sistemi yok (MW_startMarchTo).');
-    };
-  }
-
-  function renderSpy(targetEl){
-    const kb=getKaleBirlik(); const own=kb['Casus Kuş']||0;
-    $('#ecView').innerHTML = `
-      <div class="ec-row">Kaç <b>Casus Kuş</b> göndermek istiyorsun?</div>
-      <input class="ec-num" id="ecSpyCount" type="number" min="1" max="${own}" value="${Math.min(1,own)}">
-      <div class="ec-row" style="opacity:.8">Mevcut: ${own}</div>
-    `;
-    $('#ecDo').onclick = function(){
-      const adet = parseInt($('#ecSpyCount').value||'0');
-      if (isNaN(adet) || adet<1){ alert('Geçerli bir sayı gir.'); return; }
-      if (typeof MW_startMarchTo==='function'){
-        MW_startMarchTo(targetEl, { title:`🕵️ Casusluk (${adet})`, power:0, loot:{} });
-        hide();
-      } else alert('Sefer sistemi yok (MW_startMarchTo).');
-    };
-  }
-
-  function renderSupport(targetEl){
-    const kb=getKaleBirlik(); const carts = kb['Yük Arabası']||0; const cap = carts*CART_CAP;
-    $('#ecView').innerHTML = `
-      <div class="ec-row">Göndereceğin ganimeti seç (max kapasite: <b>${cap}</b>)</div>
-      <div class="ec-row">Altın: <input class="ec-num" id="ecGold" type="number" min="0" value="0"></div>
-      <div class="ec-row">Yemek: <input class="ec-num" id="ecFood" type="number" min="0" value="0"></div>
-      <div class="ec-row" style="opacity:.8">Yük Arabası: ${carts} (kapasite/birim: ${CART_CAP})</div>
-    `;
-    $('#ecDo').onclick = function(){
-      const g = parseInt($('#ecGold').value||'0');
-      const f = parseInt($('#ecFood').value||'0');
-      const need = (g+f);
-      if (need<=0){ alert('Gönderilecek ganimet yok.'); return; }
-      if (need>cap){ alert('Kapasite yetersiz.'); return; }
-      // Not: Gerçekten kasadan düşmek için burada resource sistemine bağlanmamız gerekir.
-      if (typeof MW_startMarchTo==='function'){
-        MW_startMarchTo(targetEl, { title:'📦 Destek Konvoyu', power:0, loot:{} });
-        hide();
-      } else alert('Sefer sistemi yok (MW_startMarchTo).');
-    };
-  }
-
-  function renderMessage(targetEl){
-    $('#ecView').innerHTML = `
-      <div class="ec-row">Mesaj (yakında online sistemle):</div>
-      <textarea id="ecMsg" style="width:100%;min-height:120px;border-radius:12px;border:1px solid #c9b07a;background:#1f1913;color:#ffe9b0;padding:10px"></textarea>
-      <div class="ec-row" style="opacity:.7">Şimdilik localStorage’da logluyoruz; online aktif olunca buradan gidecek.</div>
-    `;
-    $('#ecDo').onclick = function(){
-      const txt = (modal.querySelector('#ecMsg').value||'').trim();
-      if (!txt){ alert('Mesaj boş.'); return; }
-      const logs = JSON.parse(localStorage.getItem('mw_messages')||'[]');
-      logs.push({ t:Date.now(), to:'enemyCastle', msg:txt });
-      localStorage.setItem('mw_messages', JSON.stringify(logs));
-      alert('Mesaj kaydedildi (online gelince gönderilecek).');
-      hide();
-    };
-  }
-
-  function setTab(tab, targetEl){
-    modal.querySelectorAll('.ec-tab').forEach(b=>b.classList.toggle('ec-on', b.getAttribute('data-ec-tab')===tab));
-    if      (tab==='attack')  renderAttack(targetEl);
-    else if (tab==='spy')     renderSpy(targetEl);
-    else if (tab==='support') renderSupport(targetEl);
-    else                      renderMessage(targetEl);
-  }
-
-  function openFor(targetEl){
-    show(); setTab('attack', targetEl);
-    modal.querySelectorAll('.ec-tab').forEach(btn=>{
-      btn.onclick = ()=> setTab(btn.getAttribute('data-ec-tab'), targetEl);
-    });
-  }
-
-  // ---- Bağlama: enemyCastle'a tıklandığında paneli aç ----
-  function bindEnemyCastles(){
-    document.querySelectorAll('.enemyCastle').forEach(el=>{
-      if (el.__ecBound) return; el.__ecBound = true;
-      el.style.cursor='pointer';
-      el.addEventListener('click', ()=> openFor(el));
-    });
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindEnemyCastles);
-  else bindEnemyCastles();
-})();
-// === HARİTA GENİŞLETME PATCH (append-only, bozmaz) ===
-(function(){
-  if (window.__MW_EXPAND_V1__) return; window.__MW_EXPAND_V1__ = true;
-
-  const map = document.getElementById('mapContainer');
-  const my = document.getElementById('oyuncuKalesi');
-
-  // ---- 1) Düşman kalesini kendi kalenin yanına yerleştir ----
-  (function placeEnemyNearMine(){
-    if (!map || !my) return;
-    const enemy = document.querySelector('.enemyCastle');
-    if (!enemy) return;
-    // Kendi kalenin sol-üst koordinatını oku
-    const n = v => parseFloat(String(v).replace('px',''))||0;
-    const mx = n(my.style.left), myTop = n(my.style.top);
-    // Biraz yanına (ofset) koy
-    const offX = 480, offY = -120;  // yakın ama üstünü kapatmasın
-    enemy.style.left = (mx + offX) + 'px';
-    enemy.style.top  = (myTop + offY) + 'px';
-    // Boyutunu kendi kaleyle hizala (zaten CSS’te !important ama garanti)
-    enemy.style.width = my.offsetWidth + 'px';
-    enemy.style.height = my.offsetHeight + 'px';
-  })();
-
-  // ---- Mini toast (koordinat + bilgi için) ----
-  function toast(msg){
-    let box = document.getElementById('mwToastBox');
-    if(!box){
-      box = document.createElement('div');
-      box.id='mwToastBox';
-      box.style.cssText = 'position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:10050;pointer-events:none;';
-      document.body.appendChild(box);
-    }
-    const t = document.createElement('div');
-    t.style.cssText = 'margin-top:8px;background:#2d261e;color:#ffe9b0;border:2px solid #d4b15f;border-radius:12px;padding:10px 14px;font-weight:800;font-size:18px;box-shadow:0 6px 16px rgba(0,0,0,.45)';
-    t.textContent = msg;
-    box.appendChild(t);
-    setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .35s'; setTimeout(()=>t.remove(), 400); }, 2000);
-  }
-
-  // ---- 2) Koordinata Git alanı (X,Y) ----
-  (function addGotoXY(){
-    const hud = document.getElementById('konumPanel');
-    if (!hud || document.getElementById('mwGotoBox')) return;
-    const wrap = document.createElement('div');
-    wrap.id = 'mwGotoBox';
-    wrap.style.cssText = 'margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:16px;';
+  if (hud && !document.getElementById("mwGotoBox")){
+    const wrap = document.createElement("div");
+    wrap.id = "mwGotoBox";
+    wrap.style.cssText = "margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:16px;";
     wrap.innerHTML = `
       <span style="opacity:.8">Git:</span>
       <input id="mwGX" type="number" placeholder="X" style="width:110px;padding:6px;border-radius:8px;border:1px solid #c9b07a;background:#1f1913;color:#ffe9b0">
@@ -848,481 +79,437 @@ window.addEventListener("scroll", guncelleKonum);
       <button id="mwGoBtn" style="padding:8px 12px;border-radius:10px;border:0;font-weight:900;background:#ffcc00;color:#352b17;cursor:pointer">Git</button>
     `;
     hud.appendChild(wrap);
-    document.getElementById('mwGoBtn').addEventListener('click', ()=>{
+    wrap.querySelector("#mwGoBtn").addEventListener("click", ()=>{
       const gx = parseInt(document.getElementById('mwGX').value||'0');
       const gy = parseInt(document.getElementById('mwGY').value||'0');
       if (isNaN(gx)||isNaN(gy)) return;
-      // Ekran merkezini bu koordinata getir
       window.scrollTo(Math.max(0, gx - window.innerWidth/2), Math.max(0, gy - window.innerHeight/2));
       toast(`📍 Gidildi: X:${gx} Y:${gy}`);
     });
+  }
+
+  /* ---------- Utils ---------- */
+  const LS_KEY = "mw_marches_v3";
+  function loadMarches(){ try{return JSON.parse(localStorage.getItem(LS_KEY)||"[]")}catch(_){return[]} }
+  function saveMarches(a){ try{localStorage.setItem(LS_KEY, JSON.stringify(a.slice(-CFG.MAX_MARCHES)))}catch(_){ } }
+  function px(v){ return parseFloat(String(v||'').replace('px',''))||0; }
+  function centerOf(el){
+    if (!el || !map) return {x:0,y:0};
+    const l = px(el.style.left), t = px(el.style.top);
+    if (l || t) return { x: l + el.offsetWidth/2, y: t + el.offsetHeight/2 };
+    const mr = map.getBoundingClientRect(), r = el.getBoundingClientRect();
+    return { x:(r.left-mr.left)+r.width/2, y:(r.top-mr.top)+r.height/2 };
+  }
+  function dist(a,b){ const dx=a.x-b.x, dy=a.y-b.y; return Math.sqrt(dx*dx+dy*dy); }
+
+  /* ---------- March (sefer) sistemi ---------- */
+  const marchDots = new Map();   // id -> element
+  const targetsMap = new Map();  // id -> targetEl (güvence)
+
+  function makeDot(){ const el = document.createElement("div"); el.className="mw-march"; el.textContent=CFG.MARCH_ICON; el.style.position="absolute"; el.style.zIndex="9998"; el.style.pointerEvents="none"; return el; }
+
+  function addGold(n){ const e=document.getElementById("gold"); if (e){ e.textContent = String(parseInt(e.textContent||"0",10)+n); } }
+  function addFood(n){ const e=document.getElementById("food"); if (e){ e.textContent = String(parseInt(e.textContent||"0",10)+n); } }
+  function addStone(n){ const e=document.getElementById("stone"); if (e){ e.textContent = String(parseInt(e.textContent||"0",10)+n); } }
+  window.addGold = window.addGold || addGold;
+  window.addFood = window.addFood || addFood;
+  window.addStone = window.addStone || addStone;
+
+  // Enemy castle asla gizlenmez — watchdog
+  setInterval(()=>{
+    document.querySelectorAll('.enemyCastle').forEach(el=>{
+      if (!el) return;
+      if (el.style.display==='none' || el.hidden || el.__mwRemoved){ el.style.display=''; el.hidden=false; el.__mwRemoved=false; }
+    });
+  }, 500);
+
+  // March başlat
+  window.MW_startMarchTo = function(targetEl, cfg){
+    try{
+      if (!myCastle || !targetEl) return toast("Hedef/kale yok.");
+      const A = centerOf(myCastle);
+      const B = centerOf(targetEl);
+      const d = dist(A,B);
+      const travelSecs = Math.max(1, Math.round(d / CFG.SPEED_PX_PER_SEC));
+
+      const id = "m"+Date.now()+Math.floor(Math.random()*1e5);
+      const m = {
+        id, title: (cfg && cfg.title)||"Hedef",
+        power: cfg && cfg.power || 0,
+        loot:  cfg && cfg.loot  || {gold:0,food:0,stone:0},
+        from: A, to: B,
+        phase: "going",
+        startedAt: Date.now(),
+        travelSecs,
+        endsAt: Date.now() + travelSecs*1000
+      };
+      const list = loadMarches(); list.push(m); saveMarches(list);
+      targetsMap.set(id, targetEl);
+
+      // march icon
+      const dot = makeDot(); map.appendChild(dot); marchDots.set(id, dot);
+      dot.style.left = (A.x-8)+"px"; dot.style.top = (A.y-8)+"px";
+
+      toast("🚩 Sefer başladı!");
+      return m;
+    }catch(e){ console.warn("MW_startMarchTo err", e); }
+  };
+
+  // March tick
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function tick(){
+    const list = loadMarches(); if (!list.length) return;
+    const now = Date.now();
+
+    for (let m of list){
+      if (m._done) continue;
+      const dot = marchDots.get(m.id) || makeDot(); 
+      if (!marchDots.has(m.id)){ map.appendChild(dot); marchDots.set(m.id, dot); }
+
+      if (m.phase === "going"){
+        const t = Math.max(0, Math.min(1, (now - m.startedAt) / (m.endsAt - m.startedAt)));
+        const x = lerp(m.from.x, m.to.x, t), y = lerp(m.from.y, m.to.y, t);
+        dot.style.left = (x-8)+"px"; dot.style.top = (y-8)+"px";
+
+        if (now >= m.endsAt){
+          // VARIŞ → SAVAŞ
+          m.phase = "fighting";
+          m.startedAt = now;
+          // Güce göre savaş süresi (sn): 5..300
+          const p = parseInt(m.power||0,10);
+          m.battleSecs = Math.max(5, Math.min(300, Math.round((p||0)/2)));
+          m.endsAt = now + (m.battleSecs*1000);
+          // hedef üzerinde ⚔️
+          placeSwordsAt(m);
+        }
+      }
+      else if (m.phase === "fighting"){
+        // dot hedefte bekler
+        dot.style.left = (m.to.x-8)+"px"; dot.style.top = (m.to.y-8)+"px";
+        if (now >= m.endsAt){
+          // Savaş bitti → DÖNÜŞ
+          removeSwords(m.id);
+          m.phase = "returning";
+          m.startedAt = now;
+          m.endsAt = now + (m.travelSecs*1000);
+          // DÖNÜŞ BAŞLARKEN hedefi gizle (kale hariç)
+          try{
+            const tEl = targetsMap.get(m.id);
+            if (tEl && !tEl.classList.contains('enemyCastle')){
+              tEl.style.display='none'; tEl.__mwRemoved=true;
+            }
+          }catch(_){}
+        }
+      }
+      else if (m.phase === "returning"){
+        const t = Math.max(0, Math.min(1, (now - m.startedAt) / (m.endsAt - m.startedAt)));
+        const x = lerp(m.to.x, m.from.x, t), y = lerp(m.to.y, m.from.y, t);
+        dot.style.left = (x-8)+"px"; dot.style.top = (y-8)+"px";
+        if (now >= m.endsAt){
+          // VARIŞ (geri)
+          // LOOT ekle
+          try{
+            const L = m.loot || {}; 
+            if (L.gold) addGold(L.gold);
+            if (L.food) addFood(L.food);
+            if (L.stone) addStone(L.stone);
+          }catch(_){}
+          // bitir
+          dot.remove(); marchDots.delete(m.id);
+          m._done = true;
+        }
+      }
+    }
+
+    saveMarches(list);
+  }
+  setInterval(tick, 200);
+
+  /* ---------- ⚔️ kılıç göstergesi ---------- */
+  const swords = new Map(); // id -> el
+  function placeSwordsAt(m){
+    const targetEl = targetsMap.get(m.id);
+    const el = document.createElement('div');
+    el.textContent = '⚔️';
+    el.style.cssText = 'position:absolute; font-size:64px; filter:drop-shadow(0 3px 4px rgba(0,0,0,.6)); animation: mwPulse 1.2s infinite ease-in-out; pointer-events:none; z-index:9999;';
+    const pos = targetEl ? centerOf(targetEl) : m.to;
+    el.style.left = (pos.x - 32) + 'px';
+    el.style.top  = (pos.y - 96) + 'px';
+    map.appendChild(el);
+    swords.set(m.id, el);
+  }
+  function removeSwords(id){ const el = swords.get(id); if (el){ el.remove(); swords.delete(id); } }
+
+  /* ---------- Şehir bağlama (kendi kaleyi hariç) ---------- */
+  (function bindCities(){
+    const nodes = Array.from(document.querySelectorAll('.mapIcon')).filter(x=>x.id!=='oyuncuKalesi' && !x.classList.contains('enemyCastle'));
+    if (!nodes.length) return;
+    nodes.forEach((el, i)=>{
+      if (el.__cityBound) return; el.__cityBound = true;
+      el.style.cursor='pointer';
+      // Ölçekli güç/loot
+      const base = {gold: 600, food: 400, power: 280};
+      const cfg = { power: base.power + i*60, loot:{gold: base.gold+i*120, food: base.food+i*90} };
+      el.addEventListener('click', ()=> openBattleModal({title:'🏙️ Şehir', power:cfg.power, loot:cfg.loot, targetEl: el, info:'Şehri ele geçirirsen ganimet dönüşte kasana eklenecek.'}) );
+    });
   })();
 
-  // ---- 3) Yaratık sayısını artır (mevcuta ek spawn) ----
-  (function extraMonsters(){
+  /* ---------- Yaratık spawn (ekstra) ---------- */
+  ;(function spawnExtraMonsters(){
     if (!map) return;
-    // Haritanın büyük kısmına yay
-    const W = map.scrollWidth || 120000, H = map.scrollHeight || 120000;
-    const CREATURES = [
-      {type:'küçük', src:'monster_small.png', size:200, power: 20,  loot:{gold:60,  food:40}},
-      {type:'orta',  src:'monster_mid.png',   size:280, power: 100, loot:{gold:200, food:140}},
-      {type:'büyük', src:'monster_big.png',   size:360, power: 260, loot:{gold:520, food:360}},
-    ];
-    const COUNT = 150; // ekstra 150 canavar
     function ri(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
-    for(let i=0;i<COUNT;i++){
-      const d = CREATURES[Math.floor(Math.random()*CREATURES.length)];
+    for(let i=0;i<CFG.CREATURE_SPAWN;i++){
+      const d = CFG.CREATURES[Math.floor(Math.random()*CFG.CREATURES.length)];
       const el = document.createElement('img');
       el.src = d.src; el.alt = d.type + ' yaratık'; el.className='monster';
-      el.style.left = ri(600, W-600) + 'px';
-      el.style.top  = ri(600, H-600) + 'px';
+      el.style.position='absolute';
+      el.style.left = ri(600, CFG.WORLD_W-600) + 'px';
+      el.style.top  = ri(600, CFG.WORLD_H-600) + 'px';
       el.style.width = d.size + 'px'; el.style.height = d.size + 'px';
-      // Tık davranışı: mevcut attackMonster'ı kullan (sefer/loot modalı)
-      el.addEventListener('click', ()=> window.attackMonster && window.attackMonster({ el, data:{type:d.type, power:d.power, loot:d.loot} }));
+      el.addEventListener('click', ()=> openBattleModal({title:`👹 ${d.type.toUpperCase()} Yaratık`, power:d.power, loot:d.loot, targetEl: el}) );
       map.appendChild(el);
     }
   })();
 
-  // ---- 4) Şehir sayısını artır (otomatik şehirler) ----
-  (function extraCities(){
+  /* ---------- Ekstra şehir spawn ---------- */
+  ;(function spawnExtraCities(){
     if (!map) return;
-    const W = map.scrollWidth || 120000, H = map.scrollHeight || 120000;
-    const COUNT = 80; // ekstra 80 şehir
     function ri(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
-    for(let i=0;i<COUNT;i++){
+    for(let i=0;i<CFG.CITY_SPAWN;i++){
       const el = document.createElement('img');
-      el.src = 'sehir1.png';
-      el.alt = 'Küçük Şehir';
-      el.className = 'mapIcon autoCity';
-      el.style.left = ri(600, W-600) + 'px';
-      el.style.top  = ri(600, H-600) + 'px';
+      el.src = 'sehir1.png'; el.alt='Küçük Şehir'; el.className='mapIcon autoCity';
+      el.style.left = ri(600, CFG.WORLD_W-600) + 'px';
+      el.style.top  = ri(600, CFG.WORLD_H-600) + 'px';
       map.appendChild(el);
     }
-    // Mevcut şehir click mantığını yeniden bağla (bozmadan)
+    // yeni eklenenler için bağlayıcı
     setTimeout(()=>{
-      const cities = Array.from(document.querySelectorAll('.mapIcon')).filter(x=>x.id!=='oyuncuKalesi');
-      cities.forEach((el, i) => {
+      document.querySelectorAll('.mapIcon.autoCity').forEach((el, i)=>{
         if (el.__cityBound) return; el.__cityBound = true;
         el.style.cursor='pointer';
         const base = {gold: 600, food: 400, power: 280};
-        const cfg = { gold: base.gold + i*120, food: base.food + i*90, power: base.power + i*60 };
-        el.addEventListener('click', ()=>{
-          // Eğer düşman kale paneli varsa onu açmak için enemyCastle sınıfını kontrol ediyoruz.
-          if (el.classList.contains('enemyCastle') && typeof window.__ENEMY_CASTLE_UI__ !== 'undefined'){
-            // enemyCastle panel JS bloğu zaten click ekliyor; burada dokunma
-            return;
-          }
-          if (typeof MW_openBattleModal === 'function'){
-            MW_openBattleModal({
-              title:'🏙️ Şehir', power: cfg.power, loot: { gold: cfg.gold, food: cfg.food }, targetEl: el,
-              info:'Şehri ele geçirirsen ganimet dönüşte kasana eklenecek.'
-            });
-          }else{
-            alert(`🏙️ Şehir\nGüç:${cfg.power}\nGanimet:+${cfg.gold} altın, +${cfg.food} yemek`);
-          }
-        });
+        const cfg = { power: base.power + i*50, loot:{gold: base.gold+i*90, food: base.food+i*70} };
+        el.addEventListener('click', ()=> openBattleModal({title:'🏙️ Şehir', power:cfg.power, loot:cfg.loot, targetEl: el}) );
       });
     }, 0);
   })();
 
-  // ---- 5) İkon/yaratık tıklayınca koordinat göster (bilgi amaçlı) ----
-  (function bindCoordHints(){
-    function center(el){
-      const n = v => parseFloat(String(v).replace('px',''))||0;
-      const mapRect = map.getBoundingClientRect();
-      const r = el.getBoundingClientRect();
-      // map’e göre merkez
-      return { x: (r.left - mapRect.left) + r.width/2, y: (r.top - mapRect.top) + r.height/2 };
+  /* ---------- EnemyCastle Panel ---------- */
+  ;(function enemyCastleUI(){
+    if (window.__ENEMY_CASTLE_UI__) return; window.__ENEMY_CASTLE_UI__=true;
+
+    const css = `
+      #ecOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:11000;display:none}
+      #ecModal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,880px);background:#2d261e;color:#ffe9b0;z-index:11001;border:6px solid #d4b15f;border-radius:22px;box-shadow:0 10px 30px rgba(0,0,0,.5);font-family:inherit;display:none}
+      .ec-head{display:flex;justify-content:space-between;align-items:center;padding:22px 24px;border-bottom:1px solid rgba(212,177,95,.35);font-size:30px;font-weight:900}
+      .ec-body{padding:22px 24px;font-size:20px;line-height:1.5}
+      .ec-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+      .ec-tab{padding:10px 14px;border-radius:12px;background:#4a3b28;color:#ffe9b0;cursor:pointer;font-weight:800;border:0}
+      .ec-tab.ec-on{background:#ffcc00;color:#352b17}
+      .ec-actions{display:flex;gap:10px;margin-top:14px}
+      .ec-actions button{flex:1;padding:14px 16px;font-size:20px;font-weight:900;border-radius:12px;border:0;cursor:pointer}
+      .ec-primary{background:#ffcc00;color:#352b17}.ec-ghost{background:#3a2f1e;color:#ffe9b0}
+      input.ec-num{width:110px;padding:6px;border-radius:8px;border:1px solid #c9b07a;background:#1f1913;color:#ffe9b0}
+      table.ec-table{width:100%;border-collapse:collapse;margin-top:10px}
+      table.ec-table th,table.ec-table td{border-bottom:1px solid rgba(212,177,95,.25);padding:6px 4px;text-align:left}
+    `;
+    const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+
+    const overlay=document.createElement('div'); overlay.id='ecOverlay';
+    const modal=document.createElement('div'); modal.id='ecModal';
+    modal.innerHTML = `
+      <div class="ec-head">
+        <div>🏰 Oyuncu Kalesi</div>
+        <button id="ecClose" style="background:transparent;border:0;color:#ffe9b0;font-size:28px;cursor:pointer">✖</button>
+      </div>
+      <div class="ec-body">
+        <div class="ec-tabs">
+          <button class="ec-tab ec-on" data-ec-tab="attack">Saldır</button>
+          <button class="ec-tab" data-ec-tab="spy">Casusluk</button>
+          <button class="ec-tab" data-ec-tab="support">Destek</button>
+          <button class="ec-tab" data-ec-tab="message">Mesaj</button>
+        </div>
+        <div id="ecView"></div>
+        <div class="ec-actions">
+          <button id="ecDo" class="ec-primary">Gönder</button>
+          <button id="ecCancel" class="ec-ghost">Kapat</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay); document.body.appendChild(modal);
+    const $ = s => modal.querySelector(s);
+    function show(){ overlay.style.display='block'; modal.style.display='block'; }
+    function hide(){ overlay.style.display='none'; modal.style.display='none'; }
+    $('#ecClose').onclick = hide; $('#ecCancel').onclick = hide; overlay.onclick = hide;
+
+    const birlikGucu = {"Casus Kuş":1,"Cüce":3,"Yük Arabası":0,"Elf":5,"Gnom":2,"Şaman":1,"Süvari":6,"Mancınık":4,"Pegasus":7,"Ogre":8,"Ejderha":10,"Kaos":12};
+    function getKB(){ try{return JSON.parse(localStorage.getItem('kaleBirlikleri')||'{}')}catch(_){return{}} }
+    function sumPower(sel){ let p=0; Object.keys(sel).forEach(k=>{ p+=(sel[k]||0)*(birlikGucu[k]||0) }); return p; }
+
+    function renderAttack(targetEl){
+      const kb=getKB();
+      const rows = Object.keys(birlikGucu).map(n=>{
+        const own=kb[n]||0;
+        return `<tr><td>${n}</td><td>${own}</td><td><input class="ec-num" type="number" min="0" max="${own}" value="0" data-ec-unit="${n}"></td></tr>`;
+      }).join('');
+      $('#ecView').innerHTML = `<div>Göndereceğin birlikleri seç:</div>
+        <table class="ec-table"><thead><tr><th>Birlik</th><th>Mevcut</th><th>Gönder</th></tr></thead><tbody>${rows}</tbody></table>`;
+      $('#ecDo').onclick = ()=>{
+        const sel={}; modal.querySelectorAll('input[data-ec-unit]').forEach(i=>{ const n=i.dataset.ecUnit; const v=parseInt(i.value||'0'); if(v>0) sel[n]=v; });
+        if (!Object.keys(sel).length) return alert('Birlik seçmedin.');
+        const power=sumPower(sel);
+        MW_startMarchTo(targetEl,{title:'🏰 Oyuncu Kalesi', power, loot:{}}); hide();
+      };
     }
+    function renderSpy(targetEl){
+      const own=(getKB()['Casus Kuş']||0);
+      $('#ecView').innerHTML = `<div>Kaç <b>Casus Kuş</b> göndereceksin?</div>
+        <input id="ecSpyCount" class="ec-num" type="number" min="1" max="${own}" value="${Math.min(1,own)}">
+        <div style="opacity:.7">Mevcut: ${own}</div>`;
+      $('#ecDo').onclick = ()=>{
+        const adet=parseInt((modal.querySelector('#ecSpyCount').value||'0')); if(!(adet>0)) return alert('Geçerli sayı gir.');
+        MW_startMarchTo(targetEl,{title:`🕵️ Casusluk (${adet})`, power:0, loot:{}}); hide();
+      };
+    }
+    function renderSupport(targetEl){
+      const carts=(getKB()['Yük Arabası']||0), cap=carts*CFG.CART_CAP;
+      $('#ecView').innerHTML = `<div>Göndereceğin ganimeti seç (kapasite: <b>${cap}</b>)</div>
+        <div>Altın: <input id="ecGold" class="ec-num" type="number" min="0" value="0"></div>
+        <div>Yemek: <input id="ecFood" class="ec-num" type="number" min="0" value="0"></div>
+        <div style="opacity:.7">Yük Arabası: ${carts} (kapasite/birim: ${CFG.CART_CAP})</div>`;
+      $('#ecDo').onclick = ()=>{
+        const g=parseInt((modal.querySelector('#ecGold').value||'0'));
+        const f=parseInt((modal.querySelector('#ecFood').value||'0'));
+        if (g+f<=0) return alert('Gönderilecek ganimet yok.');
+        if (g+f>cap) return alert('Kapasite yetersiz.');
+        MW_startMarchTo(targetEl,{title:'📦 Destek Konvoyu', power:0, loot:{}}); hide();
+      };
+    }
+    function renderMessage(targetEl){
+      $('#ecView').innerHTML = `<div>Mesaj (online gelince):</div>
+        <textarea id="ecMsg" style="width:100%;min-height:120px;border-radius:12px;border:1px solid #c9b07a;background:#1f1913;color:#ffe9b0;padding:10px"></textarea>`;
+      $('#ecDo').onclick = ()=>{
+        const txt=(modal.querySelector('#ecMsg').value||'').trim(); if(!txt) return alert('Mesaj boş.');
+        const logs=JSON.parse(localStorage.getItem('mw_messages')||'[]'); logs.push({t:Date.now(),to:'enemyCastle',msg:txt});
+        localStorage.setItem('mw_messages', JSON.stringify(logs)); alert('Mesaj kaydedildi (offline).'); hide();
+      };
+    }
+    function setTab(tab, targetEl){
+      modal.querySelectorAll('.ec-tab').forEach(b=>b.classList.toggle('ec-on', b.dataset.ecTab===tab));
+      if (tab==='attack') renderAttack(targetEl);
+      else if (tab==='spy') renderSpy(targetEl);
+      else if (tab==='support') renderSupport(targetEl);
+      else renderMessage(targetEl);
+    }
+    window.__EC_openFor = function(targetEl){
+      show(); setTab('attack', targetEl);
+      modal.querySelectorAll('.ec-tab').forEach(btn=> btn.onclick=()=> setTab(btn.dataset.ecTab, targetEl) );
+    };
+
+    function bindEnemy(){
+      document.querySelectorAll('.enemyCastle').forEach(el=>{
+        if (el.__ecBound) return; el.__ecBound=true;
+        el.style.cursor='pointer';
+        el.addEventListener('click', (ev)=>{ ev.stopImmediatePropagation(); window.__EC_openFor(el); }, true);
+      });
+    }
+    if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', bindEnemy); else bindEnemy();
+    new MutationObserver(bindEnemy).observe(document.body,{childList:true,subtree:true});
+  })();
+
+  /* ---------- Battle modal (büyük) ---------- */
+  function ensureMainModal(){
+    if (document.getElementById('mwModal')) return;
+    const overlay = document.createElement('div'); overlay.id='mwOverlay';
+    const modal   = document.createElement('div'); modal.id='mwModal';
+    modal.innerHTML = `
+      <div class="mw-modal-header">
+        <div id="mwTitle">Hedef</div>
+        <button id="mwCloseBtn" aria-label="Kapat">✖</button>
+      </div>
+      <div class="mw-modal-body">
+        <div class="mw-row" id="mwPower">Gerekli güç: -</div>
+        <div class="mw-row" id="mwLoot">Ganimet: -</div>
+        <div class="mw-row" id="mwETA">Tahmini varış: - sn</div>
+        <div class="mw-row" id="mwInfo"></div>
+      </div>
+      <div class="mw-modal-actions">
+        <button id="mwAttackBtn">Saldır</button>
+        <button id="mwCancelBtn">Kapat</button>
+      </div>`;
+    document.body.appendChild(overlay); document.body.appendChild(modal);
+    // basic styles (minimum)
+    const st = document.createElement('style'); st.textContent = `
+      #mwOverlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:10000; display:none; }
+      #mwModal{ position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+        width:min(92vw, 840px); background:#2d261e; color:#ffe9b0; z-index:10001;
+        border:6px solid #d4b15f; border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,.5); font-family:inherit; display:none; }
+      .mw-modal-header{ display:flex; justify-content:space-between; align-items:center; padding:22px 24px; border-bottom:1px solid rgba(212,177,95,.35); font-size:36px; font-weight:900; }
+      .mw-modal-header button{ background:transparent; border:0; color:#ffe9b0; font-size:34px; cursor:pointer; }
+      .mw-modal-body{ padding:22px 24px; font-size:28px; line-height:1.6; }
+      .mw-modal-actions{ display:flex; gap:16px; padding:22px 24px; }
+      .mw-modal-actions button{ flex:1; padding:18px 22px; font-size:28px; border-radius:16px; border:0; cursor:pointer; }
+      #mwAttackBtn{ background:#ffcc00; color:#352b17; } #mwCancelBtn{ background:#4a3b28; color:#ffe9b0; }
+      .mw-march{ position:absolute; width:72px; height:72px; font-size:48px; display:flex; align-items:center; justify-content:center; }
+      @keyframes mwPulse{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+    `; document.head.appendChild(st);
+
+    // events
+    const $ = (id)=>document.getElementById(id);
+    $('mwCloseBtn').onclick = closeBattleModal;
+    $('mwCancelBtn').onclick = closeBattleModal;
+    overlay.onclick = closeBattleModal;
+
+    document.addEventListener('click', function(e){
+      const btn = e.target && e.target.closest && e.target.closest('#mwAttackBtn');
+      if (!btn) return;
+      const cfg = window.__MW_current;
+      if (!cfg || !cfg.targetEl) return alert('Hedef yok.');
+      MW_startMarchTo(cfg.targetEl, cfg);
+      closeBattleModal();
+    }, true);
+  }
+  function openBattleModal(cfg){
+    ensureMainModal();
+    window.__MW_current = cfg;
+    const $ = (id)=>document.getElementById(id);
+    $('mwTitle').textContent = cfg.title || 'Hedef';
+    $('mwPower').textContent = 'Gerekli güç: ' + (cfg.power ?? '-');
+    const L = cfg.loot || {}; $('mwLoot').textContent = 'Ganimet: +' + (L.gold||0) + ' altın, +' + (L.food||0) + ' yemek';
+    const A = centerOf(myCastle), B = centerOf(cfg.targetEl);
+    const eta = Math.max(1, Math.round( dist(A,B) / CFG.SPEED_PX_PER_SEC ));
+    $('mwETA').textContent = 'Tahmini varış: ~' + eta + ' sn';
+    $('mwInfo').textContent = cfg.info || '';
+    document.getElementById('mwOverlay').style.display='block';
+    document.getElementById('mwModal').style.display='block';
+  }
+  function closeBattleModal(){ 
+    const ov = document.getElementById('mwOverlay'); const md = document.getElementById('mwModal');
+    if (ov) ov.style.display='none'; if (md) md.style.display='none';
+  }
+
+  /* ---------- Koordinat toast (ikon/yaratık tıklamasında) ---------- */
+  ;(function bindCoordHints(){
     function attach(el){
       if (el.__coordBound) return; el.__coordBound = true;
-      el.addEventListener('click', (ev)=>{
-        const p = center(el);
+      el.addEventListener('click', ()=>{
+        const p = centerOf(el);
         toast(`📍 X:${Math.round(p.x)} Y:${Math.round(p.y)}`);
       });
     }
     document.querySelectorAll('.mapIcon').forEach(attach);
     document.querySelectorAll('.monster').forEach(attach);
-    // sonradan eklenenler için basit observer (opsiyonel)
-    const obs = new MutationObserver(muts=>{
-      muts.forEach(m=>{
-        m.addedNodes && m.addedNodes.forEach(n=>{
-          if (n && n.nodeType===1){
-            if (n.classList && (n.classList.contains('mapIcon') || n.classList.contains('monster'))) attach(n);
-          }
-        });
-      });
-    });
-    obs.observe(map || document.body, {childList:true, subtree:true});
+    new MutationObserver(muts=>{
+      muts.forEach(m=> m.addedNodes && m.addedNodes.forEach(n=>{
+        if (n.nodeType===1 && n.classList && (n.classList.contains('mapIcon') || n.classList.contains('monster'))) attach(n);
+      }));
+    }).observe(map || document.body, {childList:true, subtree:true});
   })();
 
+  /* ---------- Kendi kaleye tıkla → menü ---------- */
+  if (myCastle && !myCastle.__mwGoBack){
+    myCastle.__mwGoBack = true;
+    myCastle.style.cursor='pointer';
+    myCastle.addEventListener('click', ()=>{ window.location.href='index.html'; });
+  }
+
 })();
-// === ENEMY CASTLE PANEL - RESCUE (append-only) ===
-(function(){
-  if (window.__EC_RESCUE__) return; window.__EC_RESCUE__ = true;
-
-  // 0) Stil
-  const css = `
-  #ecOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:11000;display:none}
-  #ecModal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:min(92vw,880px);background:#2d261e;color:#ffe9b0;z-index:11001;
-    border:6px solid #d4b15f;border-radius:22px;box-shadow:0 10px 30px rgba(0,0,0,.5);
-    font-family:inherit;display:none}
-  .ec-head{display:flex;justify-content:space-between;align-items:center;padding:22px 24px;border-bottom:1px solid rgba(212,177,95,.35);font-size:30px;font-weight:900}
-  .ec-body{padding:22px 24px;font-size:20px;line-height:1.5}
-  .ec-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-  .ec-tab{padding:10px 14px;border-radius:12px;background:#4a3b28;color:#ffe9b0;cursor:pointer;font-weight:800;border:0}
-  .ec-tab.ec-on{background:#ffcc00;color:#352b17}
-  .ec-actions{display:flex;gap:10px;margin-top:14px}
-  .ec-actions button{flex:1;padding:14px 16px;font-size:20px;font-weight:900;border-radius:12px;border:0;cursor:pointer}
-  .ec-primary{background:#ffcc00;color:#352b17}.ec-ghost{background:#3a2f1e;color:#ffe9b0}
-  input.ec-num{width:110px;padding:6px;border-radius:8px;border:1px solid #c9b07a;background:#1f1913;color:#ffe9b0}
-  table.ec-table{width:100%;border-collapse:collapse;margin-top:10px}
-  table.ec-table th,table.ec-table td{border-bottom:1px solid rgba(212,177,95,.25);padding:6px 4px;text-align:left}
-  `;
-  const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
-
-  // 1) Panel DOM
-  const overlay=document.createElement('div'); overlay.id='ecOverlay';
-  const modal=document.createElement('div'); modal.id='ecModal';
-  modal.innerHTML = `
-    <div class="ec-head">
-      <div>🏰 Oyuncu Kalesi</div>
-      <button id="ecClose" style="background:transparent;border:0;color:#ffe9b0;font-size:28px;cursor:pointer">✖</button>
-    </div>
-    <div class="ec-body">
-      <div class="ec-tabs">
-        <button class="ec-tab ec-on" data-ec-tab="attack">Saldır</button>
-        <button class="ec-tab" data-ec-tab="spy">Casusluk</button>
-        <button class="ec-tab" data-ec-tab="support">Destek</button>
-        <button class="ec-tab" data-ec-tab="message">Mesaj</button>
-      </div>
-      <div id="ecView"></div>
-      <div class="ec-actions">
-        <button id="ecDo" class="ec-primary">Gönder</button>
-        <button id="ecCancel" class="ec-ghost">Kapat</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay); document.body.appendChild(modal);
-  const $ = s => modal.querySelector(s);
-  function show(){ overlay.style.display='block'; modal.style.display='block'; }
-  function hide(){ overlay.style.display='none'; modal.style.display='none'; }
-  $('#ecClose').onclick = hide; $('#ecCancel').onclick = hide; overlay.onclick = hide;
-
-  // 2) Yardımcılar
-  const birlikGucu = {"Casus Kuş":1,"Cüce":3,"Yük Arabası":0,"Elf":5,"Gnom":2,"Şaman":1,"Süvari":6,"Mancınık":4,"Pegasus":7,"Ogre":8,"Ejderha":10,"Kaos":12};
-  const CART_CAP = 100;
-  const getKB = () => { try{return JSON.parse(localStorage.getItem('kaleBirlikleri')||'{}')}catch(_){return{}} };
-  const sumPower = sel => Object.entries(sel).reduce((a,[k,v])=>a+(v*(birlikGucu[k]||0)),0);
-
-  // 3) Görünümler
-  function renderAttack(targetEl){
-    const kb=getKB(); const rows = Object.keys(birlikGucu).map(n=>{
-      const own=kb[n]||0;
-      return `<tr><td>${n}</td><td>${own}</td><td><input class="ec-num" type="number" min="0" max="${own}" value="0" data-ec-unit="${n}"></td></tr>`;
-    }).join('');
-    $('#ecView').innerHTML = `
-      <div>Göndereceğin birlikleri seç:</div>
-      <table class="ec-table"><thead><tr><th>Birlik</th><th>Mevcut</th><th>Gönder</th></tr></thead><tbody>${rows}</tbody></table>
-    `;
-    $('#ecDo').onclick = ()=>{
-      const sel={}; modal.querySelectorAll('input[data-ec-unit]').forEach(i=>{const n=i.dataset.ecUnit; const v=parseInt(i.value||'0'); if(v>0) sel[n]=v;});
-      if(!Object.keys(sel).length) return alert('Birlik seçmedin.');
-      const power=sumPower(sel);
-      if (typeof MW_startMarchTo==='function'){
-        MW_startMarchTo(targetEl,{title:'🏰 Oyuncu Kalesi', power, loot:{}});
-        hide();
-      } else alert('Sefer sistemi yok (MW_startMarchTo).');
-    };
-  }
-  function renderSpy(targetEl){
-    const own=(getKB()['Casus Kuş']||0);
-    $('#ecView').innerHTML = `<div>Kaç <b>Casus Kuş</b> göndereceksin?</div>
-      <input id="ecSpyCount" class="ec-num" type="number" min="1" max="${own}" value="${Math.min(1,own)}">
-      <div style="opacity:.7">Mevcut: ${own}</div>`;
-    $('#ecDo').onclick = ()=>{
-      const adet=parseInt($('#ecSpyCount').value||'0'); if(!(adet>0)) return alert('Geçerli sayı gir.');
-      if (typeof MW_startMarchTo==='function'){ MW_startMarchTo(targetEl,{title:`🕵️ Casusluk (${adet})`,power:0,loot:{}}); hide(); }
-      else alert('Sefer sistemi yok (MW_startMarchTo).');
-    };
-  }
-  function renderSupport(targetEl){
-    const carts=(getKB()['Yük Arabası']||0), cap=carts*CART_CAP;
-    $('#ecView').innerHTML = `<div>Göndereceğin ganimeti seç (kapasite: <b>${cap}</b>)</div>
-      <div>Altın: <input id="ecGold" class="ec-num" type="number" min="0" value="0"></div>
-      <div>Yemek: <input id="ecFood" class="ec-num" type="number" min="0" value="0"></div>
-      <div style="opacity:.7">Yük Arabası: ${carts} (kapasite/birim: ${CART_CAP})</div>`;
-    $('#ecDo').onclick = ()=>{
-      const g=parseInt($('#ecGold').value||'0'), f=parseInt($('#ecFood').value||'0');
-      if (g+f<=0) return alert('Gönderilecek ganimet yok.');
-      if (g+f>cap) return alert('Kapasite yetersiz.');
-      if (typeof MW_startMarchTo==='function'){ MW_startMarchTo(targetEl,{title:'📦 Destek Konvoyu',power:0,loot:{}}); hide(); }
-      else alert('Sefer sistemi yok (MW_startMarchTo).');
-    };
-  }
-  function renderMessage(){
-    $('#ecView').innerHTML = `<div>Mesaj (online gelince buradan gidecek):</div>
-      <textarea id="ecMsg" style="width:100%;min-height:120px;border-radius:12px;border:1px solid #c9b07a;background:#1f1913;color:#ffe9b0;padding:10px"></textarea>`;
-    $('#ecDo').onclick = ()=>{
-      const txt=(modal.querySelector('#ecMsg').value||'').trim(); if(!txt) return alert('Mesaj boş.');
-      const logs=JSON.parse(localStorage.getItem('mw_messages')||'[]'); logs.push({t:Date.now(),to:'enemyCastle',msg:txt});
-      localStorage.setItem('mw_messages',JSON.stringify(logs)); alert('Mesaj kaydedildi (placeholder).'); hide();
-    };
-  }
-  function setTab(tab, targetEl){
-    modal.querySelectorAll('.ec-tab').forEach(b=>b.classList.toggle('ec-on', b.dataset.ecTab===tab));
-    if      (tab==='attack')  renderAttack(targetEl);
-    else if (tab==='spy')     renderSpy(targetEl);
-    else if (tab==='support') renderSupport(targetEl);
-    else                      renderMessage(targetEl);
-  }
-  function openFor(targetEl){ show(); setTab('attack', targetEl);
-    modal.querySelectorAll('.ec-tab').forEach(btn=>{ btn.onclick=()=>setTab(btn.dataset.ecTab, targetEl); });
-  }
-
-  // 4) Enemy castle tıklamasını şehir dinleyicisinden önce yakala ve durdur
-  function bindEnemy(){
-    document.querySelectorAll('.enemyCastle').forEach(el=>{
-      if (el.__ecBound) return; el.__ecBound=true;
-      el.style.cursor='pointer';
-      el.addEventListener('click', (ev)=>{ ev.stopImmediatePropagation(); openFor(el); }, true); // capture
-    });
-  }
-  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', bindEnemy); else bindEnemy();
-  // Eklenen düğümler için de
-  const obs=new MutationObserver(()=>bindEnemy()); obs.observe(document.body,{childList:true,subtree:true});
-})();
-// === Hedefi SAVAŞ SONRA gizle (enemyCastle hariç) — append-only ===
-(function(){
-  if (window.__MW_HIDE_AFTER_BATTLE__) return; window.__MW_HIDE_AFTER_BATTLE__ = true;
-
-  // Saldırı başladığında hedefi saklamak yerine "sonra gizlemek için" kuyruğa at
-  window.__mwHideQueue = window.__mwHideQueue || [];
-
-  function enqueueIfHideLater(targetEl){
-    try{
-      if (!targetEl || !targetEl.classList) return;
-      // Düşman kaleleri ASLA kaybolmasın
-      if (targetEl.classList.contains('enemyCastle')) return;
-
-      // Başlangıçta görünür kalsın (önceki patch gizlediyse geri aç)
-      targetEl.style.display = '';
-      targetEl.__mwRemoved = false;
-
-      // Savaştan sonra gizlemek için kuyruğa ekle
-      window.__mwHideQueue.push(targetEl);
-      window.__mwHidePending = true;
-    }catch(_){}
-  }
-
-  // MW_startMarchTo'yu sar: başlarken sadece kuyruğa al (gizleme yok)
-  if (typeof window.MW_startMarchTo === 'function'){
-    const prev = window.MW_startMarchTo;
-    window.MW_startMarchTo = function(targetEl, cfg){
-      enqueueIfHideLater(targetEl);
-      return prev(targetEl, cfg);
-    };
-  }
-
-  // İlk ganimet eklenirken "bir defalık" gizle
-  function hideNextAfterWin(){
-    try{
-      if (!window.__mwHidePending) return;
-      const el = window.__mwHideQueue.shift();
-      if (el && el.parentNode){
-        el.style.display = 'none';   // savaş SONRASI gizle
-        el.__mwRemoved = true;
-      }
-      // Kuyruk boşsa bayrağı kapat
-      if (!window.__mwHideQueue.length) window.__mwHidePending = false;
-    }catch(_){}
-  }
-
-  // addGold/addFood'u sar: orijinali çalıştır + sonra gizle
-  ['addGold','addFood'].forEach(fn=>{
-    const orig = window[fn];
-    window[fn] = function(n){
-      try{ if (typeof orig === 'function') orig(n); }catch(_){}
-      // Ganimet yazıldığı an savaş bitmiş demektir → hedefi gizle
-      hideNextAfterWin();
-    };
-  });
-})();
-// === SAVAŞ FAZI + SONRA KAYBOL (enemyCastle hariç) — append-only ===
-(function(){
-  if (window.__MW_BATTLE_PHASE__) return; window.__MW_BATTLE_PHASE__ = true;
-
-  const KEY = "mw_marches_v3";
-  const map = document.getElementById('mapContainer');
-  const castleEl = document.getElementById('oyuncuKalesi');
-
-  // hedef referansları için: march.id -> targetEl
-  window.__MW_TARGETS__ = window.__MW_TARGETS__ || new Map();
-
-  // MW_startMarchTo’yu sar: missionType ve target referansı kaydet
-  if (typeof window.MW_startMarchTo === 'function'){
-    const prev = window.MW_startMarchTo;
-    window.MW_startMarchTo = function(targetEl, cfg){
-      const r = prev(targetEl, cfg);
-      try{
-        // mission type
-        let mType = 'attack';
-        const title = (cfg && cfg.title || '').toLowerCase();
-        if (title.includes('casus')) mType = 'spy';
-        else if (title.includes('destek')) mType = 'support';
-
-        // son eklenen seferi yakalayıp işaretle
-        const ms = JSON.parse(localStorage.getItem(KEY)||'[]');
-        if (ms.length){
-          const m = ms[ms.length-1];
-          m.mType = mType;
-          // savaş süresi: güce göre (sn)
-          const p = parseInt(cfg.power||m.power||0,10);
-          m.battleSecs = Math.max(5, Math.min(300, Math.round((p||0)/2))); // 5–300sn
-          localStorage.setItem(KEY, JSON.stringify(ms));
-          // hedef referansı map’te tut (sayfa kapanırsa uçabilir; şimdilik yeterli)
-          window.__MW_TARGETS__.set(m.id, targetEl);
-        }
-      }catch(_){}
-      return r;
-    };
-  }
-
-  // mini ⚔️ göstergesi
-  const swords = new Map(); // march.id -> el
-  function placeSwordsAt(m){
-    try{
-      const targetEl = window.__MW_TARGETS__.get(m.id);
-      const el = document.createElement('div');
-      el.textContent = '⚔️';
-      el.style.cssText = 'position:absolute; font-size:64px; filter:drop-shadow(0 3px 4px rgba(0,0,0,.6)); ' +
-                         'animation: mwPulse 1.2s infinite ease-in-out; pointer-events:none; z-index:9999;';
-      const pos = centerOf(targetEl, m.to);
-      el.style.left = (pos.x - 32) + 'px';
-      el.style.top  = (pos.y - 96) + 'px'; // biraz üstünde
-      map.appendChild(el);
-      swords.set(m.id, el);
-    }catch(_){}
-  }
-  function removeSwords(id){ const el = swords.get(id); if(el){ el.remove(); swords.delete(id); } }
-
-  function pxNum(v){ return parseFloat(String(v||'').replace('px',''))||0; }
-  function centerOf(targetEl, fallback){
-    if (targetEl){
-      const l = pxNum(targetEl.style.left), t = pxNum(targetEl.style.top);
-      if (l || t) return { x: l + targetEl.offsetWidth/2, y: t + targetEl.offsetHeight/2 };
-      const mr = map.getBoundingClientRect(), r = targetEl.getBoundingClientRect();
-      return { x:(r.left-mr.left)+r.width/2, y:(r.top-mr.top)+r.height/2 };
-    }
-    return fallback || {x:0,y:0};
-  }
-
-  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(_){return[]} }
-  function save(a){ try{localStorage.setItem(KEY, JSON.stringify(a))}catch(_){} }
-
-  // Denetçi: seferleri izleyip "fighting" fazını enjekte eder
-  setInterval(()=>{
-    let ms = load(); if (!ms.length) return;
-    let changed=false;
-    const now = Date.now();
-
-    ms.forEach(m=>{
-      // zaten döngü sonunda temizlenmiş olanlar
-      if (m._done) return;
-
-      // 1) VARIŞTA SAVAŞ BAŞLAT — orijinal tick hemen 'returning' yapmış olabilir
-      const arrivedGoing = (m.phase === 'going' && now >= m.endsAt);
-      const flippedDirect = (m.phase === 'returning' && !m._battleHandled); // tick erken çevirmiş
-      if ((arrivedGoing || flippedDirect) && !m._inBattle){
-        m._battleHandled = true;
-        m._inBattle = true;
-        m.phase = 'fighting';
-        const secs = Math.max(5, m.battleSecs || 10);
-        m.startedAt = now;
-        m.endsAt = now + secs*1000;
-        placeSwordsAt(m);
-        changed = true;
-      }
-
-      // 2) SAVAŞ BİTİNCE DÖNÜŞE GEÇ
-      if (m.phase === 'fighting' && now >= m.endsAt){
-        m._inBattle = false;
-        removeSwords(m.id);
-
-        // DÖNERKEN hedefi gizle: enemyCastle ve casus/destek HARİÇ
-        try{
-          const targetEl = window.__MW_TARGETS__.get(m.id);
-          const isEnemyCastle = !!(targetEl && targetEl.classList && targetEl.classList.contains('enemyCastle'));
-          const nonHideMission = (m.mType === 'spy' || m.mType === 'support');
-          if (!isEnemyCastle && !nonHideMission){
-            if (targetEl && targetEl.parentNode){ targetEl.style.display='none'; targetEl.__mwRemoved = true; }
-          }
-        }catch(_){}
-
-        // dönüş fazını ayarla (orijinal travelSecs’i kullan)
-        m.phase = 'returning';
-        m.startedAt = now;
-        m.endsAt = now + (m.travelSecs*1000 || 1);
-        changed = true;
-      }
-    });
-
-    if (changed) save(ms);
-  }, 200);
-})();
-// === ENEMY CASTLE NEVER HIDE (append-only, garanti) ===
-(function(){
-  if (window.__EC_NEVER_HIDE_FIX__) return; window.__EC_NEVER_HIDE_FIX__ = true;
-
-  function isEnemyCastle(el){
-    return !!(el && el.classList && el.classList.contains('enemyCastle'));
-  }
-  function unhide(el){
-    try{
-      el.style.display = '';
-      el.hidden = false;
-      el.__mwRemoved = false;
-    }catch(_){}
-  }
-
-  // 1) Sefer başlarken kaleyi "asla saklama" işaretle
-  if (typeof window.MW_startMarchTo === 'function'){
-    const prev = window.MW_startMarchTo;
-    window.MW_startMarchTo = function(targetEl, cfg){
-      if (isEnemyCastle(targetEl)) targetEl.__mwNeverHide = true;
-      return prev(targetEl, cfg);
-    };
-  }
-
-  // 2) Savaştan sonra gizleme kuyruğuna kaleyi SOKMA
-  window.__mwHideQueue = window.__mwHideQueue || [];
-  if (!window.__mwHideQueue.__patchedPush){
-    const oldPush = window.__mwHideQueue.push;
-    window.__mwHideQueue.push = function(el){
-      if (isEnemyCastle(el)) return this.length; // kaleyi hiç kuyruğa alma
-      return oldPush.apply(this, arguments);
-    };
-    window.__mwHideQueue.__patchedPush = true;
-  }
-
-  // 3) Watchdog: her 500ms'de bir saklanmış kale varsa geri görünür yap
-  setInterval(()=>{
-    document.querySelectorAll('.enemyCastle').forEach(el=>{
-      if (el && (el.style.display === 'none' || el.hidden || el.__mwRemoved)){
-        unhide(el);
-      }
-    });
-  }, 500);
-
-  // 4) Ek güvence: sefer kayıtlarından hedefi bulup yine görünür yap
-  const KEY="mw_marches_v3";
-  setInterval(()=>{
-    try{
-      const ms = JSON.parse(localStorage.getItem(KEY) || '[]');
-      ms.forEach(m=>{
-        const t = window.__MW_TARGETS__ && window.__MW_TARGETS__.get(m.id);
-        if (isEnemyCastle(t)) unhide(t);
-      });
-    }catch(_){}
-  }, 1000);
-})();k
