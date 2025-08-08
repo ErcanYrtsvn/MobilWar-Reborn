@@ -957,3 +957,138 @@ window.addEventListener("scroll", guncelleKonum);
   })();
 
 })();
+// === ENEMY CASTLE PANEL - RESCUE (append-only) ===
+(function(){
+  if (window.__EC_RESCUE__) return; window.__EC_RESCUE__ = true;
+
+  // 0) Stil
+  const css = `
+  #ecOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:11000;display:none}
+  #ecModal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(92vw,880px);background:#2d261e;color:#ffe9b0;z-index:11001;
+    border:6px solid #d4b15f;border-radius:22px;box-shadow:0 10px 30px rgba(0,0,0,.5);
+    font-family:inherit;display:none}
+  .ec-head{display:flex;justify-content:space-between;align-items:center;padding:22px 24px;border-bottom:1px solid rgba(212,177,95,.35);font-size:30px;font-weight:900}
+  .ec-body{padding:22px 24px;font-size:20px;line-height:1.5}
+  .ec-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .ec-tab{padding:10px 14px;border-radius:12px;background:#4a3b28;color:#ffe9b0;cursor:pointer;font-weight:800;border:0}
+  .ec-tab.ec-on{background:#ffcc00;color:#352b17}
+  .ec-actions{display:flex;gap:10px;margin-top:14px}
+  .ec-actions button{flex:1;padding:14px 16px;font-size:20px;font-weight:900;border-radius:12px;border:0;cursor:pointer}
+  .ec-primary{background:#ffcc00;color:#352b17}.ec-ghost{background:#3a2f1e;color:#ffe9b0}
+  input.ec-num{width:110px;padding:6px;border-radius:8px;border:1px solid #c9b07a;background:#1f1913;color:#ffe9b0}
+  table.ec-table{width:100%;border-collapse:collapse;margin-top:10px}
+  table.ec-table th,table.ec-table td{border-bottom:1px solid rgba(212,177,95,.25);padding:6px 4px;text-align:left}
+  `;
+  const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+
+  // 1) Panel DOM
+  const overlay=document.createElement('div'); overlay.id='ecOverlay';
+  const modal=document.createElement('div'); modal.id='ecModal';
+  modal.innerHTML = `
+    <div class="ec-head">
+      <div>🏰 Oyuncu Kalesi</div>
+      <button id="ecClose" style="background:transparent;border:0;color:#ffe9b0;font-size:28px;cursor:pointer">✖</button>
+    </div>
+    <div class="ec-body">
+      <div class="ec-tabs">
+        <button class="ec-tab ec-on" data-ec-tab="attack">Saldır</button>
+        <button class="ec-tab" data-ec-tab="spy">Casusluk</button>
+        <button class="ec-tab" data-ec-tab="support">Destek</button>
+        <button class="ec-tab" data-ec-tab="message">Mesaj</button>
+      </div>
+      <div id="ecView"></div>
+      <div class="ec-actions">
+        <button id="ecDo" class="ec-primary">Gönder</button>
+        <button id="ecCancel" class="ec-ghost">Kapat</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay); document.body.appendChild(modal);
+  const $ = s => modal.querySelector(s);
+  function show(){ overlay.style.display='block'; modal.style.display='block'; }
+  function hide(){ overlay.style.display='none'; modal.style.display='none'; }
+  $('#ecClose').onclick = hide; $('#ecCancel').onclick = hide; overlay.onclick = hide;
+
+  // 2) Yardımcılar
+  const birlikGucu = {"Casus Kuş":1,"Cüce":3,"Yük Arabası":0,"Elf":5,"Gnom":2,"Şaman":1,"Süvari":6,"Mancınık":4,"Pegasus":7,"Ogre":8,"Ejderha":10,"Kaos":12};
+  const CART_CAP = 100;
+  const getKB = () => { try{return JSON.parse(localStorage.getItem('kaleBirlikleri')||'{}')}catch(_){return{}} };
+  const sumPower = sel => Object.entries(sel).reduce((a,[k,v])=>a+(v*(birlikGucu[k]||0)),0);
+
+  // 3) Görünümler
+  function renderAttack(targetEl){
+    const kb=getKB(); const rows = Object.keys(birlikGucu).map(n=>{
+      const own=kb[n]||0;
+      return `<tr><td>${n}</td><td>${own}</td><td><input class="ec-num" type="number" min="0" max="${own}" value="0" data-ec-unit="${n}"></td></tr>`;
+    }).join('');
+    $('#ecView').innerHTML = `
+      <div>Göndereceğin birlikleri seç:</div>
+      <table class="ec-table"><thead><tr><th>Birlik</th><th>Mevcut</th><th>Gönder</th></tr></thead><tbody>${rows}</tbody></table>
+    `;
+    $('#ecDo').onclick = ()=>{
+      const sel={}; modal.querySelectorAll('input[data-ec-unit]').forEach(i=>{const n=i.dataset.ecUnit; const v=parseInt(i.value||'0'); if(v>0) sel[n]=v;});
+      if(!Object.keys(sel).length) return alert('Birlik seçmedin.');
+      const power=sumPower(sel);
+      if (typeof MW_startMarchTo==='function'){
+        MW_startMarchTo(targetEl,{title:'🏰 Oyuncu Kalesi', power, loot:{}});
+        hide();
+      } else alert('Sefer sistemi yok (MW_startMarchTo).');
+    };
+  }
+  function renderSpy(targetEl){
+    const own=(getKB()['Casus Kuş']||0);
+    $('#ecView').innerHTML = `<div>Kaç <b>Casus Kuş</b> göndereceksin?</div>
+      <input id="ecSpyCount" class="ec-num" type="number" min="1" max="${own}" value="${Math.min(1,own)}">
+      <div style="opacity:.7">Mevcut: ${own}</div>`;
+    $('#ecDo').onclick = ()=>{
+      const adet=parseInt($('#ecSpyCount').value||'0'); if(!(adet>0)) return alert('Geçerli sayı gir.');
+      if (typeof MW_startMarchTo==='function'){ MW_startMarchTo(targetEl,{title:`🕵️ Casusluk (${adet})`,power:0,loot:{}}); hide(); }
+      else alert('Sefer sistemi yok (MW_startMarchTo).');
+    };
+  }
+  function renderSupport(targetEl){
+    const carts=(getKB()['Yük Arabası']||0), cap=carts*CART_CAP;
+    $('#ecView').innerHTML = `<div>Göndereceğin ganimeti seç (kapasite: <b>${cap}</b>)</div>
+      <div>Altın: <input id="ecGold" class="ec-num" type="number" min="0" value="0"></div>
+      <div>Yemek: <input id="ecFood" class="ec-num" type="number" min="0" value="0"></div>
+      <div style="opacity:.7">Yük Arabası: ${carts} (kapasite/birim: ${CART_CAP})</div>`;
+    $('#ecDo').onclick = ()=>{
+      const g=parseInt($('#ecGold').value||'0'), f=parseInt($('#ecFood').value||'0');
+      if (g+f<=0) return alert('Gönderilecek ganimet yok.');
+      if (g+f>cap) return alert('Kapasite yetersiz.');
+      if (typeof MW_startMarchTo==='function'){ MW_startMarchTo(targetEl,{title:'📦 Destek Konvoyu',power:0,loot:{}}); hide(); }
+      else alert('Sefer sistemi yok (MW_startMarchTo).');
+    };
+  }
+  function renderMessage(){
+    $('#ecView').innerHTML = `<div>Mesaj (online gelince buradan gidecek):</div>
+      <textarea id="ecMsg" style="width:100%;min-height:120px;border-radius:12px;border:1px solid #c9b07a;background:#1f1913;color:#ffe9b0;padding:10px"></textarea>`;
+    $('#ecDo').onclick = ()=>{
+      const txt=(modal.querySelector('#ecMsg').value||'').trim(); if(!txt) return alert('Mesaj boş.');
+      const logs=JSON.parse(localStorage.getItem('mw_messages')||'[]'); logs.push({t:Date.now(),to:'enemyCastle',msg:txt});
+      localStorage.setItem('mw_messages',JSON.stringify(logs)); alert('Mesaj kaydedildi (placeholder).'); hide();
+    };
+  }
+  function setTab(tab, targetEl){
+    modal.querySelectorAll('.ec-tab').forEach(b=>b.classList.toggle('ec-on', b.dataset.ecTab===tab));
+    if      (tab==='attack')  renderAttack(targetEl);
+    else if (tab==='spy')     renderSpy(targetEl);
+    else if (tab==='support') renderSupport(targetEl);
+    else                      renderMessage(targetEl);
+  }
+  function openFor(targetEl){ show(); setTab('attack', targetEl);
+    modal.querySelectorAll('.ec-tab').forEach(btn=>{ btn.onclick=()=>setTab(btn.dataset.ecTab, targetEl); });
+  }
+
+  // 4) Enemy castle tıklamasını şehir dinleyicisinden önce yakala ve durdur
+  function bindEnemy(){
+    document.querySelectorAll('.enemyCastle').forEach(el=>{
+      if (el.__ecBound) return; el.__ecBound=true;
+      el.style.cursor='pointer';
+      el.addEventListener('click', (ev)=>{ ev.stopImmediatePropagation(); openFor(el); }, true); // capture
+    });
+  }
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', bindEnemy); else bindEnemy();
+  // Eklenen düğümler için de
+  const obs=new MutationObserver(()=>bindEnemy()); obs.observe(document.body,{childList:true,subtree:true});
+})();
