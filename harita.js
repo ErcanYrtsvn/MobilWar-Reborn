@@ -1092,3 +1092,59 @@ window.addEventListener("scroll", guncelleKonum);
   // Eklenen düğümler için de
   const obs=new MutationObserver(()=>bindEnemy()); obs.observe(document.body,{childList:true,subtree:true});
 })();
+// === Hedefi SAVAŞ SONRA gizle (enemyCastle hariç) — append-only ===
+(function(){
+  if (window.__MW_HIDE_AFTER_BATTLE__) return; window.__MW_HIDE_AFTER_BATTLE__ = true;
+
+  // Saldırı başladığında hedefi saklamak yerine "sonra gizlemek için" kuyruğa at
+  window.__mwHideQueue = window.__mwHideQueue || [];
+
+  function enqueueIfHideLater(targetEl){
+    try{
+      if (!targetEl || !targetEl.classList) return;
+      // Düşman kaleleri ASLA kaybolmasın
+      if (targetEl.classList.contains('enemyCastle')) return;
+
+      // Başlangıçta görünür kalsın (önceki patch gizlediyse geri aç)
+      targetEl.style.display = '';
+      targetEl.__mwRemoved = false;
+
+      // Savaştan sonra gizlemek için kuyruğa ekle
+      window.__mwHideQueue.push(targetEl);
+      window.__mwHidePending = true;
+    }catch(_){}
+  }
+
+  // MW_startMarchTo'yu sar: başlarken sadece kuyruğa al (gizleme yok)
+  if (typeof window.MW_startMarchTo === 'function'){
+    const prev = window.MW_startMarchTo;
+    window.MW_startMarchTo = function(targetEl, cfg){
+      enqueueIfHideLater(targetEl);
+      return prev(targetEl, cfg);
+    };
+  }
+
+  // İlk ganimet eklenirken "bir defalık" gizle
+  function hideNextAfterWin(){
+    try{
+      if (!window.__mwHidePending) return;
+      const el = window.__mwHideQueue.shift();
+      if (el && el.parentNode){
+        el.style.display = 'none';   // savaş SONRASI gizle
+        el.__mwRemoved = true;
+      }
+      // Kuyruk boşsa bayrağı kapat
+      if (!window.__mwHideQueue.length) window.__mwHidePending = false;
+    }catch(_){}
+  }
+
+  // addGold/addFood'u sar: orijinali çalıştır + sonra gizle
+  ['addGold','addFood'].forEach(fn=>{
+    const orig = window[fn];
+    window[fn] = function(n){
+      try{ if (typeof orig === 'function') orig(n); }catch(_){}
+      // Ganimet yazıldığı an savaş bitmiş demektir → hedefi gizle
+      hideNextAfterWin();
+    };
+  });
+})();
