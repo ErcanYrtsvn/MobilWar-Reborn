@@ -414,3 +414,47 @@ window.addEventListener("scroll", guncelleKonum);
     window.addEventListener('DOMContentLoaded', rebindCities);
   }
 })();
+
+// ==== SALDIR ÇALIŞTIRICI - RESCUE (bozmadan ek) ====
+(function(){
+  if (window.__MW_ATTACK_RESCUE__) return; window.__MW_ATTACK_RESCUE__=true;
+
+  // 1) Saldır butonuna delegasyon (modal içinden yakala)
+  document.addEventListener('click', function(e){
+    if (!e.target) return;
+    const btn = e.target.closest && e.target.closest('#mwAttackBtn');
+    if (!btn) return;
+
+    // Modal açılırken kaydedilen hedef/config
+    const cfg = window.MW__lastCfg || window.__MW_current;
+    if (!cfg || !cfg.targetEl){
+      alert('Hedef bulunamadı.'); 
+      return;
+    }
+
+    // Sefer fonksiyonu varsa tetikle
+    if (typeof window.MW_startMarchTo === 'function'){
+      window.MW_startMarchTo(cfg.targetEl, {
+        title: cfg.title,
+        power: cfg.power,
+        loot:  cfg.loot
+      });
+      // Modali kapat
+      const ov = document.getElementById('mwOverlay'); 
+      const md = document.getElementById('mwModal');
+      if (ov) ov.style.display='none';
+      if (md) md.style.display='none';
+      // İstersen geçici bildirim
+      // alert('Sefer başlatıldı!');
+    } else {
+      alert('Sefer sistemi yüklenmemiş (MW_startMarchTo yok).');
+    }
+  }, true);
+
+  // 2) Modal açma fonksiyonunu sar: cfg'yi global sakla
+  const oldOpen = window.MW_openBattleModal;
+  window.MW_openBattleModal = function(cfg){
+    try { window.MW__lastCfg = cfg; } catch(e){}
+    if (typeof oldOpen === 'function') return oldOpen(cfg);
+  };
+})();
