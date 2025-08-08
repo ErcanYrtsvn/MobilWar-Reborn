@@ -794,3 +794,166 @@ window.addEventListener("scroll", guncelleKonum);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindEnemyCastles);
   else bindEnemyCastles();
 })();
+// === HARİTA GENİŞLETME PATCH (append-only, bozmaz) ===
+(function(){
+  if (window.__MW_EXPAND_V1__) return; window.__MW_EXPAND_V1__ = true;
+
+  const map = document.getElementById('mapContainer');
+  const my = document.getElementById('oyuncuKalesi');
+
+  // ---- 1) Düşman kalesini kendi kalenin yanına yerleştir ----
+  (function placeEnemyNearMine(){
+    if (!map || !my) return;
+    const enemy = document.querySelector('.enemyCastle');
+    if (!enemy) return;
+    // Kendi kalenin sol-üst koordinatını oku
+    const n = v => parseFloat(String(v).replace('px',''))||0;
+    const mx = n(my.style.left), myTop = n(my.style.top);
+    // Biraz yanına (ofset) koy
+    const offX = 480, offY = -120;  // yakın ama üstünü kapatmasın
+    enemy.style.left = (mx + offX) + 'px';
+    enemy.style.top  = (myTop + offY) + 'px';
+    // Boyutunu kendi kaleyle hizala (zaten CSS’te !important ama garanti)
+    enemy.style.width = my.offsetWidth + 'px';
+    enemy.style.height = my.offsetHeight + 'px';
+  })();
+
+  // ---- Mini toast (koordinat + bilgi için) ----
+  function toast(msg){
+    let box = document.getElementById('mwToastBox');
+    if(!box){
+      box = document.createElement('div');
+      box.id='mwToastBox';
+      box.style.cssText = 'position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:10050;pointer-events:none;';
+      document.body.appendChild(box);
+    }
+    const t = document.createElement('div');
+    t.style.cssText = 'margin-top:8px;background:#2d261e;color:#ffe9b0;border:2px solid #d4b15f;border-radius:12px;padding:10px 14px;font-weight:800;font-size:18px;box-shadow:0 6px 16px rgba(0,0,0,.45)';
+    t.textContent = msg;
+    box.appendChild(t);
+    setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .35s'; setTimeout(()=>t.remove(), 400); }, 2000);
+  }
+
+  // ---- 2) Koordinata Git alanı (X,Y) ----
+  (function addGotoXY(){
+    const hud = document.getElementById('konumPanel');
+    if (!hud || document.getElementById('mwGotoBox')) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'mwGotoBox';
+    wrap.style.cssText = 'margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:16px;';
+    wrap.innerHTML = `
+      <span style="opacity:.8">Git:</span>
+      <input id="mwGX" type="number" placeholder="X" style="width:110px;padding:6px;border-radius:8px;border:1px solid #c9b07a;background:#1f1913;color:#ffe9b0">
+      <input id="mwGY" type="number" placeholder="Y" style="width:110px;padding:6px;border-radius:8px;border:1px solid #c9b07a;background:#1f1913;color:#ffe9b0">
+      <button id="mwGoBtn" style="padding:8px 12px;border-radius:10px;border:0;font-weight:900;background:#ffcc00;color:#352b17;cursor:pointer">Git</button>
+    `;
+    hud.appendChild(wrap);
+    document.getElementById('mwGoBtn').addEventListener('click', ()=>{
+      const gx = parseInt(document.getElementById('mwGX').value||'0');
+      const gy = parseInt(document.getElementById('mwGY').value||'0');
+      if (isNaN(gx)||isNaN(gy)) return;
+      // Ekran merkezini bu koordinata getir
+      window.scrollTo(Math.max(0, gx - window.innerWidth/2), Math.max(0, gy - window.innerHeight/2));
+      toast(`📍 Gidildi: X:${gx} Y:${gy}`);
+    });
+  })();
+
+  // ---- 3) Yaratık sayısını artır (mevcuta ek spawn) ----
+  (function extraMonsters(){
+    if (!map) return;
+    // Haritanın büyük kısmına yay
+    const W = map.scrollWidth || 120000, H = map.scrollHeight || 120000;
+    const CREATURES = [
+      {type:'küçük', src:'monster_small.png', size:200, power: 20,  loot:{gold:60,  food:40}},
+      {type:'orta',  src:'monster_mid.png',   size:280, power: 100, loot:{gold:200, food:140}},
+      {type:'büyük', src:'monster_big.png',   size:360, power: 260, loot:{gold:520, food:360}},
+    ];
+    const COUNT = 150; // ekstra 150 canavar
+    function ri(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+    for(let i=0;i<COUNT;i++){
+      const d = CREATURES[Math.floor(Math.random()*CREATURES.length)];
+      const el = document.createElement('img');
+      el.src = d.src; el.alt = d.type + ' yaratık'; el.className='monster';
+      el.style.left = ri(600, W-600) + 'px';
+      el.style.top  = ri(600, H-600) + 'px';
+      el.style.width = d.size + 'px'; el.style.height = d.size + 'px';
+      // Tık davranışı: mevcut attackMonster'ı kullan (sefer/loot modalı)
+      el.addEventListener('click', ()=> window.attackMonster && window.attackMonster({ el, data:{type:d.type, power:d.power, loot:d.loot} }));
+      map.appendChild(el);
+    }
+  })();
+
+  // ---- 4) Şehir sayısını artır (otomatik şehirler) ----
+  (function extraCities(){
+    if (!map) return;
+    const W = map.scrollWidth || 120000, H = map.scrollHeight || 120000;
+    const COUNT = 80; // ekstra 80 şehir
+    function ri(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+    for(let i=0;i<COUNT;i++){
+      const el = document.createElement('img');
+      el.src = 'sehir1.png';
+      el.alt = 'Küçük Şehir';
+      el.className = 'mapIcon autoCity';
+      el.style.left = ri(600, W-600) + 'px';
+      el.style.top  = ri(600, H-600) + 'px';
+      map.appendChild(el);
+    }
+    // Mevcut şehir click mantığını yeniden bağla (bozmadan)
+    setTimeout(()=>{
+      const cities = Array.from(document.querySelectorAll('.mapIcon')).filter(x=>x.id!=='oyuncuKalesi');
+      cities.forEach((el, i) => {
+        if (el.__cityBound) return; el.__cityBound = true;
+        el.style.cursor='pointer';
+        const base = {gold: 600, food: 400, power: 280};
+        const cfg = { gold: base.gold + i*120, food: base.food + i*90, power: base.power + i*60 };
+        el.addEventListener('click', ()=>{
+          // Eğer düşman kale paneli varsa onu açmak için enemyCastle sınıfını kontrol ediyoruz.
+          if (el.classList.contains('enemyCastle') && typeof window.__ENEMY_CASTLE_UI__ !== 'undefined'){
+            // enemyCastle panel JS bloğu zaten click ekliyor; burada dokunma
+            return;
+          }
+          if (typeof MW_openBattleModal === 'function'){
+            MW_openBattleModal({
+              title:'🏙️ Şehir', power: cfg.power, loot: { gold: cfg.gold, food: cfg.food }, targetEl: el,
+              info:'Şehri ele geçirirsen ganimet dönüşte kasana eklenecek.'
+            });
+          }else{
+            alert(`🏙️ Şehir\nGüç:${cfg.power}\nGanimet:+${cfg.gold} altın, +${cfg.food} yemek`);
+          }
+        });
+      });
+    }, 0);
+  })();
+
+  // ---- 5) İkon/yaratık tıklayınca koordinat göster (bilgi amaçlı) ----
+  (function bindCoordHints(){
+    function center(el){
+      const n = v => parseFloat(String(v).replace('px',''))||0;
+      const mapRect = map.getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      // map’e göre merkez
+      return { x: (r.left - mapRect.left) + r.width/2, y: (r.top - mapRect.top) + r.height/2 };
+    }
+    function attach(el){
+      if (el.__coordBound) return; el.__coordBound = true;
+      el.addEventListener('click', (ev)=>{
+        const p = center(el);
+        toast(`📍 X:${Math.round(p.x)} Y:${Math.round(p.y)}`);
+      });
+    }
+    document.querySelectorAll('.mapIcon').forEach(attach);
+    document.querySelectorAll('.monster').forEach(attach);
+    // sonradan eklenenler için basit observer (opsiyonel)
+    const obs = new MutationObserver(muts=>{
+      muts.forEach(m=>{
+        m.addedNodes && m.addedNodes.forEach(n=>{
+          if (n && n.nodeType===1){
+            if (n.classList && (n.classList.contains('mapIcon') || n.classList.contains('monster'))) attach(n);
+          }
+        });
+      });
+    });
+    obs.observe(map || document.body, {childList:true, subtree:true});
+  })();
+
+})();
