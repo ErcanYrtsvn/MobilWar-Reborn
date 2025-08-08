@@ -1148,3 +1148,125 @@ window.addEventListener("scroll", guncelleKonum);
     };
   });
 })();
+// === SAVAŞ FAZI + SONRA KAYBOL (enemyCastle hariç) — append-only ===
+(function(){
+  if (window.__MW_BATTLE_PHASE__) return; window.__MW_BATTLE_PHASE__ = true;
+
+  const KEY = "mw_marches_v3";
+  const map = document.getElementById('mapContainer');
+  const castleEl = document.getElementById('oyuncuKalesi');
+
+  // hedef referansları için: march.id -> targetEl
+  window.__MW_TARGETS__ = window.__MW_TARGETS__ || new Map();
+
+  // MW_startMarchTo’yu sar: missionType ve target referansı kaydet
+  if (typeof window.MW_startMarchTo === 'function'){
+    const prev = window.MW_startMarchTo;
+    window.MW_startMarchTo = function(targetEl, cfg){
+      const r = prev(targetEl, cfg);
+      try{
+        // mission type
+        let mType = 'attack';
+        const title = (cfg && cfg.title || '').toLowerCase();
+        if (title.includes('casus')) mType = 'spy';
+        else if (title.includes('destek')) mType = 'support';
+
+        // son eklenen seferi yakalayıp işaretle
+        const ms = JSON.parse(localStorage.getItem(KEY)||'[]');
+        if (ms.length){
+          const m = ms[ms.length-1];
+          m.mType = mType;
+          // savaş süresi: güce göre (sn)
+          const p = parseInt(cfg.power||m.power||0,10);
+          m.battleSecs = Math.max(5, Math.min(300, Math.round((p||0)/2))); // 5–300sn
+          localStorage.setItem(KEY, JSON.stringify(ms));
+          // hedef referansı map’te tut (sayfa kapanırsa uçabilir; şimdilik yeterli)
+          window.__MW_TARGETS__.set(m.id, targetEl);
+        }
+      }catch(_){}
+      return r;
+    };
+  }
+
+  // mini ⚔️ göstergesi
+  const swords = new Map(); // march.id -> el
+  function placeSwordsAt(m){
+    try{
+      const targetEl = window.__MW_TARGETS__.get(m.id);
+      const el = document.createElement('div');
+      el.textContent = '⚔️';
+      el.style.cssText = 'position:absolute; font-size:64px; filter:drop-shadow(0 3px 4px rgba(0,0,0,.6)); ' +
+                         'animation: mwPulse 1.2s infinite ease-in-out; pointer-events:none; z-index:9999;';
+      const pos = centerOf(targetEl, m.to);
+      el.style.left = (pos.x - 32) + 'px';
+      el.style.top  = (pos.y - 96) + 'px'; // biraz üstünde
+      map.appendChild(el);
+      swords.set(m.id, el);
+    }catch(_){}
+  }
+  function removeSwords(id){ const el = swords.get(id); if(el){ el.remove(); swords.delete(id); } }
+
+  function pxNum(v){ return parseFloat(String(v||'').replace('px',''))||0; }
+  function centerOf(targetEl, fallback){
+    if (targetEl){
+      const l = pxNum(targetEl.style.left), t = pxNum(targetEl.style.top);
+      if (l || t) return { x: l + targetEl.offsetWidth/2, y: t + targetEl.offsetHeight/2 };
+      const mr = map.getBoundingClientRect(), r = targetEl.getBoundingClientRect();
+      return { x:(r.left-mr.left)+r.width/2, y:(r.top-mr.top)+r.height/2 };
+    }
+    return fallback || {x:0,y:0};
+  }
+
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(_){return[]} }
+  function save(a){ try{localStorage.setItem(KEY, JSON.stringify(a))}catch(_){} }
+
+  // Denetçi: seferleri izleyip "fighting" fazını enjekte eder
+  setInterval(()=>{
+    let ms = load(); if (!ms.length) return;
+    let changed=false;
+    const now = Date.now();
+
+    ms.forEach(m=>{
+      // zaten döngü sonunda temizlenmiş olanlar
+      if (m._done) return;
+
+      // 1) VARIŞTA SAVAŞ BAŞLAT — orijinal tick hemen 'returning' yapmış olabilir
+      const arrivedGoing = (m.phase === 'going' && now >= m.endsAt);
+      const flippedDirect = (m.phase === 'returning' && !m._battleHandled); // tick erken çevirmiş
+      if ((arrivedGoing || flippedDirect) && !m._inBattle){
+        m._battleHandled = true;
+        m._inBattle = true;
+        m.phase = 'fighting';
+        const secs = Math.max(5, m.battleSecs || 10);
+        m.startedAt = now;
+        m.endsAt = now + secs*1000;
+        placeSwordsAt(m);
+        changed = true;
+      }
+
+      // 2) SAVAŞ BİTİNCE DÖNÜŞE GEÇ
+      if (m.phase === 'fighting' && now >= m.endsAt){
+        m._inBattle = false;
+        removeSwords(m.id);
+
+        // DÖNERKEN hedefi gizle: enemyCastle ve casus/destek HARİÇ
+        try{
+          const targetEl = window.__MW_TARGETS__.get(m.id);
+          const isEnemyCastle = !!(targetEl && targetEl.classList && targetEl.classList.contains('enemyCastle'));
+          const nonHideMission = (m.mType === 'spy' || m.mType === 'support');
+          if (!isEnemyCastle && !nonHideMission){
+            if (targetEl && targetEl.parentNode){ targetEl.style.display='none'; targetEl.__mwRemoved = true; }
+          }
+        }catch(_){}
+
+        // dönüş fazını ayarla (orijinal travelSecs’i kullan)
+        m.phase = 'returning';
+        m.startedAt = now;
+        m.endsAt = now + (m.travelSecs*1000 || 1);
+        changed = true;
+      }
+    });
+
+    if (changed) save(ms);
+  }, 200);
+})();
