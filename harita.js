@@ -458,3 +458,162 @@ window.addEventListener("scroll", guncelleKonum);
     if (typeof oldOpen === 'function') return oldOpen(cfg);
   };
 })();
+// ==== HARİTA FİNAL PATCH v4 (bozmadan ek) ====
+(function(){
+  if (window.__MW_FINAL_V4__) return; window.__MW_FINAL_V4__ = true;
+
+  // ----- 0) Mini toast -----
+  function toast(msg){
+    let box = document.getElementById('mwToastBox');
+    if(!box){
+      box = document.createElement('div');
+      box.id='mwToastBox';
+      box.style.cssText = 'position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:10050;pointer-events:none;';
+      document.body.appendChild(box);
+    }
+    const t = document.createElement('div');
+    t.style.cssText = 'margin-top:8px;background:#2d261e;color:#ffe9b0;border:2px solid #d4b15f;border-radius:12px;padding:10px 14px;font-weight:800;font-size:18px;box-shadow:0 6px 16px rgba(0,0,0,.45)';
+    t.textContent = msg;
+    box.appendChild(t);
+    setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .35s'; setTimeout(()=>t.remove(), 400); }, 2000);
+  }
+
+  // ----- 1) Hedef kilidi (ikinci saldırıyı engelle) -----
+  const busyTargets = new WeakSet();
+
+  // ----- 2) Rescue: Saldır butonu her koşulda tetiklesin -----
+  document.addEventListener('click', function(e){
+    const btn = e.target && e.target.closest && e.target.closest('#mwAttackBtn');
+    if (!btn) return;
+    const cfg = window.MW__lastCfg || window.__MW_current;
+    if (!cfg || !cfg.targetEl){ alert('Hedef bulunamadı.'); return; }
+    if (typeof window.MW_startMarchTo === 'function'){
+      window.MW_startMarchTo(cfg.targetEl, { title: cfg.title, power: cfg.power, loot: cfg.loot });
+      // modalı kapat
+      const ov = document.getElementById('mwOverlay'); const md = document.getElementById('mwModal');
+      if (ov) ov.style.display='none'; if (md) md.style.display='none';
+    } else {
+      alert('Sefer sistemi yüklenmemiş (MW_startMarchTo yok).');
+    }
+  }, true);
+
+  // Modal açılırken hedef meşgulse engelle + cfg’yi sakla
+  if (typeof window.MW_openBattleModal === 'function'){
+    const oldOpen = window.MW_openBattleModal;
+    window.MW_openBattleModal = function(cfg){
+      try { window.MW__lastCfg = cfg; } catch(e){}
+      if (cfg?.targetEl && busyTargets.has(cfg.targetEl)){
+        toast('❗ Bu hedefe zaten sefer var.');
+        return;
+      }
+      return oldOpen(cfg);
+    };
+  }
+
+  // ----- 3) Sefer başlat: hedefi hemen kaldır, respawn planla -----
+  const RESPAWN_MONSTERS = true;
+  const RESPAWN_CITIES   = false; // şehirler tekrar belirmesin istiyorsan false kalsın
+  const RESPAWN_DELAY = { small: 10*60*1000, mid: 20*60*1000, big: 30*60*1000 }; // 10/20/30 dk
+
+  function scheduleMonsterRespawn(meta){
+    if (!RESPAWN_MONSTERS) return;
+    const delay = (meta.kindSize==='küçük') ? RESPAWN_DELAY.small :
+                  (meta.kindSize==='orta')  ? RESPAWN_DELAY.mid   :
+                  RESPAWN_DELAY.big;
+    setTimeout(()=> {
+      const map = document.getElementById('mapContainer');
+      if (!map) return;
+      const el = document.createElement('img');
+      el.src = meta.src;
+      el.alt = meta.kindSize + ' yaratık';
+      el.className = 'monster';
+      el.style.left  = meta.left;
+      el.style.top   = meta.top;
+      el.style.width = meta.width;
+      el.style.height= meta.height;
+      // attackMonster için data oluştur
+      const data = { type: meta.kindSize, power: meta.power, loot: {gold: meta.gold, food: meta.food} };
+      el.addEventListener('click', () => window.attackMonster && window.attackMonster({el, data}));
+      map.appendChild(el);
+    }, delay);
+  }
+
+  function scheduleCityRespawn(meta){
+    if (!RESPAWN_CITIES) return;
+    setTimeout(()=> {
+      const map = document.getElementById('mapContainer');
+      if (!map) return;
+      const el = document.createElement('img');
+      el.src = meta.src; el.className='mapIcon'; el.alt='Küçük Şehir';
+      el.style.left= meta.left; el.style.top = meta.top; el.style.width= meta.width; el.style.height= meta.height;
+      map.appendChild(el);
+    }, 15*60*1000); // örnek 15 dk
+  }
+
+  if (typeof window.MW_startMarchTo === 'function'){
+    const oldStart = window.MW_startMarchTo;
+    window.MW_startMarchTo = function(targetEl, cfg){
+      if (!targetEl){ toast('Hedef bulunamadı.'); return; }
+      if (busyTargets.has(targetEl)){ toast('❗ Bu hedefe zaten sefer var.'); return; }
+      busyTargets.add(targetEl);
+
+      // Meta bilgileri çıkar (respawn için)
+      const meta = {
+        left: targetEl.style.left, top: targetEl.style.top,
+        width: targetEl.style.width, height: targetEl.style.height,
+        src: targetEl.getAttribute('src') || '',
+        isMonster: targetEl.classList.contains('monster'),
+        isCity:     targetEl.classList.contains('mapIcon') && targetEl.id !== 'oyuncuKalesi',
+        // modal cfg’den tip/ganimet gücünü yakala
+        kindSize: (cfg.title||'').toLowerCase().includes('küçük') ? 'küçük' :
+                  (cfg.title||'').toLowerCase().includes('orta')   ? 'orta'   :
+                  (cfg.title||'').toLowerCase().includes('büyük')  ? 'büyük'  : 'büyük',
+        power: cfg.power||0,
+        gold:  (cfg.loot&&cfg.loot.gold)||0,
+        food:  (cfg.loot&&cfg.loot.food)||0
+      };
+
+      // Hedefi görünmez yap (kayıtlı kalsın)
+      if (targetEl.parentNode){
+        targetEl.style.display='none';
+        targetEl.__mwRemoved = true;
+      }
+
+      // Respawn planı (isteğe bağlı)
+      if (meta.isMonster) scheduleMonsterRespawn(meta);
+      else if (meta.isCity) scheduleCityRespawn(meta);
+
+      // Gerçek seferi başlat
+      const r = oldStart(targetEl, cfg);
+      toast('🚩 Sefer başladı!');
+      return r;
+    };
+  } else {
+    console.warn('MW_startMarchTo yok – sefer sistemi yüklenmeli.');
+  }
+
+  // ----- 4) Geri dönüşte loot bildirimi (addGold/food/stone sar) -----
+  (function(){
+    const wrap = (name, text) => {
+      const orig = window[name];
+      window[name] = function(n){
+        try{ if (typeof orig === 'function') orig(n); }catch(e){}
+        if (n && n > 0) toast(`+${n} ${text} kasana eklendi`);
+      };
+    };
+    wrap('addGold','altın'); wrap('addFood','yemek'); wrap('addStone','taş');
+  })();
+
+  // ----- 5) Kendi kale: menüye dönüş (güvence) -----
+  (function(){
+    const myCastle = document.getElementById('oyuncuKalesi');
+    if (myCastle && !myCastle.__mwGoBack){
+      myCastle.__mwGoBack = true;
+      myCastle.style.cursor='pointer';
+      myCastle.addEventListener('click', ()=>{ window.location.href='index.html'; });
+    }
+  })();
+
+  // ----- 6) Güvenli: şehir/yaratık mevcut click’leri bozmadan çalıştır -----
+  // (mevcut attackMonster ve şehir click’leri durur; biz sadece üzerine katman ekledik)
+})();
