@@ -1,6 +1,4 @@
-
 <!DOCTYPE html>
-
 <html lang="tr">
 <head>
 <meta charset="utf-8"/>
@@ -86,118 +84,127 @@
 </head>
 <body>
 <div class="container">
-<h1>MobilWar-Reborn</h1>
-<img alt="MobilWar Logo" class="logo-image" src="KilicKalkan.png"/>
-<div id="login-section">
-<input id="username" placeholder="Oyuncu Adı" type="text"/>
-<input id="password" placeholder="Şifre" type="password"/>
-<button onclick="login()">Giriş Yap</button>
-</div>
-<div id="game-section" style="display:none;">
-<div class="section" id="academy">
-<h2>📘 Akademi</h2>
-<div id="akademiPanel"></div>
-</div>
-<div class="resource-bar">
-<div>Altın: <span id="gold">1000000</span> 💰</div>
-<div>Yemek: <span id="food">1000000</span> 🍖</div>
-<div>Taş: <span id="stone">1000000</span> 🪨</div>
-</div>
-<div class="menu">
-<!-- Ortalanmış Yeni Yapılar Butonu -->
-<div style="width: 100%; display: flex; justify-content: center;">
-  <button style="width: 60%;" onclick="showSection('structures')">🏠 Yapılar</button>
-</div>
+  <h1>MobilWar-Reborn</h1>
+  <img alt="MobilWar Logo" class="logo-image" src="KilicKalkan.png"/>
 
-<!-- Yeni Mağara Butonu -->
-<button onclick="showSection('magara')">🏔️ Mağara</button>
-<button onclick="showSection('units')">🪖 Birlikler</button>
-<button onclick="showSection('battle')">⚔️ Saldırı</button>
-<button onclick="showSection('barracks')">🏹 Baraka</button>
-<button onclick="showSection('defense')">🛡️ Savunma</button>
-<button onclick="showSection('academy')">📘 Akademi</button>
-<button onclick="showSection('temple')">⛩️ Tapınak</button>
-<button onclick="window.location.href='harita.html'">🌍 Harita</button>
-<button onclick="showSection('command')">🎖️ Komuta Merkezi</button>
-<button onclick="showSection('options')">⚙️ Seçenekler</button>
-<button onclick="showSection('help')">❓ Yardım</button>
-<button onclick="logout()">🚪 Oturumu Kapat</button>
-</div>
-<div class="section" id="structures">
-<h2>Yapılar</h2>
-<div class="structure">🏹 Baraka (Seviye <span id="barakaLevel">1</span>) <button onclick="upgrade('baraka')">Geliştir</button> <span class="countdown" id="barakaTimer"></span></div>
-<div class="structure">🛡️ Savunma (Seviye <span id="savunmaLevel">1</span>) <button onclick="upgrade('savunma')">Geliştir</button> <span class="countdown" id="savunmaTimer"></span></div>
-<div class="structure">📘 Akademi (Seviye <span id="akademiLevel">1</span>) <button onclick="upgrade('akademi')">Geliştir</button> <span class="countdown" id="akademiTimer"></span></div>
-<div class="structure">⛩️ Tapınak (Seviye <span id="tapinakLevel">1</span>) <button onclick="upgrade('tapinak')">Geliştir</button> <span class="countdown" id="tapinakTimer"></span></div>
-<div class="structure">🍖 Çiftlik (Seviye <span id="ciftlikLevel">1</span>) <button onclick="upgrade('ciftlik')">Geliştir</button> <span class="countdown" id="ciftlikTimer"></span></div>
-<div class="structure">🪨 Taş Ocağı (Seviye <span id="tasLevel">1</span>) <button onclick="upgrade('tas')">Geliştir</button> <span class="countdown" id="tasTimer"></span></div>
-<div class="structure">💰 Maden (Seviye <span id="madenLevel">1</span>) <button onclick="upgrade('maden')">Geliştir</button> <span class="countdown" id="madenTimer"></span></div>
-<div class="structure">🏔️ Mağara (Seviye <span id="magaraLevel">1</span>) <button onclick="upgrade('magara')">Geliştir</button> <span class="countdown" id="magaraTimer"></span></div>
-</div>
-<div class="section" id="barracks">
-<h2>Baraka</h2>
-<div id="kaynakDurumu" style="margin: 1rem 0; font-weight: bold;"></div>
-<div id="barakaPanel"></div>
-</div>
-<div class="section" id="defense">
-<h2>Savunma</h2>
-<div id="savunmaPanel"></div>
-</div>
-<div class="section" id="temple">
-<h2>⛩️ Tapınak</h2>
-<div id="tapinakPanel"></div>
-</div><div class="section" id="battle">
-<h2>⚔️ Saldırı</h2>
-<h3>🛡️ Yolda Olan Birlikler</h3>
-<ul id="yoldaBirliklerListesi"></ul>
-<h3>⚔️ Savaş Raporları</h3>
-<ul id="savasRaporlariListesi"></ul>
-<h3>🕵️ Casusluk Raporları</h3>
-<ul id="casuslukRaporlariListesi"></ul>
-</div>
-<div class="section" id="units">
-<h2>🪖 Birlikler</h2>
-<p>Toplam Asker: <span id="toplamAskerSayisi">0</span></p>
-<p>Toplam Güç: <span id="toplamGuc">0</span></p>
-<ul id="birlikListesi"></ul>
-</div>
-</div>
+  <div id="login-section">
+    <input id="username" placeholder="Oyuncu Adı" type="text"/>
+    <input id="password" placeholder="Şifre" type="password"/>
+    <button onclick="login()">Giriş Yap</button>
+  </div>
+
+  <div id="game-section" style="display:none;">
+    <div class="section" id="academy">
+      <h2>📘 Akademi</h2>
+      <div id="akademiPanel"></div>
+    </div>
+
+    <div class="resource-bar">
+      <div>Altın: <span id="gold">1000000</span> 💰</div>
+      <div>Yemek: <span id="food">1000000</span> 🍖</div>
+      <div>Taş: <span id="stone">1000000</span> 🪨</div>
+    </div>
+
+    <div class="menu">
+      <!-- Ortalanmış Yeni Yapılar Butonu -->
+      <div style="width: 100%; display: flex; justify-content: center;">
+        <button style="width: 60%;" onclick="showSection('structures')">🏠 Yapılar</button>
+      </div>
+
+      <!-- Yeni Mağara Butonu -->
+      <button onclick="showSection('magara')">🏔️ Mağara</button>
+      <button onclick="showSection('units')">🪖 Birlikler</button>
+      <button onclick="showSection('battle')">⚔️ Saldırı</button>
+      <button onclick="showSection('barracks')">🏹 Baraka</button>
+      <button onclick="showSection('defense')">🛡️ Savunma</button>
+      <button onclick="showSection('academy')">📘 Akademi</button>
+      <button onclick="showSection('temple')">⛩️ Tapınak</button>
+      <button onclick="window.location.href='harita.html'">🌍 Harita</button>
+      <button onclick="showSection('command')">🎖️ Komuta Merkezi</button>
+      <button onclick="showSection('options')">⚙️ Seçenekler</button>
+      <button onclick="showSection('help')">❓ Yardım</button>
+      <button onclick="logout()">🚪 Oturumu Kapat</button>
+    </div>
+
+    <div class="section" id="structures">
+      <h2>Yapılar</h2>
+      <div class="structure">🏹 Baraka (Seviye <span id="barakaLevel">1</span>) <button onclick="upgrade('baraka')">Geliştir</button> <span class="countdown" id="barakaTimer"></span></div>
+      <div class="structure">🛡️ Savunma (Seviye <span id="savunmaLevel">1</span>) <button onclick="upgrade('savunma')">Geliştir</button> <span class="countdown" id="savunmaTimer"></span></div>
+      <div class="structure">📘 Akademi (Seviye <span id="akademiLevel">1</span>) <button onclick="upgrade('akademi')">Geliştir</button> <span class="countdown" id="akademiTimer"></span></div>
+      <div class="structure">⛩️ Tapınak (Seviye <span id="tapinakLevel">1</span>) <button onclick="upgrade('tapinak')">Geliştir</button> <span class="countdown" id="tapinakTimer"></span></div>
+      <div class="structure">🍖 Çiftlik (Seviye <span id="ciftlikLevel">1</span>) <button onclick="upgrade('ciftlik')">Geliştir</button> <span class="countdown" id="ciftlikTimer"></span></div>
+      <div class="structure">🪨 Taş Ocağı (Seviye <span id="tasLevel">1</span>) <button onclick="upgrade('tas')">Geliştir</button> <span class="countdown" id="tasTimer"></span></div>
+      <div class="structure">💰 Maden (Seviye <span id="madenLevel">1</span>) <button onclick="upgrade('maden')">Geliştir</button> <span class="countdown" id="madenTimer"></span></div>
+      <div class="structure">🏔️ Mağara (Seviye <span id="magaraLevel">1</span>) <button onclick="upgrade('magara')">Geliştir</button> <span class="countdown" id="magaraTimer"></span></div>
+    </div>
+
+    <div class="section" id="barracks">
+      <h2>Baraka</h2>
+      <div id="kaynakDurumu" style="margin: 1rem 0; font-weight: bold;"></div>
+      <div id="barakaPanel"></div>
+    </div>
+
+    <div class="section" id="defense">
+      <h2>Savunma</h2>
+      <div id="savunmaPanel"></div>
+    </div>
+
+    <div class="section" id="temple">
+      <h2>⛩️ Tapınak</h2>
+      <div id="tapinakPanel"></div>
+    </div>
+
+    <div class="section" id="battle">
+      <h2>⚔️ Saldırı</h2>
+      <h3>🛡️ Yolda Olan Birlikler</h3>
+      <ul id="yoldaBirliklerListesi"></ul>
+      <h3>⚔️ Savaş Raporları</h3>
+      <ul id="savasRaporlariListesi"></ul>
+      <h3>🕵️ Casusluk Raporları</h3>
+      <ul id="casuslukRaporlariListesi"></ul>
+    </div>
+
+    <div class="section" id="units">
+      <h2>🪖 Birlikler</h2>
+      <p>Toplam Asker: <span id="toplamAskerSayisi">0</span></p>
+      <p>Toplam Güç: <span id="toplamGuc">0</span></p>
+      <ul id="birlikListesi"></ul>
+    </div>
+  </div> <!-- /game-section -->
+</div> <!-- /container -->
 
 <div class="section" id="magara">
   <h2>🏔️ Mağara</h2>
   <div id="magaraPanel"></div>
 </div>
 
-</div>
 <script>
-    let gold = 1000, food = 1000, stone = 1000;
-    function login() {
-      const u = document.getElementById("username").value;
-      const p = document.getElementById("password").value;
-      if (u && p) {
-        document.getElementById("login-section").style.display = "none";
-        document.getElementById("game-section").style.display = "block";
-      } else {
-        alert("Lütfen giriş bilgilerini girin!");
-      }
+  let gold = 1000, food = 1000, stone = 1000;
+  function login() {
+    // Eski basit login burada dursun, aşağıdaki blok override edecek.
+    const u = document.getElementById("username").value;
+    const p = document.getElementById("password").value;
+    if (u && p) {
+      document.getElementById("login-section").style.display = "none";
+      document.getElementById("game-section").style.display = "block";
+    } else {
+      alert("Lütfen giriş bilgilerini girin!");
     }
+  }
+  function logout() { location.reload(); }
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+  }
+</script>
 
-    function logout() {
-      location.reload();
-    }
-
-    function showSection(id) {
-      document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-      document.getElementById(id).style.display = 'block';
-    }
-  </script>
-<script defer="" src="js/tapinak.js"></script>
-<script defer="" src="js/baraka.js"></script>
-<script defer="" src="js/savunma.js"></script>
-<script defer="" src="js/yapilar.js"></script>
-<script defer="" src="js/akademi.js"></script>
+<script defer src="js/tapinak.js"></script>
+<script defer src="js/baraka.js"></script>
+<script defer src="js/savunma.js"></script>
+<script defer src="js/yapilar.js"></script>
+<script defer src="js/akademi.js"></script>
 <div id="saldiri-container" style="padding: 20px;"></div>
-<script defer="" src="js/saldiri.js"></script>
+<script defer src="js/saldiri.js"></script>
 <script defer src="js/magara.js"></script>
 
 <div class="section" id="magara">
@@ -205,7 +212,6 @@
   <div id="magaraPanel"></div>
 </div>
 
-</div>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const saldiriBtn = document.querySelector("button[onclick=\"showSection('battle')\"]");
@@ -225,90 +231,141 @@ document.addEventListener("DOMContentLoaded", function () {
     console.warn("Saldırı butonu bulunamadı!");
   }
 });
-</script><script defer="True" src="js/birlikler.js"></script>
- <script>
-/* ==== MobilWar-Reborn — Basit Token Tabanlı Giriş (ek modül) ==== */
-(function () {
-  const API_BASE = "/api";
+</script>
+<script defer src="js/birlikler.js"></script>
 
-  const qs = (id) => document.getElementById(id);
-  const show = (id, on) => { const el = qs(id); if (el) el.style.display = on ? "block" : "none"; };
+<!-- === SUNUCU DOĞRULAMALI GİRİŞ — KAPIYA BEKÇİ === -->
+<script>
+(function(){
+  const API = '/api';
+  const Q = id => document.getElementById(id);
+  const show = (id,on)=>{ const el=Q(id); if(el) el.style.display = on?'block':'none'; };
 
-  const saveToken = (t) => localStorage.setItem("mw_token", t);
-  const getToken  = () => localStorage.getItem("mw_token");
-  const clearToken = () => localStorage.removeItem("mw_token");
-
-  async function api(path, payload) {
-    const res = await fetch(API_BASE + path, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload || {})
-    });
-    return res.json();
+  async function verifyToken(){
+    const t = localStorage.getItem('mw_token');
+    if(!t) return false;
+    try{
+      const res = await fetch(API+'/me.php', { headers:{ Authorization:'Bearer '+t } });
+      const j = await res.json().catch(()=>null);
+      return !!(j && j.ok);
+    }catch(_){ return false; }
   }
 
-  // == GİRİŞ: mevcut login()'i override eder ==
-  window.login = async function () {
-    const username = qs("username")?.value.trim();
-    const password = qs("password")?.value;
-    if (!username || !password) {
-      alert("Lütfen kullanıcı adı ve şifre girin.");
-      return;
+  // Açılışta: önce login göster; token doğrulanırsa oyunu aç
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    show('game-section', false);
+    show('login-section', true);
+    if (await verifyToken()){
+      show('login-section', false);
+      show('game-section', true);
     }
-    try {
-      const out = await api("/login.php", { username, password });
-      if (out && out.ok) {
-        saveToken(out.token);
-        await afterLogin();
+  });
+
+  // Giriş: sunucuya sormadan UI'ı açma
+  window.login = async function(){
+    const u = Q('username')?.value.trim();
+    const p = Q('password')?.value || '';
+    if(!u || !p){ alert('Kullanıcı adı ve şifre gir.'); return; }
+
+    try{
+      const res = await fetch(API+'/login.php', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ username:u, password:p })
+      });
+      const data = await res.json().catch(()=>null);
+      if (data && data.ok){
+        localStorage.setItem('mw_token', data.token);
+        show('login-section', false);
+        show('game-section', true);
       } else {
-        alert(out?.error || "Giriş başarısız.");
+        alert(data?.error || 'Giriş başarısız.');
       }
-    } catch (e) {
-      alert("Sunucuya ulaşılamadı. Birazdan tekrar deneyin.");
+    }catch(e){
+      alert('Sunucuya ulaşılamadı.');
     }
   };
 
-  // == ÇIKIŞ: mevcut logout()'u override eder ==
-  window.logout = function () {
-    clearToken();
-    location.reload();
+  // Çıkış: token sil, login ekranına dön
+  window.logout = function(){
+    localStorage.removeItem('mw_token');
+    show('game-section', false);
+    show('login-section', true);
   };
+})();
+</script>
+<script>
+(function(){
+  const API = '/api';
+  const $ = (s, r=document) => r.querySelector(s);
 
-  // == Giriş sonrası arayüz ==
-  async function afterLogin() {
-    show("login-section", false);
-    show("game-section", true);
+  // UI kilidi: açılışta oyunu kapat, login açık kalsın
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const gs = $('#game-section'), ls = $('#login-section');
+    if (gs) gs.style.display = 'none';
+    if (ls) ls.style.display = 'block';
+  });
 
-    // Kullanıcı bilgisi çek (opsiyonel)
-    try {
-      const me = await api("/me.php", { token: getToken() });
-      if (me?.ok) {
-        window.currentUser = me.user; // istersen başka yerde kullan
-        // Örn: başlığa isim yazmak istersen:
-        // qs("welcomeName")?.innerText = me.user.username;
-      }
-    } catch (e) {}
+  async function verifyToken(){
+    const t = localStorage.getItem('mw_token');
+    if(!t) return false;
+    try{
+      const r = await fetch(API+'/me.php', { headers:{ Authorization:'Bearer '+t }});
+      const j = await r.json().catch(()=>null);
+      return !!(j && j.ok);
+    }catch(e){ return false; }
   }
 
-  // == Sayfa açılınca: token varsa otomatik giriş dene ==
-  document.addEventListener("DOMContentLoaded", async () => {
-    const t = getToken();
-    if (t) {
-      try {
-        const me = await api("/me.php", { token: t });
-        if (me?.ok) {
-          show("login-section", false);
-          show("game-section", true);
-          window.currentUser = me.user;
-          return;
+  // Güvenli login handler
+  async function secureLogin(e){
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    const u = $('#username')?.value.trim();
+    const p = $('#password')?.value || '';
+    if(!u || !p){ alert('Kullanıcı adı ve şifre gir.'); return; }
+
+    try{
+      const res = await fetch(API+'/login.php', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ username:u, password:p })
+      });
+      const data = await res.json().catch(()=>null);
+      if (data && data.ok){
+        localStorage.setItem('mw_token', data.token);
+        // token doğrulaması
+        if (await verifyToken()){
+          $('#login-section').style.display = 'none';
+          $('#game-section').style.display   = 'block';
+        } else {
+          alert('Token doğrulanamadı.');
         }
-      } catch (e) {}
-      clearToken();
+      } else {
+        alert(data?.error || 'Giriş başarısız.');
+      }
+    }catch(_){ alert('Sunucuya ulaşılamadı.'); }
+  }
+
+  // Eski login’i KİLİTLE → bizimki çalışsın
+  try{
+    Object.defineProperty(window, 'login', { value: secureLogin, writable: false });
+  }catch(_){
+    window.login = secureLogin; // bazı tarayıcılarda kilitleyemezsek üzerine yazarız
+  }
+
+  // Butonun onclick’ini de zorla bizim fonksiyona bağla
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const btn = $('#login-section button[onclick]');
+    if (btn) btn.onclick = secureLogin;
+  });
+
+  // Sayfa açılışında token varsa doğrula → oyunu aç
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    if (await verifyToken()){
+      $('#login-section').style.display = 'none';
+      $('#game-section').style.display   = 'block';
     }
-    show("login-section", true);
-    show("game-section", false);
   });
 })();
- </script>   
+</script>
 </body>
 </html>
