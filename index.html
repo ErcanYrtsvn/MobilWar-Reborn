@@ -225,5 +225,90 @@ document.addEventListener("DOMContentLoaded", function () {
     console.warn("Saldırı butonu bulunamadı!");
   }
 });
-</script><script defer="True" src="js/birlikler.js"></script></body>
+</script><script defer="True" src="js/birlikler.js"></script>
+ <script>
+/* ==== MobilWar-Reborn — Basit Token Tabanlı Giriş (ek modül) ==== */
+(function () {
+  const API_BASE = "/api";
+
+  const qs = (id) => document.getElementById(id);
+  const show = (id, on) => { const el = qs(id); if (el) el.style.display = on ? "block" : "none"; };
+
+  const saveToken = (t) => localStorage.setItem("mw_token", t);
+  const getToken  = () => localStorage.getItem("mw_token");
+  const clearToken = () => localStorage.removeItem("mw_token");
+
+  async function api(path, payload) {
+    const res = await fetch(API_BASE + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {})
+    });
+    return res.json();
+  }
+
+  // == GİRİŞ: mevcut login()'i override eder ==
+  window.login = async function () {
+    const username = qs("username")?.value.trim();
+    const password = qs("password")?.value;
+    if (!username || !password) {
+      alert("Lütfen kullanıcı adı ve şifre girin.");
+      return;
+    }
+    try {
+      const out = await api("/login.php", { username, password });
+      if (out && out.ok) {
+        saveToken(out.token);
+        await afterLogin();
+      } else {
+        alert(out?.error || "Giriş başarısız.");
+      }
+    } catch (e) {
+      alert("Sunucuya ulaşılamadı. Birazdan tekrar deneyin.");
+    }
+  };
+
+  // == ÇIKIŞ: mevcut logout()'u override eder ==
+  window.logout = function () {
+    clearToken();
+    location.reload();
+  };
+
+  // == Giriş sonrası arayüz ==
+  async function afterLogin() {
+    show("login-section", false);
+    show("game-section", true);
+
+    // Kullanıcı bilgisi çek (opsiyonel)
+    try {
+      const me = await api("/me.php", { token: getToken() });
+      if (me?.ok) {
+        window.currentUser = me.user; // istersen başka yerde kullan
+        // Örn: başlığa isim yazmak istersen:
+        // qs("welcomeName")?.innerText = me.user.username;
+      }
+    } catch (e) {}
+  }
+
+  // == Sayfa açılınca: token varsa otomatik giriş dene ==
+  document.addEventListener("DOMContentLoaded", async () => {
+    const t = getToken();
+    if (t) {
+      try {
+        const me = await api("/me.php", { token: t });
+        if (me?.ok) {
+          show("login-section", false);
+          show("game-section", true);
+          window.currentUser = me.user;
+          return;
+        }
+      } catch (e) {}
+      clearToken();
+    }
+    show("login-section", true);
+    show("game-section", false);
+  });
+})();
+ </script>   
+</body>
 </html>
